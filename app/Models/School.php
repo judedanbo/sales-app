@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\BoardAffiliation;
+use App\Enums\MediumOfInstruction;
 use App\Enums\SchoolType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,6 +19,8 @@ class School extends Model
     {
         return [
             'school_type' => SchoolType::class,
+            'board_affiliation' => BoardAffiliation::class,
+            'medium_of_instruction' => MediumOfInstruction::class,
             'established_date' => 'date',
             'is_active' => 'boolean',
         ];
@@ -27,7 +31,13 @@ class School extends Model
         'school_name',
         'school_type',
         'board_affiliation',
+        'medium_of_instruction',
         'established_date',
+        'principal_name',
+        'total_students',
+        'total_teachers',
+        'website',
+        'description',
         'is_active',
     ];
 

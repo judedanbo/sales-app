@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\BoardAffiliation;
 use App\Enums\SchoolType;
 use App\Models\School;
 use Illuminate\Database\Seeder;
@@ -18,7 +19,7 @@ class SchoolSeeder extends Seeder
             'school_code' => 'SCH-001',
             'school_name' => 'Greenwood Primary School',
             'school_type' => SchoolType::PRIMARY,
-            'board_affiliation' => 'CBSE',
+            'board_affiliation' => BoardAffiliation::CBSE,
             'established_date' => '1995-06-15',
             'is_active' => true,
         ]);
@@ -27,7 +28,7 @@ class SchoolSeeder extends Seeder
             'school_code' => 'SCH-002',
             'school_name' => 'St. Mary\'s High School',
             'school_type' => SchoolType::SECONDARY,
-            'board_affiliation' => 'ICSE',
+            'board_affiliation' => BoardAffiliation::ICSE,
             'established_date' => '1987-04-10',
             'is_active' => true,
         ]);
@@ -35,8 +36,8 @@ class SchoolSeeder extends Seeder
         School::factory()->create([
             'school_code' => 'SCH-003',
             'school_name' => 'Rainbow International School',
-            'school_type' => SchoolType::COMBINED,
-            'board_affiliation' => 'IB',
+            'school_type' => SchoolType::HIGHER_SECONDARY,
+            'board_affiliation' => BoardAffiliation::IB,
             'established_date' => '2010-08-20',
             'is_active' => true,
         ]);

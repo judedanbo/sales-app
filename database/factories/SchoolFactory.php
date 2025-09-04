@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\BoardAffiliation;
 use App\Enums\SchoolType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -17,13 +18,11 @@ class SchoolFactory extends Factory
      */
     public function definition(): array
     {
-        $boards = ['CBSE', 'ICSE', 'State Board', 'IB', 'IGCSE', 'NIOS'];
-        
         return [
-            'school_code' => 'SCH-' . $this->faker->unique()->numberBetween(1000, 9999),
-            'school_name' => $this->faker->words(3, true) . ' School',
+            'school_code' => 'SCH-'.$this->faker->unique()->numberBetween(1000, 9999),
+            'school_name' => $this->faker->words(3, true).' School',
             'school_type' => $this->faker->randomElement(SchoolType::cases()),
-            'board_affiliation' => $this->faker->randomElement($boards),
+            'board_affiliation' => $this->faker->optional(0.8)->randomElement(BoardAffiliation::cases()),
             'established_date' => $this->faker->dateTimeBetween('-50 years', '-1 year'),
             'is_active' => $this->faker->boolean(90), // 90% chance of being active
         ];
