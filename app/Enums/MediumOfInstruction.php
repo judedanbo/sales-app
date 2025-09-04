@@ -2,20 +2,20 @@
 
 namespace App\Enums;
 
-enum SchoolType: string
+enum MediumOfInstruction: string
 {
-    case PRIMARY = 'primary';
-    case SECONDARY = 'secondary';
-    case HIGHER_SECONDARY = 'higher_secondary';
-    case K12 = 'k12';
+    case ENGLISH = 'english';
+    case HINDI = 'hindi';
+    case REGIONAL = 'regional';
+    case BILINGUAL = 'bilingual';
 
     public function label(): string
     {
         return match ($this) {
-            self::PRIMARY => 'Primary School',
-            self::SECONDARY => 'Secondary School',
-            self::HIGHER_SECONDARY => 'Higher Secondary School',
-            self::K12 => 'K-12 School',
+            self::ENGLISH => 'English',
+            self::HINDI => 'Hindi',
+            self::REGIONAL => 'Regional Language',
+            self::BILINGUAL => 'Bilingual',
         };
     }
 

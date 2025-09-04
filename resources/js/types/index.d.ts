@@ -98,6 +98,13 @@ export interface SchoolOfficial {
     is_active: boolean;
 }
 
+export interface PaginationLink {
+    url: string | null;
+    label: string;
+    page: number | null;
+    active: boolean;
+}
+
 export interface PaginatedData<T> {
     data: T[];
     current_page: number;
@@ -106,12 +113,11 @@ export interface PaginatedData<T> {
     total: number;
     from: number;
     to: number;
-    links: {
-        first: string | null;
-        last: string | null;
-        prev: string | null;
-        next: string | null;
-    };
+    links: PaginationLink[];
+    prev_page_url?: string | null;
+    next_page_url?: string | null;
+    first_page_url?: string | null;
+    last_page_url?: string | null;
 }
 
 export interface SchoolFilters {

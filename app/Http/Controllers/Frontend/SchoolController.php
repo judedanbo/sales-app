@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Frontend;
 
+use App\Enums\BoardAffiliation;
+use App\Enums\MediumOfInstruction;
+use App\Enums\SchoolType;
 use App\Http\Controllers\Controller;
 use App\Models\School;
 use Illuminate\Http\Request;
@@ -22,7 +25,7 @@ class SchoolController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('school_name', 'like', "%{$search}%")
-                  ->orWhere('school_code', 'like', "%{$search}%");
+                    ->orWhere('school_code', 'like', "%{$search}%");
             });
         }
 
@@ -41,7 +44,7 @@ class SchoolController extends Controller
         // Apply sorting
         $sortBy = $request->get('sort_by', 'school_name');
         $sortDirection = $request->get('sort_direction', 'asc');
-        
+
         if (in_array($sortBy, ['school_name', 'school_code', 'school_type', 'established_date', 'created_at'])) {
             $query->orderBy($sortBy, $sortDirection);
         }
@@ -51,19 +54,8 @@ class SchoolController extends Controller
         return Inertia::render('Schools/Index', [
             'schools' => $schools,
             'filters' => $request->only(['search', 'school_type', 'is_active', 'board_affiliation', 'sort_by', 'sort_direction']),
-            'schoolTypes' => [
-                'primary' => 'Primary School',
-                'secondary' => 'Secondary School',
-                'higher_secondary' => 'Higher Secondary School',
-                'k12' => 'K-12 School',
-            ],
-            'boardAffiliations' => [
-                'cbse' => 'CBSE',
-                'icse' => 'ICSE',
-                'state_board' => 'State Board',
-                'ib' => 'IB',
-                'cambridge' => 'Cambridge',
-            ],
+            'schoolTypes' => SchoolType::options(),
+            'boardAffiliations' => BoardAffiliation::options(),
         ]);
     }
 
@@ -73,25 +65,9 @@ class SchoolController extends Controller
     public function create(): Response
     {
         return Inertia::render('Schools/Create', [
-            'schoolTypes' => [
-                'primary' => 'Primary School',
-                'secondary' => 'Secondary School',
-                'higher_secondary' => 'Higher Secondary School',
-                'k12' => 'K-12 School',
-            ],
-            'boardAffiliations' => [
-                'cbse' => 'CBSE',
-                'icse' => 'ICSE',
-                'state_board' => 'State Board',
-                'ib' => 'IB',
-                'cambridge' => 'Cambridge',
-            ],
-            'mediumOfInstructions' => [
-                'english' => 'English',
-                'hindi' => 'Hindi',
-                'regional' => 'Regional Language',
-                'bilingual' => 'Bilingual',
-            ],
+            'schoolTypes' => SchoolType::options(),
+            'boardAffiliations' => BoardAffiliation::options(),
+            'mediumOfInstructions' => MediumOfInstruction::options(),
         ]);
     }
 
@@ -103,11 +79,11 @@ class SchoolController extends Controller
         $validated = $request->validate([
             'school_name' => 'required|string|max:255',
             'school_code' => 'required|string|max:50|unique:schools,school_code',
-            'school_type' => 'required|string|in:primary,secondary,higher_secondary,k12',
-            'board_affiliation' => 'nullable|string|in:cbse,icse,state_board,ib,cambridge',
+            'school_type' => 'required|string|in:'.implode(',', SchoolType::values()),
+            'board_affiliation' => 'nullable|string|in:'.implode(',', BoardAffiliation::values()),
             'established_date' => 'nullable|date',
             'principal_name' => 'nullable|string|max:255',
-            'medium_of_instruction' => 'nullable|string|in:english,hindi,regional,bilingual',
+            'medium_of_instruction' => 'nullable|string|in:'.implode(',', MediumOfInstruction::values()),
             'total_students' => 'nullable|integer|min:0',
             'total_teachers' => 'nullable|integer|min:0',
             'website' => 'nullable|url|max:255',
@@ -141,25 +117,9 @@ class SchoolController extends Controller
 
         return Inertia::render('Schools/Edit', [
             'school' => $school,
-            'schoolTypes' => [
-                'primary' => 'Primary School',
-                'secondary' => 'Secondary School',
-                'higher_secondary' => 'Higher Secondary School',
-                'k12' => 'K-12 School',
-            ],
-            'boardAffiliations' => [
-                'cbse' => 'CBSE',
-                'icse' => 'ICSE',
-                'state_board' => 'State Board',
-                'ib' => 'IB',
-                'cambridge' => 'Cambridge',
-            ],
-            'mediumOfInstructions' => [
-                'english' => 'English',
-                'hindi' => 'Hindi',
-                'regional' => 'Regional Language',
-                'bilingual' => 'Bilingual',
-            ],
+            'schoolTypes' => SchoolType::options(),
+            'boardAffiliations' => BoardAffiliation::options(),
+            'mediumOfInstructions' => MediumOfInstruction::options(),
         ]);
     }
 
@@ -170,12 +130,12 @@ class SchoolController extends Controller
     {
         $validated = $request->validate([
             'school_name' => 'required|string|max:255',
-            'school_code' => 'required|string|max:50|unique:schools,school_code,' . $school->id,
-            'school_type' => 'required|string|in:primary,secondary,higher_secondary,k12',
-            'board_affiliation' => 'nullable|string|in:cbse,icse,state_board,ib,cambridge',
+            'school_code' => 'required|string|max:50|unique:schools,school_code,'.$school->id,
+            'school_type' => 'required|string|in:'.implode(',', SchoolType::values()),
+            'board_affiliation' => 'nullable|string|in:'.implode(',', BoardAffiliation::values()),
             'established_date' => 'nullable|date',
             'principal_name' => 'nullable|string|max:255',
-            'medium_of_instruction' => 'nullable|string|in:english,hindi,regional,bilingual',
+            'medium_of_instruction' => 'nullable|string|in:'.implode(',', MediumOfInstruction::values()),
             'total_students' => 'nullable|integer|min:0',
             'total_teachers' => 'nullable|integer|min:0',
             'website' => 'nullable|url|max:255',

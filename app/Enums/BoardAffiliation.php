@@ -2,20 +2,22 @@
 
 namespace App\Enums;
 
-enum SchoolType: string
+enum BoardAffiliation: string
 {
-    case PRIMARY = 'primary';
-    case SECONDARY = 'secondary';
-    case HIGHER_SECONDARY = 'higher_secondary';
-    case K12 = 'k12';
+    case CBSE = 'cbse';
+    case ICSE = 'icse';
+    case STATE_BOARD = 'state_board';
+    case IB = 'ib';
+    case CAMBRIDGE = 'cambridge';
 
     public function label(): string
     {
         return match ($this) {
-            self::PRIMARY => 'Primary School',
-            self::SECONDARY => 'Secondary School',
-            self::HIGHER_SECONDARY => 'Higher Secondary School',
-            self::K12 => 'K-12 School',
+            self::CBSE => 'CBSE',
+            self::ICSE => 'ICSE',
+            self::STATE_BOARD => 'State Board',
+            self::IB => 'IB',
+            self::CAMBRIDGE => 'Cambridge',
         };
     }
 

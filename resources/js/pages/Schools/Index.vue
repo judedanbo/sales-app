@@ -504,7 +504,8 @@ const clearFilters = () => {
                     <div v-if="props.schools.last_page > 1" class="mt-6 flex items-center justify-between">
                         <div class="text-sm text-muted-foreground">Page {{ props.schools.current_page }} of {{ props.schools.last_page }}</div>
                         <div class="flex gap-2">
-                            <Link v-if="props.schools.links.prev" :href="props.schools.links.prev" preserve-scroll preserve-state>
+                            <!-- Previous Button -->
+                            <Link v-if="props.schools.prev_page_url" :href="props.schools.prev_page_url" preserve-scroll preserve-state>
                                 <Button variant="outline" size="sm">
                                     <ChevronLeft class="h-4 w-4" />
                                     Previous
@@ -515,7 +516,30 @@ const clearFilters = () => {
                                 Previous
                             </Button>
 
-                            <Link v-if="props.schools.links.next" :href="props.schools.links.next" preserve-scroll preserve-state>
+                            <!-- Page Numbers -->
+                            <template v-for="link in props.schools.links" :key="link.label">
+                                <Link 
+                                    v-if="link.url && link.page && !link.active" 
+                                    :href="link.url" 
+                                    preserve-scroll 
+                                    preserve-state
+                                >
+                                    <Button variant="outline" size="sm">
+                                        {{ link.label }}
+                                    </Button>
+                                </Link>
+                                <Button 
+                                    v-else-if="link.page && link.active" 
+                                    variant="default" 
+                                    size="sm" 
+                                    disabled
+                                >
+                                    {{ link.label }}
+                                </Button>
+                            </template>
+
+                            <!-- Next Button -->
+                            <Link v-if="props.schools.next_page_url" :href="props.schools.next_page_url" preserve-scroll preserve-state>
                                 <Button variant="outline" size="sm">
                                     Next
                                     <ChevronRight class="h-4 w-4" />

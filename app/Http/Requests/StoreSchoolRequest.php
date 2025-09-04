@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\BoardAffiliation;
+use App\Enums\MediumOfInstruction;
 use App\Enums\SchoolType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -43,8 +45,11 @@ class StoreSchoolRequest extends FormRequest
             ],
             'board_affiliation' => [
                 'nullable',
-                'string',
-                'max:255',
+                Rule::enum(BoardAffiliation::class),
+            ],
+            'medium_of_instruction' => [
+                'nullable',
+                Rule::enum(MediumOfInstruction::class),
             ],
             'established_date' => [
                 'nullable',
