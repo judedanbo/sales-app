@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\BoardAffiliation;
 use App\Enums\MediumOfInstruction;
+use App\Enums\SchoolStatus;
 use App\Enums\SchoolType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -22,7 +23,7 @@ class School extends Model
             'board_affiliation' => BoardAffiliation::class,
             'medium_of_instruction' => MediumOfInstruction::class,
             'established_date' => 'date',
-            'is_active' => 'boolean',
+            'is_active' => SchoolStatus::class,
         ];
     }
 
@@ -78,7 +79,7 @@ class School extends Model
 
     public function scopeActive($query)
     {
-        return $query->where('is_active', true);
+        return $query->where('is_active', SchoolStatus::Active);
     }
 
     public function scopeByType($query, string $type)

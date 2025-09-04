@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Enums\BoardAffiliation;
 use App\Enums\MediumOfInstruction;
+use App\Enums\SchoolStatus;
 use App\Enums\SchoolType;
 use App\Http\Controllers\Controller;
 use App\Models\School;
@@ -20,42 +21,55 @@ class SchoolController extends Controller
     {
         $query = School::with(['contacts', 'addresses', 'management', 'officials']);
 
+        // Get filter data from request (works for both GET and POST/reload)
+        $filters = $request->all();
+
         // Apply filters
-        if ($request->filled('search')) {
-            $search = $request->search;
+        if (! empty($filters['search'])) {
+            $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('school_name', 'like', "%{$search}%")
                     ->orWhere('school_code', 'like', "%{$search}%");
             });
         }
 
-        if ($request->filled('school_type')) {
-            $query->where('school_type', $request->school_type);
+        if (! empty($filters['school_type'])) {
+            $query->where('school_type', $filters['school_type']);
         }
 
-        if ($request->filled('is_active')) {
-            $query->where('is_active', $request->boolean('is_active'));
+        if (! empty($filters['is_active'])) {
+            $query->where('is_active', $filters['is_active']);
         }
 
-        if ($request->filled('board_affiliation')) {
-            $query->where('board_affiliation', $request->board_affiliation);
+        if (! empty($filters['board_affiliation'])) {
+            $query->where('board_affiliation', $filters['board_affiliation']);
         }
 
         // Apply sorting
-        $sortBy = $request->get('sort_by', 'school_name');
-        $sortDirection = $request->get('sort_direction', 'asc');
+        $sortBy = $filters['sort_by'] ?? 'school_name';
+        $sortDirection = $filters['sort_direction'] ?? 'asc';
 
         if (in_array($sortBy, ['school_name', 'school_code', 'school_type', 'established_date', 'created_at'])) {
             $query->orderBy($sortBy, $sortDirection);
         }
 
-        $schools = $query->paginate(15)->withQueryString();
+        // Handle pagination
+        $page = $filters['page'] ?? 1;
+        $schools = $query->paginate(15, ['*'], 'page', $page);
 
         return Inertia::render('Schools/Index', [
             'schools' => $schools,
-            'filters' => $request->only(['search', 'school_type', 'is_active', 'board_affiliation', 'sort_by', 'sort_direction']),
+            'filters' => [
+                'search' => $filters['search'] ?? '',
+                'school_type' => $filters['school_type'] ?? '',
+                'is_active' => $filters['is_active'] ?? '',
+                'board_affiliation' => $filters['board_affiliation'] ?? '',
+                'sort_by' => $sortBy,
+                'sort_direction' => $sortDirection,
+            ],
             'schoolTypes' => SchoolType::options(),
             'boardAffiliations' => BoardAffiliation::options(),
+            'schoolStatuses' => SchoolStatus::options(),
         ]);
     }
 
