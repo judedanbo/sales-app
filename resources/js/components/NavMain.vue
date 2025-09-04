@@ -17,7 +17,7 @@ const page = usePage();
         <SidebarMenu>
             <SidebarMenuItem v-for="item in items" :key="item.title">
                 <SidebarMenuButton as-child :is-active="urlIsActive(item.href, page.url)" :tooltip="item.title">
-                    <Link :href="item.href">
+                    <Link :href="item.href" :data-testid="`nav-${item.title.toLowerCase()}`">
                         <component :is="item.icon" />
                         <span>{{ item.title }}</span>
                     </Link>
