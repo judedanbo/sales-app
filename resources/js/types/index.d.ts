@@ -35,3 +35,90 @@ export interface User {
 }
 
 export type BreadcrumbItemType = BreadcrumbItem;
+
+export interface School {
+    id: number;
+    school_name: string;
+    school_code: string;
+    school_type: 'primary' | 'secondary' | 'higher_secondary' | 'k12';
+    board_affiliation?: 'cbse' | 'icse' | 'state_board' | 'ib' | 'cambridge';
+    established_date?: string;
+    principal_name?: string;
+    medium_of_instruction?: 'english' | 'hindi' | 'regional' | 'bilingual';
+    total_students?: number;
+    total_teachers?: number;
+    website?: string;
+    description?: string;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string | null;
+    contacts?: SchoolContact[];
+    addresses?: SchoolAddress[];
+    management?: SchoolManagement[];
+    officials?: SchoolOfficial[];
+}
+
+export interface SchoolContact {
+    id: number;
+    school_id: number;
+    contact_type: string;
+    contact_value: string;
+    is_primary: boolean;
+}
+
+export interface SchoolAddress {
+    id: number;
+    school_id: number;
+    address_type: string;
+    address_line1: string;
+    address_line2?: string;
+    city: string;
+    state: string;
+    country: string;
+    postal_code: string;
+    is_primary: boolean;
+}
+
+export interface SchoolManagement {
+    id: number;
+    school_id: number;
+    management_type: string;
+    organization_name?: string;
+    registration_number?: string;
+}
+
+export interface SchoolOfficial {
+    id: number;
+    school_id: number;
+    name: string;
+    designation: string;
+    contact_number?: string;
+    email?: string;
+    is_active: boolean;
+}
+
+export interface PaginatedData<T> {
+    data: T[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number;
+    to: number;
+    links: {
+        first: string | null;
+        last: string | null;
+        prev: string | null;
+        next: string | null;
+    };
+}
+
+export interface SchoolFilters {
+    search?: string;
+    school_type?: string;
+    is_active?: string;
+    board_affiliation?: string;
+    sort_by?: string;
+    sort_direction?: 'asc' | 'desc';
+}
