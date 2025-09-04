@@ -67,22 +67,38 @@ class SchoolController extends Controller
                 'sort_by' => $sortBy,
                 'sort_direction' => $sortDirection,
             ],
-            'schoolTypes' => SchoolType::options(),
-            'boardAffiliations' => BoardAffiliation::options(),
-            'schoolStatuses' => SchoolStatus::options(),
+            'schoolTypes' => $this->formatOptionsForSelect(SchoolType::options()),
+            'boardAffiliations' => $this->formatOptionsForSelect(BoardAffiliation::options()),
+            'schoolStatuses' => $this->formatOptionsForSelect(SchoolStatus::options()),
         ]);
     }
 
     /**
-     * Show the form for creating a new school.
+     * Get form data for school creation/editing (AJAX endpoint).
      */
-    public function create(): Response
+    public function getFormData(): \Illuminate\Http\JsonResponse
     {
-        return Inertia::render('Schools/Create', [
-            'schoolTypes' => SchoolType::options(),
-            'boardAffiliations' => BoardAffiliation::options(),
-            'mediumOfInstructions' => MediumOfInstruction::options(),
+        return response()->json([
+            'schoolTypes' => $this->formatOptionsForSelect(SchoolType::options()),
+            'boardAffiliations' => $this->formatOptionsForSelect(BoardAffiliation::options()),
+            'mediumOfInstructions' => $this->formatOptionsForSelect(MediumOfInstruction::options()),
         ]);
+    }
+
+    /**
+     * Format enum options for select components.
+     */
+    private function formatOptionsForSelect(array $options): array
+    {
+        $formatted = [];
+        foreach ($options as $value => $label) {
+            $formatted[] = [
+                'value' => $value,
+                'label' => $label,
+            ];
+        }
+
+        return $formatted;
     }
 
     /**
@@ -96,17 +112,23 @@ class SchoolController extends Controller
             'school_type' => 'required|string|in:'.implode(',', SchoolType::values()),
             'board_affiliation' => 'nullable|string|in:'.implode(',', BoardAffiliation::values()),
             'established_date' => 'nullable|date',
-            'principal_name' => 'nullable|string|max:255',
-            'medium_of_instruction' => 'nullable|string|in:'.implode(',', MediumOfInstruction::values()),
-            'total_students' => 'nullable|integer|min:0',
-            'total_teachers' => 'nullable|integer|min:0',
-            'website' => 'nullable|url|max:255',
-            'description' => 'nullable|string',
+            // 'principal_name' => 'nullable|string|max:255',
+            // 'medium_of_instruction' => 'nullable|string|in:'.implode(',', MediumOfInstruction::values()),
+            // 'total_students' => 'nullable|integer|min:0',
+            // 'total_teachers' => 'nullable|integer|min:0',2
+            // 'website' => 'nullable|url|max:255',
+            // 'description' => 'nullable|string',
             'is_active' => 'boolean',
         ]);
 
         $school = School::create($validated);
 
+        // If this is an Inertia request (e.g., from modal), redirect back to index
+        if ($request->header('X-Inertia')) {
+            return redirect()->route('schools.index')->with('success', 'School created successfully.');
+        }
+
+        // For non-Inertia requests, redirect to show page
         return redirect()->route('schools.show', $school)->with('success', 'School created successfully.');
     }
 
@@ -123,21 +145,6 @@ class SchoolController extends Controller
     }
 
     /**
-     * Show the form for editing the specified school.
-     */
-    public function edit(School $school): Response
-    {
-        $school->load(['contacts', 'addresses', 'management', 'officials']);
-
-        return Inertia::render('Schools/Edit', [
-            'school' => $school,
-            'schoolTypes' => SchoolType::options(),
-            'boardAffiliations' => BoardAffiliation::options(),
-            'mediumOfInstructions' => MediumOfInstruction::options(),
-        ]);
-    }
-
-    /**
      * Update the specified school.
      */
     public function update(Request $request, School $school)
@@ -148,10 +155,10 @@ class SchoolController extends Controller
             'school_type' => 'required|string|in:'.implode(',', SchoolType::values()),
             'board_affiliation' => 'nullable|string|in:'.implode(',', BoardAffiliation::values()),
             'established_date' => 'nullable|date',
-            'principal_name' => 'nullable|string|max:255',
-            'medium_of_instruction' => 'nullable|string|in:'.implode(',', MediumOfInstruction::values()),
-            'total_students' => 'nullable|integer|min:0',
-            'total_teachers' => 'nullable|integer|min:0',
+            // 'principal_name' => 'nullable|string|max:255',
+            // 'medium_of_instruction' => 'nullable|string|in:'.implode(',', MediumOfInstruction::values()),
+            // 'total_students' => 'nullable|integer|min:0',
+            // 'total_teachers' => 'nullable|integer|min:0',
             'website' => 'nullable|url|max:255',
             'description' => 'nullable|string',
             'is_active' => 'boolean',
@@ -159,6 +166,12 @@ class SchoolController extends Controller
 
         $school->update($validated);
 
+        // If this is an Inertia request (e.g., from modal), redirect back to index
+        if ($request->header('X-Inertia')) {
+            return redirect()->route('schools.index')->with('success', 'School updated successfully.');
+        }
+
+        // For non-Inertia requests, redirect to show page
         return redirect()->route('schools.show', $school)->with('success', 'School updated successfully.');
     }
 

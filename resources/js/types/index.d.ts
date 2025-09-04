@@ -43,8 +43,8 @@ export interface School {
     school_type: 'primary' | 'secondary' | 'higher_secondary' | 'k12';
     board_affiliation?: 'cbse' | 'icse' | 'state_board' | 'ib' | 'cambridge';
     established_date?: string;
-    principal_name?: string;
-    medium_of_instruction?: 'english' | 'hindi' | 'regional' | 'bilingual';
+    // principal_name?: string;
+    // medium_of_instruction?: 'english' | 'hindi' | 'regional' | 'bilingual';
     total_students?: number;
     total_teachers?: number;
     website?: string;

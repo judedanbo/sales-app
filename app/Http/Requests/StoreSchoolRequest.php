@@ -47,10 +47,10 @@ class StoreSchoolRequest extends FormRequest
                 'nullable',
                 Rule::enum(BoardAffiliation::class),
             ],
-            'medium_of_instruction' => [
-                'nullable',
-                Rule::enum(MediumOfInstruction::class),
-            ],
+            // 'medium_of_instruction' => [
+            //     'nullable',
+            //     Rule::enum(MediumOfInstruction::class),
+            // ],
             'established_date' => [
                 'nullable',
                 'date',

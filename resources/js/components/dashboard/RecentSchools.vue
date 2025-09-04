@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import Badge from '@/components/ui/badge.vue';
 import { Link } from '@inertiajs/vue3';
-import { create, show } from '@/routes/schools';
+import { show } from '@/routes/schools';
 import { 
     Clock, 
     Plus, 
@@ -60,22 +60,18 @@ const getSchoolTypeLabel = (type: string) => {
                 </CardTitle>
                 <CardDescription>Schools added in the last 30 days</CardDescription>
             </div>
-            <Link :href="create().url">
-                <Button size="sm">
-                    <Plus class="h-3 w-3 mr-1" />
-                    Add School
-                </Button>
-            </Link>
+            <Button size="sm" disabled>
+                <Plus class="h-3 w-3 mr-1" />
+                Add School
+            </Button>
         </CardHeader>
         <CardContent>
             <div v-if="recentSchools.length === 0" class="text-center py-8 text-muted-foreground">
                 <SchoolIcon class="mx-auto h-8 w-8 mb-2 opacity-50" />
                 <p class="text-sm">No schools added recently</p>
-                <Link :href="create().url">
-                    <Button variant="ghost" size="sm" class="mt-2">
-                        Add your first school
-                    </Button>
-                </Link>
+                <Button variant="ghost" size="sm" class="mt-2" disabled>
+                    Add your first school
+                </Button>
             </div>
             
             <div v-else class="space-y-4">

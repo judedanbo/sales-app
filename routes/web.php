@@ -22,7 +22,8 @@ Route::get('docs', [DocumentationController::class, 'index'])
 // School Frontend Routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/schools/dashboard', [SchoolController::class, 'dashboard'])->name('schools.dashboard');
-    Route::resource('schools', SchoolController::class);
+    Route::get('/schools/form-data', [SchoolController::class, 'getFormData'])->name('schools.form-data');
+    Route::resource('schools', SchoolController::class)->except(['create', 'edit']);
 });
 
 require __DIR__.'/settings.php';

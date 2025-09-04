@@ -21,7 +21,7 @@ class School extends Model
         return [
             'school_type' => SchoolType::class,
             'board_affiliation' => BoardAffiliation::class,
-            'medium_of_instruction' => MediumOfInstruction::class,
+            // 'medium_of_instruction' => MediumOfInstruction::class,
             'established_date' => 'date',
             'is_active' => SchoolStatus::class,
         ];
@@ -32,13 +32,13 @@ class School extends Model
         'school_name',
         'school_type',
         'board_affiliation',
-        'medium_of_instruction',
+        // 'medium_of_instruction',
         'established_date',
-        'principal_name',
-        'total_students',
-        'total_teachers',
-        'website',
-        'description',
+        // 'principal_name',
+        // 'total_students',
+        // 'total_teachers',
+        // 'website',
+        // 'description',
         'is_active',
     ];
 

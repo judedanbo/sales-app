@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import SchoolStats from '@/components/schools/SchoolStats.vue';
 import SchoolsTable from '@/components/schools/SchoolsTable.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { create, index } from '@/routes/schools';
+import { index } from '@/routes/schools';
 import { type BreadcrumbItem, type PaginatedData, type School, type SchoolFilters } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { BarChart3, Plus, TrendingUp } from 'lucide-vue-next';

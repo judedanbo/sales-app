@@ -8,9 +8,9 @@ import { computed } from 'vue';
 
 interface Props {
     filters: SchoolFilters;
-    schoolTypes: Record<string, string>;
-    boardAffiliations: Record<string, string>;
-    schoolStatuses: Array<{ value: number; label: string }>;
+    schoolTypes: Array<{ value: string; label: string }>;
+    boardAffiliations: Array<{ value: string; label: string }>;
+    schoolStatuses: Array<{ value: string; label: string }>;
 }
 
 interface Emits {
@@ -75,8 +75,8 @@ function clearFilters() {
                     class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
                 >
                     <option value="">All Types</option>
-                    <option v-for="(label, value) in props.schoolTypes" :key="value" :value="value">
-                        {{ label }}
+                    <option v-for="type in props.schoolTypes" :key="type.value" :value="type.value">
+                        {{ type.label }}
                     </option>
                 </select>
 
@@ -86,8 +86,8 @@ function clearFilters() {
                     class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
                 >
                     <option value="">All Boards</option>
-                    <option v-for="(label, value) in props.boardAffiliations" :key="value" :value="value">
-                        {{ label }}
+                    <option v-for="board in props.boardAffiliations" :key="board.value" :value="board.value">
+                        {{ board.label }}
                     </option>
                 </select>
 

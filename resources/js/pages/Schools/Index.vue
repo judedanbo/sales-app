@@ -1,13 +1,14 @@
 <script setup lang="ts">
+import SchoolCreateModal from '@/components/schools/SchoolCreateModal.vue';
 import SchoolFiltersComponent from '@/components/schools/SchoolFilters.vue';
 import SchoolsTable from '@/components/schools/SchoolsTable.vue';
 import SchoolStats from '@/components/schools/SchoolStats.vue';
 import { Button } from '@/components/ui/button';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { create, index } from '@/routes/schools';
+import { index } from '@/routes/schools';
 import { type BreadcrumbItem, type PaginatedData, type School, type SchoolFilters } from '@/types';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { useDebounceFn } from '@vueuse/core';
 import { Plus } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
@@ -41,6 +42,7 @@ const localFilters = ref<SchoolFilters>({
 
 const isLoading = ref(false);
 const selectedSchools = ref<number[]>([]);
+const showCreateModal = ref(false);
 
 // Selection handlers
 const toggleSelection = (schoolId: number) => {
@@ -172,6 +174,12 @@ function handleFiltersUpdate(newFilters: SchoolFilters) {
     localFilters.value = { ...newFilters };
 }
 
+function handleSchoolCreated(school: School) {
+    // Refresh the page to show the new school
+
+    router.reload({ only: ['schools'] });
+}
+
 function handlePageChange(page: number) {
     goToPage(page);
 }
@@ -193,16 +201,14 @@ const clearFilters = () => {
     <Head title="Schools" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="space-y-6">
+        <div class="space-y-6 p-8">
             <!-- Header Section -->
             <PageHeader title="Schools" description="Manage your schools and their information">
                 <template #action>
-                    <Link :href="create().url">
-                        <Button>
-                            <Plus class="mr-2 h-4 w-4" />
-                            Add School
-                        </Button>
-                    </Link>
+                    <Button @click="showCreateModal = true">
+                        <Plus class="mr-2 h-4 w-4" />
+                        Add School
+                    </Button>
                 </template>
             </PageHeader>
 
@@ -233,5 +239,8 @@ const clearFilters = () => {
                 @page-change="handlePageChange"
             />
         </div>
+
+        <!-- Create School Modal -->
+        <SchoolCreateModal :open="showCreateModal" @update:open="showCreateModal = $event" @school-created="handleSchoolCreated" />
     </AppLayout>
 </template>

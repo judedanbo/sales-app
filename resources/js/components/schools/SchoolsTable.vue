@@ -12,11 +12,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import Pagination from '@/components/ui/Pagination.vue';
 import { Skeleton } from '@/components/ui/skeleton';
-import { create, edit, show } from '@/routes/schools';
+import { show, index } from '@/routes/schools';
 import type { PaginatedData, School, SchoolFilters } from '@/types';
-import { Link } from '@inertiajs/vue3';
-import { ChevronDown, ChevronUp, Download, Edit as EditIcon, Eye, MoreHorizontal, Plus, School as SchoolIcon, Trash2 } from 'lucide-vue-next';
-import { computed } from 'vue';
+import { Link, router } from '@inertiajs/vue3';
+import { ChevronDown, ChevronUp, Download, Edit as EditIcon, Eye, MoreHorizontal, School as SchoolIcon, Trash2 } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
+import SchoolEditModal from './SchoolEditModal.vue';
 
 interface Props {
     schools: PaginatedData<School>;
@@ -36,6 +37,10 @@ interface Emits {
 
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
+
+// Edit modal state
+const showEditModal = ref(false);
+const schoolToEdit = ref<School | null>(null);
 
 // Selection helpers
 const isSelected = (schoolId: number) => props.selectedSchools.includes(schoolId);
@@ -85,6 +90,16 @@ function clearSelection() {
 
 function handlePageChange(page: number) {
     emit('page-change', page);
+}
+
+function handleEdit(school: School) {
+    schoolToEdit.value = school;
+    showEditModal.value = true;
+}
+
+function handleSchoolUpdated(school: School) {
+    // Refresh the schools data
+    router.reload({ only: ['schools'] });
 }
 </script>
 
@@ -179,7 +194,7 @@ function handlePageChange(page: number) {
                                 <div class="flex flex-col items-center gap-2">
                                     <SchoolIcon class="h-8 w-8 text-muted-foreground" />
                                     <p class="text-muted-foreground">No schools found</p>
-                                    <Link :href="create().url">
+                                    <Link :href="index().url">
                                         <Button size="sm">
                                             <Plus class="mr-2 h-4 w-4" />
                                             Add First School
@@ -251,12 +266,10 @@ function handlePageChange(page: number) {
                                                 View
                                             </DropdownMenuItem>
                                         </Link>
-                                        <Link :href="edit(school).url">
-                                            <DropdownMenuItem>
-                                                <EditIcon class="mr-2 h-4 w-4" />
-                                                Edit
-                                            </DropdownMenuItem>
-                                        </Link>
+                                        <DropdownMenuItem @click="handleEdit(school)">
+                                            <EditIcon class="mr-2 h-4 w-4" />
+                                            Edit
+                                        </DropdownMenuItem>
                                         <DropdownMenuItem class="text-red-600 dark:text-red-400" @click="handleDelete(school)">
                                             <Trash2 class="mr-2 h-4 w-4" />
                                             Delete
@@ -272,4 +285,7 @@ function handlePageChange(page: number) {
             <Pagination :current-page="schools.current_page" :last-page="schools.last_page" :disabled="isLoading" @page-change="handlePageChange" />
         </CardContent>
     </Card>
+
+    <!-- Edit School Modal -->
+    <SchoolEditModal :open="showEditModal" :school="schoolToEdit" @update:open="showEditModal = $event" @school-updated="handleSchoolUpdated" />
 </template>
