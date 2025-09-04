@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 <laravel-boost-guidelines>
 === foundation rules ===
 
@@ -455,3 +459,59 @@ $pages->assertNoJavascriptErrors()->assertNoConsoleLogs();
 - Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
 - Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test` with a specific filename or filter.
 </laravel-boost-guidelines>
+
+## Essential Commands
+
+### Development
+- `composer run dev` - Start complete dev environment (Laravel, queue, logs, Vite) 
+- `composer run dev:ssr` - Start dev with SSR support
+- `npm run dev` - Start Vite dev server only
+- `php artisan serve` - Start Laravel server only
+
+### Building & Formatting
+- `npm run build` - Build production assets
+- `npm run build:ssr` - Build with SSR for production
+- `npm run format` - Format JS/Vue with Prettier
+- `npm run lint` - Lint and fix JS/Vue with ESLint
+- `vendor/bin/pint --dirty` - Format PHP code (run before committing)
+
+### Testing
+- `php artisan test` - Run all tests
+- `php artisan test --filter=testName` - Run specific test
+- `php artisan test tests/Feature/ExampleTest.php` - Run specific file
+- `php artisan test tests/Browser` - Run browser tests (Pest 4)
+
+### Database
+- `php artisan migrate` - Run migrations
+- `php artisan migrate:fresh --seed` - Reset and seed database
+- `php artisan db:seed` - Seed database
+
+## High-Level Architecture
+
+### Laravel 12 Structure
+- **Streamlined structure** - No `app/Http/Middleware/`, no `app/Console/Kernel.php`
+- **bootstrap/app.php** - Registers middleware, exceptions, routing
+- **bootstrap/providers.php** - Application service providers
+- **Auto-registration** - Commands in `app/Console/Commands/` auto-register
+
+### Frontend Stack
+- **Inertia.js v2** - Pages in `resources/js/pages/`, layouts provide consistent structure
+- **Vue 3 + TypeScript** - Composition API, full type safety
+- **Tailwind CSS v4** - Uses `@import "tailwindcss"` (not `@tailwind` directives)
+- **shadcn/ui components** - Comprehensive UI library in `resources/js/components/ui/`
+
+### Database Architecture
+- **SQLite default** - Can be changed to MySQL/PostgreSQL
+- **Queue in database** - Jobs table for queue processing
+- **Session in database** - Sessions stored in database table
+
+### Authentication Flow
+- **Full auth scaffolding** - Login, register, password reset, email verification
+- **Settings pages** - Profile, password, appearance management at `/settings/*`
+- **Protected routes** - Auth middleware with throttling
+
+### Development Tools
+- **Laravel Boost MCP** - Use `search-docs`, `tinker`, `database-query`, `browser-logs` tools
+- **Laravel Telescope** - Debug and monitor at `/telescope`
+- **Laravel Debugbar** - Development debugging toolbar
+- **Pest 4** - Browser testing, visual regression, smoke testing

@@ -1,0 +1,288 @@
+# Sales Application Development Roadmap
+
+## Phase 1: Planning & Requirements (Week 1-2) ✅
+- [x] **Requirements Gathering**
+  - [x] Define target users: **Staff, Administration, Audit**
+  - [x] Identify product categories: **Uniforms, Books, Stationery, Merchandise**
+  - [x] Document business rules: **Cash payment only, No discounts, No credit limits**
+- [x] **Technical Architecture**
+  - [x] Choose tech stack: **Laravel 12 + Inertia.js v2 + Vue 3 + TypeScript + Tailwind CSS v4**
+  - [x] Design system architecture: **RESTful API with /api/v1/ base, SQLite/MySQL schema defined**
+    - **API Endpoints Structure:**
+      - Auth: `/api/v1/auth/` (login, logout, profile, refresh-token) - Laravel Sanctum
+      - Users: `/api/v1/users/` (CRUD operations, Admin only)
+      - Products: `/api/v1/products/` (CRUD, search, categories)
+      - Inventory: `/api/v1/inventory/` (stock management, movements, low-stock alerts)
+      - Sales: `/api/v1/sales/` (POS transactions, receipts, void)
+      - Reports: `/api/v1/reports/` (daily/weekly/monthly, audit-trail, exports)
+      - **Communication & File Management APIs:**
+        - Email Notifications: `/api/v1/notifications/email/` (Laravel Mail with queues)
+        - Import/Export: `/api/v1/import/` and `/api/v1/export/` (Laravel Excel)
+        - File Management: `/api/v1/files/` (Laravel Storage)
+      - **School Information APIs:**
+        - Schools: `/api/v1/schools/` (CRUD, contacts, addresses, management, officials, documents)
+        - Academic Years: `/api/v1/schools/:id/academic-years/` (CRUD, set current year)
+        - School Classes: `/api/v1/schools/:id/school-classes/` (CRUD school classes)
+        - Class Requirements: `/api/v1/schools/:id/academic-years/:year_id/school-classes/:class_id/requirements`
+        - Price Management: `/api/v1/products/:id/price-changes/` (versioned pricing system)
+    - **Database Tables (Laravel Migrations):**
+      - users (Laravel's default auth table extended)
+      - categories (id, name, description)
+      - products (id, sku, name, description, category_id, is_active)
+      - inventory (id, product_id, quantity, reorder_level, location)
+      - sales (id, sale_number, sale_date, total_amount, payment_method, cashier_id, status)
+      - sale_items (id, sale_id, product_id, quantity, unit_price, subtotal)
+      - stock_movements (id, product_id, movement_type, quantity, reference_id)
+      - audit_trail (via Laravel Auditing package)
+      - sessions (Laravel's database sessions)
+      - **School Information System:**
+        - schools (id, school_code, school_name, school_type, board_affiliation, is_active)
+        - school_contacts (id, school_id, contact_type, phone_primary, email_primary, website)
+        - school_addresses (id, school_id, address_type, address_line1, city, state_province, country)
+        - school_management (id, school_id, management_type, ownership_type, managing_authority)
+        - school_officials (id, school_id, user_id, official_type, name, qualification, email, phone)
+        - school_documents (id, school_id, document_type, document_name, document_number, file_url)
+        - academic_years (id, school_id, year_name, start_date, end_date, is_current)
+        - school_classes (id, school_id, class_name, class_code, min_age, max_age, order_sequence)
+        - class_product_requirements (id, school_id, academic_year_id, class_id, product_id, is_required)
+        - product_prices (id, product_id, version_number, price, final_price, status, valid_from)
+  - [x] Setup development environment: **Docker with Laravel Sail**
+- [x] **Additional Planning Tasks**
+  - [x] Define user roles and permissions (Laravel Policies & Gates):
+    - **Staff**: Create sales, view products, manage own sales
+    - **Admin**: Full CRUD on all entities, void sales, user management, reports  
+    - **Audit**: Read-only access to all data, audit trail access, export reports
+    - **School Admin**: School-level management for school officials
+    - **Principal**: Academic oversight and school operations
+    - **Teacher**: Teaching-related functions and student management
+    - **System Admin**: Full system access across all schools
+  - [x] Design RESTful API structure with Laravel API Resources
+  - [x] Create project structure: **Laravel 12 structure with Inertia pages in resources/js/pages/**
+  - [x] Setup version control (Git repository): **Git initialized with .gitignore configured**
+  - [x] Define coding standards: **Laravel Pint for PHP, ESLint + Prettier for JS/Vue**
+  - [x] Create development workflow: **Git flow with main branch, feature branches**
+  - [x] Setup environment variables configuration (.env structure)
+  - [x] Plan data backup and recovery strategy: **Database dumps, Laravel Backup package**
+
+## Phase 2: Database Design (Week 2-3) 🚧 IN PROGRESS
+- [ ] **Core Entities Implementation**
+  - [ ] Create Laravel migrations for all tables
+  - [ ] Implement Eloquent models with relationships
+  - [ ] Add model factories for testing
+  - [ ] Create database seeders with sample data
+- [ ] **Database Implementation**
+  - [ ] Run `php artisan make:migration` for each table
+  - [ ] Define foreign keys and constraints in migrations
+  - [ ] Add indexes for performance in migrations
+  - [ ] Setup database triggers for audit trail (or use Laravel Auditing)
+  - [ ] Create comprehensive seed data with factories
+- [ ] **Price Tracking Implementation**
+  - [ ] Create ProductPrice model with versioning logic
+  - [ ] Implement price change approval workflow with Laravel Events
+  - [ ] Add scheduled price changes with Laravel Scheduler
+  - [ ] Create bulk price update jobs
+- [ ] **School Class Requirements Implementation**
+  - [ ] Create ClassProductRequirement model and relationships
+  - [ ] Implement requirement copy functionality
+  - [ ] Add validation rules for requirements
+  - [ ] Create requirement templates
+
+## Phase 3: Backend Development (Week 3-6)
+- [ ] **Inventory Module**
+  - [ ] Create Product controller with API Resources
+  - [ ] Implement stock management service class
+  - [ ] Setup low stock notifications with Laravel Notifications
+  - [ ] Create inventory report generators
+  - [ ] **Price Management**
+    - [ ] Create PriceController with approval workflow
+    - [ ] Implement price history tracking
+    - [ ] Add bulk update functionality
+    - [ ] Create price change notifications
+  - [ ] **School Class Requirements**
+    - [ ] Create RequirementController with CRUD operations
+    - [ ] Implement bulk requirement management
+    - [ ] Add copy from previous year functionality
+    - [ ] Create compliance reporting
+- [ ] **Sales Module**
+  - [ ] Create SaleController for POS operations
+  - [ ] Implement cart service with session storage
+  - [ ] Generate receipts with Laravel PDF
+  - [ ] Create sales analytics with Laravel Query Builder
+- [ ] **Authentication & Authorization**
+  - [ ] Setup Laravel Sanctum for API authentication
+  - [ ] Create role-based middleware
+  - [ ] Implement Laravel Policies for authorization
+  - [ ] Add two-factor authentication (optional)
+  - [ ] Setup email verification with Laravel
+
+## Phase 4: Frontend Development (Week 5-8)
+- [ ] **Inventory Interface (Vue 3 + Inertia)**
+  - [ ] Create Product Index/Create/Edit pages
+  - [ ] Build stock monitoring dashboard with charts
+  - [ ] Implement batch updates with Vue forms
+  - [ ] Add barcode scanning (optional)
+  - [ ] **Price Management Interface**
+    - [ ] Create price history component
+    - [ ] Build approval workflow UI
+    - [ ] Add bulk price update modal
+    - [ ] Create pending changes dashboard
+  - [ ] **School Class Requirements Interface**
+    - [ ] Build requirements setup wizard
+    - [ ] Create bulk management data tables
+    - [ ] Add copy functionality UI
+    - [ ] Build compliance dashboard with charts
+- [ ] **Sales Interface**
+  - [ ] Create POS terminal page with Vue 3
+  - [ ] Build product search with autocomplete
+  - [ ] Implement cart management with Pinia store
+  - [ ] Create checkout flow with Inertia forms
+- [ ] **Reports Dashboard**
+  - [ ] Build dashboard with Chart.js/ApexCharts
+  - [ ] Create data tables with vue-good-table
+  - [ ] Add export functionality UI
+  - [ ] Implement date range filters
+
+## Phase 5: Integration & Features (Week 7-9)
+- [ ] **Payment Integration**
+  - [ ] Implement cash handling with drawer management
+  - [ ] Add receipt printer integration
+  - [ ] Create daily cash reconciliation
+- [ ] **Reporting System**
+  - [ ] Setup Laravel Excel for exports
+  - [ ] Configure Laravel PDF for receipts
+  - [ ] Implement Laravel Mail for notifications
+  - [ ] Add Laravel Queue for async processing
+- [ ] **Advanced Features**
+  - [ ] Create import jobs with Laravel Excel
+  - [ ] Implement returns with transaction reversal
+  - [ ] Add audit logging with Laravel Auditing
+  - [ ] Setup Laravel Telescope for debugging
+
+## Phase 6: Testing (Week 8-10)
+- [ ] **Unit Testing (Pest 4)**
+  - [ ] Write model tests with factories
+  - [ ] Test API endpoints with Pest
+  - [ ] Validate business logic
+  - [ ] Test form requests validation
+- [ ] **Integration Testing**
+  - [ ] Create browser tests with Pest 4
+  - [ ] Test complete workflows
+  - [ ] Validate payment processing
+  - [ ] Test email notifications
+- [ ] **Performance Testing**
+  - [ ] Run Laravel Debugbar profiling
+  - [ ] Optimize database queries with eager loading
+  - [ ] Implement caching with Redis
+  - [ ] Setup Laravel Horizon for queue monitoring
+
+## Phase 7: Deployment & Launch (Week 10-11)
+- [ ] **Production Setup**
+  - [ ] Configure production server (Ubuntu/Nginx)
+  - [ ] Setup Laravel Forge/Envoyer (optional)
+  - [ ] Configure SSL with Let's Encrypt
+  - [ ] Setup Redis for caching/sessions
+- [ ] **Database Migration**
+  - [ ] Run production migrations
+  - [ ] Import existing data
+  - [ ] Verify data integrity
+- [ ] **Optimization**
+  - [ ] Run `php artisan optimize`
+  - [ ] Compile assets with `npm run build`
+  - [ ] Configure OPcache
+  - [ ] Setup CDN for assets
+
+## Phase 8: Post-Launch (Week 12+)
+- [ ] **Maintenance**
+  - [ ] Monitor with Laravel Telescope
+  - [ ] Track errors with Sentry/Bugsnag
+  - [ ] Regular security updates
+- [ ] **Enhancements**
+  - [ ] Add PWA support
+  - [ ] Implement real-time updates with Laravel Echo
+  - [ ] Add multi-language support
+  - [ ] Create mobile app with Capacitor
+
+## Key Deliverables
+
+### MVP Features (Weeks 1-6)
+- [ ] Basic inventory tracking with Eloquent ORM
+- [ ] Simple POS system with Inertia pages
+- [ ] User authentication with Laravel Sanctum
+
+### Full Release (Weeks 7-11)
+- [ ] Complete reporting with Laravel Excel
+- [ ] Payment processing with receipts
+- [ ] Advanced inventory with low stock alerts
+
+### Future Enhancements
+- [ ] Mobile application with Laravel API
+- [ ] Parent portal with Inertia
+- [ ] AI-powered inventory predictions
+
+## Development Commands Reference
+
+### Daily Development
+```bash
+# Start development environment
+composer run dev
+
+# Run database migrations
+php artisan migrate
+
+# Seed database
+php artisan db:seed
+
+# Format code
+vendor/bin/pint --dirty
+npm run format
+
+# Run tests
+php artisan test
+```
+
+### Creating Components
+```bash
+# Create model with migration, factory, and seeder
+php artisan make:model Product -mfs
+
+# Create controller with API methods
+php artisan make:controller ProductController --api
+
+# Create form request
+php artisan make:request StoreProductRequest
+
+# Create test
+php artisan make:test ProductTest --pest
+```
+
+### Deployment
+```bash
+# Build for production
+npm run build
+php artisan optimize
+
+# Clear caches
+php artisan cache:clear
+php artisan config:clear
+php artisan route:clear
+```
+
+## Tech Stack Summary
+- **Backend**: Laravel 12, PHP 8.4
+- **Frontend**: Vue 3, TypeScript, Inertia.js v2
+- **Styling**: Tailwind CSS v4, shadcn/ui
+- **Database**: SQLite (dev), MySQL/PostgreSQL (prod)
+- **Testing**: Pest 4 with browser testing
+- **Development Tools**: Laravel Sail, Telescope, Debugbar
+- **Code Quality**: Laravel Pint, ESLint, Prettier
+
+## Recent Updates
+
+### January 2025
+- ✅ Migrated from Nuxt.js to Laravel 12 + Inertia.js v2
+- ✅ Set up Laravel Sail for Docker development
+- ✅ Configured Pest 4 for modern testing
+- ✅ Added Laravel Telescope and Debugbar for debugging
+- ✅ Implemented Tailwind CSS v4 with new import syntax
+- ✅ Created CLAUDE.md with Laravel Boost guidelines
+- ✅ Set up Git repository with proper Laravel .gitignore
