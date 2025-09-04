@@ -515,3 +515,63 @@ $pages->assertNoJavascriptErrors()->assertNoConsoleLogs();
 - **Laravel Telescope** - Debug and monitor at `/telescope`
 - **Laravel Debugbar** - Development debugging toolbar
 - **Pest 4** - Browser testing, visual regression, smoke testing
+
+## Project-Specific Implementation
+
+### Schools Management System
+- **Models**: School model with 8 related models (contacts, addresses, management, officials, documents, academic years, classes)
+- **Controllers**: 
+  - API: `app/Http/Controllers/Api/SchoolController.php` - Full CRUD with soft deletes, bulk operations, statistics
+  - Frontend: `app/Http/Controllers/Frontend/SchoolController.php` - Inertia.js endpoints for Vue components
+- **Routes**:
+  - API: `/api/schools/*` - RESTful API endpoints with resource routes
+  - Web: `/schools/*` - Protected frontend routes with auth middleware
+- **Frontend Components**:
+  - `resources/js/pages/Schools/Index.vue` - Complete listing with filters, sorting, pagination
+  - Uses shadcn/ui components (Card, Button, DropdownMenu, Input, Skeleton)
+  - Implements `useDebounceFn` from @vueuse/core for search optimization
+- **Type Definitions**: Added in `resources/js/types/index.d.ts`:
+  - School, SchoolContact, SchoolAddress, SchoolManagement, SchoolOfficial
+  - PaginatedData<T>, SchoolFilters interfaces
+- **Database**: 8 migrations, factories, and seeders for comprehensive testing
+
+### Settings Management System
+- **Database**: Settings table with JSON data column for flexible configuration
+- **Classes**: Type-safe settings classes (GeneralSettings, MailSettings, SalesSettings, InventorySettings)
+- **Provider**: Registered as singletons in AppServiceProvider
+- **Command**: `php artisan settings:init` for deployment initialization
+- **Seeder**: SettingsSeeder with sensible defaults for all categories
+
+## Code Conventions for This Project
+
+### Vue Components
+- Use `<script setup lang="ts">` for all components
+- Import order: UI components, layouts, routes, types, external libraries, Vue imports
+- Props defined with TypeScript interfaces
+- Refs and computed properties clearly separated
+- Event handlers prefixed with `handle` (e.g., `handleSort`, `handleDelete`)
+
+### API Resources
+- Use SchoolResource/SchoolCollection for consistent API responses
+- Include relationships with `load()` method
+- Return proper HTTP status codes (201 for created, 200 for success)
+- Add `message` in additional data for user feedback
+
+### Form Requests
+- Create separate StoreRequest and UpdateRequest classes
+- Include validation rules and custom messages
+- Use `prepareForValidation()` for data transformation
+- Follow existing validation patterns in the codebase
+
+### Routing Patterns
+- API routes prefixed with namespace (e.g., `api.schools.`)
+- Web routes use resource routing where applicable
+- Custom routes for special operations (restore, force delete, bulk operations)
+- Use route model binding for cleaner controller methods
+
+### Testing Approach
+- Write feature tests for all API endpoints
+- Test validation rules with datasets
+- Test soft deletes and restoration
+- Verify relationships are loaded correctly
+- Use factories for test data generation
