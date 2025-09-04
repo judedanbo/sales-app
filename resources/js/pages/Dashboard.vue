@@ -1,9 +1,33 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import DashboardStats from '@/components/dashboard/DashboardStats.vue';
+import SchoolsChart from '@/components/dashboard/SchoolsChart.vue';
+import RecentSchools from '@/components/dashboard/RecentSchools.vue';
 import { dashboard } from '@/routes';
-import { type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem, type School } from '@/types';
 import { Head } from '@inertiajs/vue3';
-import PlaceholderPattern from '../components/PlaceholderPattern.vue';
+
+interface Props {
+    stats: {
+        total_schools: number;
+        active_schools: number;
+        inactive_schools: number;
+        total_students: number;
+        total_teachers: number;
+        student_teacher_ratio: number;
+        schools_needing_attention: number;
+        schools_with_contacts: number;
+        schools_with_addresses: number;
+        data_completeness_percentage: number;
+    };
+    charts: {
+        schools_by_type: Record<string, number>;
+        schools_by_board: Record<string, number>;
+    };
+    recent_schools: School[];
+}
+
+defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -17,21 +41,15 @@ const breadcrumbs: BreadcrumbItem[] = [
     <Head title="Dashboard" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-            <div class="grid auto-rows-min gap-4 md:grid-cols-3">
-                <div class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                    <PlaceholderPattern />
-                </div>
-                <div class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                    <PlaceholderPattern />
-                </div>
-                <div class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                    <PlaceholderPattern />
-                </div>
-            </div>
-            <div class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                <PlaceholderPattern />
-            </div>
+        <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-4">
+            <!-- Stats Overview -->
+            <DashboardStats :stats="stats" />
+
+            <!-- Charts Section -->
+            <SchoolsChart :charts="charts" />
+
+            <!-- Recent Schools -->
+            <RecentSchools :recent-schools="recent_schools" />
         </div>
     </AppLayout>
 </template>
