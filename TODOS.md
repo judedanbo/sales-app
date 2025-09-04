@@ -313,3 +313,10 @@ php artisan route:clear
   - Configured API routes at /api/schools/* and web routes at /schools/*
   - Implemented soft deletes, bulk operations, and statistics endpoints
   - Created comprehensive factories and seeders for testing
+- ✅ **Schools Index Checkbox Fix** (Current)
+  - Fixed reka-ui Checkbox component event handling in Schools/Index.vue
+  - Changed from :checked/:update:checked to :model-value/:update:model-value
+  - Corrected both header select-all and individual row checkboxes
+  - Verified Export Selected button appears when schools are selected
+  - Updated SchoolSeeder to generate 25 records as requested
+  - Added browser testing configuration and built production assets

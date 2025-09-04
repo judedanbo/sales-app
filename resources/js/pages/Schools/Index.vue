@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -22,6 +23,7 @@ import {
     ChevronLeft,
     ChevronRight,
     ChevronUp,
+    Download,
     Edit as EditIcon,
     Eye,
     GraduationCap,
@@ -61,6 +63,44 @@ const localFilters = ref<SchoolFilters>({
 });
 
 const isLoading = ref(false);
+const selectedSchools = ref<number[]>([]);
+
+// Selection handlers
+const isSelected = (schoolId: number) => selectedSchools.value.includes(schoolId);
+
+const toggleSelection = (schoolId: number) => {
+    const index = selectedSchools.value.indexOf(schoolId);
+    if (index > -1) {
+        selectedSchools.value.splice(index, 1);
+    } else {
+        selectedSchools.value.push(schoolId);
+    }
+};
+
+const selectAll = () => {
+    if (selectedSchools.value.length === props.schools.data.length) {
+        selectedSchools.value = [];
+    } else {
+        selectedSchools.value = props.schools.data.map((school) => school.id);
+    }
+};
+
+const clearSelection = () => {
+    selectedSchools.value = [];
+};
+
+// Computed for select all checkbox state
+const isAllSelected = computed(() => props.schools.data.length > 0 && selectedSchools.value.length === props.schools.data.length);
+
+const isIndeterminate = computed(() => selectedSchools.value.length > 0 && selectedSchools.value.length < props.schools.data.length);
+
+// Clear selection when page changes
+watch(
+    () => props.schools.current_page,
+    () => {
+        clearSelection();
+    },
+);
 
 // Debounced search function
 const debouncedSearch = useDebounceFn(() => {
@@ -267,6 +307,26 @@ const clearFilters = () => {
                 </CardContent>
             </Card>
 
+            <!-- Bulk Actions Bar -->
+            <div v-if="selectedSchools.length > 0" class="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
+                <Card class="border-2 border-primary/20 shadow-lg">
+                    <CardContent class="p-4">
+                        <div class="flex items-center gap-4">
+                            <div class="text-sm font-medium">
+                                {{ selectedSchools.length }} {{ selectedSchools.length === 1 ? 'school' : 'schools' }} selected
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <Button variant="outline" size="sm" @click="clearSelection"> Clear </Button>
+                                <Button size="sm" class="gap-2">
+                                    <Download class="h-4 w-4" />
+                                    Export Selected
+                                </Button>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
             <!-- Schools Table -->
             <Card>
                 <CardHeader>
@@ -280,6 +340,14 @@ const clearFilters = () => {
                         <table class="w-full text-left text-sm">
                             <thead class="bg-muted/50 text-xs uppercase">
                                 <tr>
+                                    <th scope="col" class="w-12 px-4 py-3">
+                                        <Checkbox
+                                            :model-value="isAllSelected"
+                                            :indeterminate="isIndeterminate"
+                                            @update:model-value="selectAll"
+                                            aria-label="Select all schools"
+                                        />
+                                    </th>
                                     <th scope="col" class="px-4 py-3">
                                         <button
                                             @click="handleSort('school_name')"
@@ -326,7 +394,7 @@ const clearFilters = () => {
                             <tbody>
                                 <!-- Loading State -->
                                 <tr v-if="isLoading">
-                                    <td colspan="9" class="px-4 py-8 text-center">
+                                    <td colspan="10" class="px-4 py-8 text-center">
                                         <div class="flex flex-col items-center gap-2">
                                             <Skeleton class="h-4 w-32" />
                                             <Skeleton class="h-4 w-24" />
@@ -336,7 +404,7 @@ const clearFilters = () => {
 
                                 <!-- Empty State -->
                                 <tr v-else-if="!props.schools.data.length">
-                                    <td colspan="9" class="px-4 py-8 text-center">
+                                    <td colspan="10" class="px-4 py-8 text-center">
                                         <div class="flex flex-col items-center gap-2">
                                             <SchoolIcon class="h-8 w-8 text-muted-foreground" />
                                             <p class="text-muted-foreground">No schools found</p>
@@ -352,6 +420,13 @@ const clearFilters = () => {
 
                                 <!-- Data Rows -->
                                 <tr v-else v-for="school in props.schools.data" :key="school.id" class="border-b hover:bg-muted/50">
+                                    <td class="px-4 py-3">
+                                        <Checkbox
+                                            :model-value="isSelected(school.id)"
+                                            @update:model-value="() => toggleSelection(school.id)"
+                                            :aria-label="`Select ${school.school_name}`"
+                                        />
+                                    </td>
                                     <td class="px-4 py-3 font-medium">
                                         {{ school.school_name }}
                                         <div v-if="school.principal_name" class="text-xs text-muted-foreground">

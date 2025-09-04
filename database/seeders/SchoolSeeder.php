@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Enums\SchoolType;
 use App\Models\School;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class SchoolSeeder extends Seeder
@@ -43,7 +42,7 @@ class SchoolSeeder extends Seeder
         ]);
 
         // Create random schools for testing
-        School::factory(10)->create();
+        School::factory(20)->create();
         School::factory(2)->inactive()->create();
     }
 }
