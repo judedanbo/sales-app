@@ -257,45 +257,49 @@ export interface PermissionFilters {
 }
 
 export interface UserStatistics {
-    total_users: number;
-    active_users: number;
-    inactive_users: number;
-    users_by_type: Record<
-        UserType,
-        {
-            label: string;
-            count: number;
-        }
-    >;
-    users_by_school: Record<string, number>;
+    total: number;
+    active: number;
+    inactive: number;
+    recent: number;
+    by_type: Record<string, {
+        label: string;
+        count: number;
+    }>;
+    by_school: Array<{
+        school_id: number;
+        school_name: string;
+        count: number;
+    }>;
 }
 
 export interface RoleStatistics {
-    total_roles: number;
-    roles_with_users: number;
-    roles_without_users: number;
+    total: number;
+    with_users: number;
+    without_users: number;
+    with_permissions: number;
     total_permissions: number;
-    roles_by_guard: Record<string, number>;
+    recent: number;
     popular_roles: Array<{
         name: string;
+        display_name: string;
         users_count: number;
+        guard_name: string;
     }>;
+    by_guard: Record<string, number>;
 }
 
 export interface PermissionStatistics {
-    total_permissions: number;
-    permissions_with_roles: number;
-    permissions_without_roles: number;
-    total_roles: number;
+    total: number;
+    with_roles: number;
+    without_roles: number;
+    categories: number;
     usage_percentage: number;
-    permissions_by_guard: Record<string, number>;
-    permissions_by_category: Array<{
+    by_category: Array<{
         category: string;
-        display_name: string;
+        label: string;
         count: number;
-        percentage?: number;
     }>;
-    most_used_permissions: Array<{
+    most_used: Array<{
         name: string;
         display_name: string;
         roles_count: number;

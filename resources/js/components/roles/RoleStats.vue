@@ -18,7 +18,7 @@ const props = defineProps<Props>();
                 <Shield class="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div class="text-2xl font-bold">{{ statistics.total_roles.toLocaleString() }}</div>
+                <div class="text-2xl font-bold">{{ statistics.total.toLocaleString() }}</div>
             </CardContent>
         </Card>
 
@@ -28,9 +28,9 @@ const props = defineProps<Props>();
                 <ShieldCheck class="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div class="text-2xl font-bold text-green-600">{{ statistics.roles_with_users.toLocaleString() }}</div>
+                <div class="text-2xl font-bold text-green-600">{{ statistics.with_users.toLocaleString() }}</div>
                 <p class="text-xs text-muted-foreground">
-                    {{ statistics.total_roles > 0 ? Math.round((statistics.roles_with_users / statistics.total_roles) * 100) : 0 }}% have users
+                    {{ statistics.total > 0 ? Math.round((statistics.with_users / statistics.total) * 100) : 0 }}% have users
                 </p>
             </CardContent>
         </Card>
@@ -41,9 +41,9 @@ const props = defineProps<Props>();
                 <ShieldX class="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div class="text-2xl font-bold text-orange-600">{{ statistics.roles_without_users.toLocaleString() }}</div>
+                <div class="text-2xl font-bold text-orange-600">{{ statistics.without_users.toLocaleString() }}</div>
                 <p class="text-xs text-muted-foreground">
-                    {{ statistics.total_roles > 0 ? Math.round((statistics.roles_without_users / statistics.total_roles) * 100) : 0 }}% unused
+                    {{ statistics.total > 0 ? Math.round((statistics.without_users / statistics.total) * 100) : 0 }}% unused
                 </p>
             </CardContent>
         </Card>
@@ -85,14 +85,14 @@ const props = defineProps<Props>();
     </div>
 
     <!-- Roles by Guard -->
-    <div v-if="Object.keys(statistics.roles_by_guard).length > 1" class="mt-4">
+    <div v-if="Object.keys(statistics.by_guard).length > 1" class="mt-4">
         <Card>
             <CardHeader>
                 <CardTitle class="text-lg">Roles by Guard</CardTitle>
             </CardHeader>
             <CardContent>
                 <div class="grid gap-3 md:grid-cols-3 lg:grid-cols-4">
-                    <div v-for="(count, guardName) in statistics.roles_by_guard" :key="guardName" class="rounded-lg bg-muted/30 p-3 text-center">
+                    <div v-for="(count, guardName) in statistics.by_guard" :key="guardName" class="rounded-lg bg-muted/30 p-3 text-center">
                         <div class="text-2xl font-bold">{{ count }}</div>
                         <div class="text-sm text-muted-foreground capitalize">{{ guardName }}</div>
                     </div>

@@ -18,7 +18,7 @@ const props = defineProps<Props>();
                 <Key class="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div class="text-2xl font-bold">{{ statistics.total_permissions.toLocaleString() }}</div>
+                <div class="text-2xl font-bold">{{ statistics.total.toLocaleString() }}</div>
             </CardContent>
         </Card>
 
@@ -28,10 +28,9 @@ const props = defineProps<Props>();
                 <KeyRound class="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div class="text-2xl font-bold text-green-600">{{ statistics.permissions_with_roles.toLocaleString() }}</div>
+                <div class="text-2xl font-bold text-green-600">{{ statistics.with_roles.toLocaleString() }}</div>
                 <p class="text-xs text-muted-foreground">
-                    {{ statistics.total_permissions > 0 ? Math.round((statistics.permissions_with_roles / statistics.total_permissions) * 100) : 0 }}%
-                    assigned
+                    {{ statistics.total > 0 ? Math.round((statistics.with_roles / statistics.total) * 100) : 0 }}% assigned
                 </p>
             </CardContent>
         </Card>
@@ -42,13 +41,9 @@ const props = defineProps<Props>();
                 <Key class="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div class="text-2xl font-bold text-orange-600">{{ statistics.permissions_without_roles.toLocaleString() }}</div>
+                <div class="text-2xl font-bold text-orange-600">{{ statistics.without_roles.toLocaleString() }}</div>
                 <p class="text-xs text-muted-foreground">
-                    {{
-                        statistics.total_permissions > 0
-                            ? Math.round((statistics.permissions_without_roles / statistics.total_permissions) * 100)
-                            : 0
-                    }}% unassigned
+                    {{ statistics.total > 0 ? Math.round((statistics.without_roles / statistics.total) * 100) : 0 }}% unassigned
                 </p>
             </CardContent>
         </Card>
@@ -66,7 +61,7 @@ const props = defineProps<Props>();
     </div>
 
     <!-- Categories Breakdown -->
-    <div v-if="statistics.permissions_by_category?.length" class="mt-4">
+    <div v-if="statistics.by_category?.length" class="mt-4">
         <Card>
             <CardHeader>
                 <CardTitle class="text-lg">Permissions by Category</CardTitle>
@@ -74,7 +69,7 @@ const props = defineProps<Props>();
             <CardContent>
                 <div class="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
                     <div
-                        v-for="category in statistics.permissions_by_category"
+                        v-for="category in statistics.by_category"
                         :key="category.category"
                         class="flex items-center justify-between rounded-lg bg-muted/30 p-3"
                     >
@@ -93,7 +88,7 @@ const props = defineProps<Props>();
     </div>
 
     <!-- Most Used Permissions -->
-    <div v-if="statistics.most_used_permissions?.length" class="mt-4">
+    <div v-if="statistics.most_used?.length" class="mt-4">
         <Card>
             <CardHeader>
                 <CardTitle class="text-lg">Most Used Permissions</CardTitle>
@@ -101,7 +96,7 @@ const props = defineProps<Props>();
             <CardContent>
                 <div class="space-y-2">
                     <div
-                        v-for="permission in statistics.most_used_permissions.slice(0, 8)"
+                        v-for="permission in statistics.most_used.slice(0, 8)"
                         :key="permission.name"
                         class="flex items-center justify-between rounded-lg bg-muted/30 p-2"
                     >

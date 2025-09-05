@@ -62,6 +62,7 @@ class UserControllerTest extends TestCase
                 ->has('schools')
                 ->has('roles')
                 ->has('userTypes')
+                ->has('statistics')
             );
     }
 

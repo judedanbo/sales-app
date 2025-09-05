@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import PermissionFiltersComponent from '@/components/permissions/PermissionFilters.vue';
-import PermissionStats from '@/components/permissions/PermissionStats.vue';
 import PermissionsTable from '@/components/permissions/PermissionsTable.vue';
+import PermissionStats from '@/components/permissions/PermissionStats.vue';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { index } from '@/routes/permissions';
@@ -14,7 +14,6 @@ interface Props {
     permissions: PaginatedData<Permission>;
     filters: PermissionFilters;
     statistics: PermissionStatistics;
-    guardNames: string[];
     categories: Array<{ value: string; label: string; display_name: string }>;
 }
 

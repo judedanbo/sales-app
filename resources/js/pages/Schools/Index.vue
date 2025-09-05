@@ -41,16 +41,20 @@ const localFilters = ref<SchoolFilters>({
 });
 
 // Update local filters when props change (after navigation)
-watch(() => props.filters, (newFilters) => {
-    localFilters.value = {
-        search: newFilters.search || '',
-        school_type: newFilters.school_type || '',
-        status: newFilters.status || '',
-        board_affiliation: newFilters.board_affiliation || '',
-        sort_by: newFilters.sort_by || 'school_name',
-        sort_direction: newFilters.sort_direction || 'asc',
-    };
-}, { immediate: true });
+watch(
+    () => props.filters,
+    (newFilters) => {
+        localFilters.value = {
+            search: newFilters.search || '',
+            school_type: newFilters.school_type || '',
+            status: newFilters.status || '',
+            board_affiliation: newFilters.board_affiliation || '',
+            sort_by: newFilters.sort_by || 'school_name',
+            sort_direction: newFilters.sort_direction || 'asc',
+        };
+    },
+    { immediate: true },
+);
 
 const isLoading = ref(false);
 const selectedSchools = ref<number[]>([]);
@@ -138,7 +142,7 @@ function applyFilters() {
 
     // Include all current filter values, not just changed ones
     const params: Record<string, any> = {};
-    
+
     if (localFilters.value.search) {
         params.search = localFilters.value.search;
     }
@@ -173,7 +177,7 @@ function goToPage(page: number) {
 
     // Include all current filter values
     const params: Record<string, any> = {};
-    
+
     if (localFilters.value.search) {
         params.search = localFilters.value.search;
     }
@@ -192,7 +196,7 @@ function goToPage(page: number) {
     if (localFilters.value.sort_direction && localFilters.value.sort_direction !== 'asc') {
         params.sort_direction = localFilters.value.sort_direction;
     }
-    
+
     // Add page parameter if it's not the first page
     if (page > 1) {
         params.page = page;
@@ -234,7 +238,7 @@ function handleFiltersUpdate(newFilters: SchoolFilters) {
 function handleSchoolCreated(school: School) {
     // Refresh the page to show the new school while preserving filters
     const params: Record<string, any> = {};
-    
+
     if (localFilters.value.search) {
         params.search = localFilters.value.search;
     }

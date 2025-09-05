@@ -18,7 +18,7 @@ const props = defineProps<Props>();
                 <Users class="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div class="text-2xl font-bold">{{ statistics.total_users.toLocaleString() }}</div>
+                <div class="text-2xl font-bold">{{ statistics.total.toLocaleString() }}</div>
             </CardContent>
         </Card>
 
@@ -28,9 +28,9 @@ const props = defineProps<Props>();
                 <UserCheck class="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div class="text-2xl font-bold text-green-600">{{ statistics.active_users.toLocaleString() }}</div>
+                <div class="text-2xl font-bold text-green-600">{{ statistics.active.toLocaleString() }}</div>
                 <p class="text-xs text-muted-foreground">
-                    {{ statistics.total_users > 0 ? Math.round((statistics.active_users / statistics.total_users) * 100) : 0 }}% of total
+                    {{ statistics.total > 0 ? Math.round((statistics.active / statistics.total) * 100) : 0 }}% of total
                 </p>
             </CardContent>
         </Card>
@@ -41,9 +41,9 @@ const props = defineProps<Props>();
                 <UserMinus class="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div class="text-2xl font-bold text-orange-600">{{ statistics.inactive_users.toLocaleString() }}</div>
+                <div class="text-2xl font-bold text-orange-600">{{ statistics.inactive.toLocaleString() }}</div>
                 <p class="text-xs text-muted-foreground">
-                    {{ statistics.total_users > 0 ? Math.round((statistics.inactive_users / statistics.total_users) * 100) : 0 }}% of total
+                    {{ statistics.total_users > 0 ? Math.round((statistics.inactive / statistics.total) * 100) : 0 }}% of total
                 </p>
             </CardContent>
         </Card>
@@ -56,9 +56,9 @@ const props = defineProps<Props>();
             <CardContent>
                 <div class="text-2xl font-bold text-blue-600">
                     {{
-                        (statistics.users_by_type.admin?.count || 0) +
-                        (statistics.users_by_type.system_admin?.count || 0) +
-                        (statistics.users_by_type.school_admin?.count || 0)
+                        (statistics.by_type.admin?.count || 0) +
+                        (statistics.by_type.system_admin?.count || 0) +
+                        (statistics.by_type.school_admin?.count || 0)
                     }}
                 </div>
                 <p class="text-xs text-muted-foreground">System & school admins</p>
@@ -68,15 +68,13 @@ const props = defineProps<Props>();
 
     <!-- Additional Stats Row -->
     <div class="mt-4 grid gap-4 md:grid-cols-3 lg:grid-cols-5">
-        <Card v-for="(typeData, userType) in statistics.users_by_type" :key="userType" class="col-span-1">
+        <Card v-for="(typeData, userType) in statistics.by_type" :key="userType" class="col-span-1">
             <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle class="text-sm font-medium">{{ typeData.label }}</CardTitle>
             </CardHeader>
             <CardContent>
                 <div class="text-xl font-bold">{{ typeData.count }}</div>
-                <p class="text-xs text-muted-foreground">
-                    {{ statistics.total_users > 0 ? Math.round((typeData.count / statistics.total_users) * 100) : 0 }}%
-                </p>
+                <p class="text-xs text-muted-foreground">{{ statistics.total > 0 ? Math.round((typeData.count / statistics.total) * 100) : 0 }}%</p>
             </CardContent>
         </Card>
     </div>

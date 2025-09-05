@@ -75,10 +75,51 @@ class PermissionController extends Controller
             ];
         });
 
+        // Calculate statistics
+        $permissionsByCategory = Permission::get()->groupBy(function ($permission) {
+            $parts = explode('_', $permission->name);
+
+            return $parts[0] ?? 'other';
+        })->map(function ($permissions, $category) {
+            return [
+                'category' => $category,
+                'label' => ucfirst($category),
+                'count' => $permissions->count(),
+            ];
+        })->values();
+
+        $totalPermissions = Permission::count();
+        $withRoles = Permission::has('roles')->count();
+
+        // Most used permissions
+        $mostUsedPermissions = Permission::withCount('roles')
+            ->orderByDesc('roles_count')
+            ->limit(5)
+            ->get()
+            ->map(function ($permission) {
+                return [
+                    'name' => $permission->name,
+                    'display_name' => ucwords(str_replace('_', ' ', $permission->name)),
+                    'roles_count' => $permission->roles_count,
+                    'category' => $this->getCategory($permission->name),
+                ];
+            });
+
+        $statistics = [
+            'total' => $totalPermissions,
+            'with_roles' => $withRoles,
+            'without_roles' => Permission::doesntHave('roles')->count(),
+            'categories' => $categories->count(),
+            'usage_percentage' => $totalPermissions > 0 ? round(($withRoles / $totalPermissions) * 100, 1) : 0,
+            'by_category' => $permissionsByCategory,
+            'most_used' => $mostUsedPermissions,
+        ];
+
         return Inertia::render('Permissions/Index', [
             'permissions' => $permissions,
             'filters' => $request->only(['guard_name', 'search', 'category', 'has_roles', 'sort_by', 'sort_direction']),
             'categories' => $categories,
+            'statistics' => $statistics,
         ]);
     }
 

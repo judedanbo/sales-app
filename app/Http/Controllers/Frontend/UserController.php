@@ -73,12 +73,49 @@ class UserController extends Controller
             ];
         });
 
+        // Calculate statistics
+        $userTypeStats = [];
+        foreach (UserType::cases() as $type) {
+            $userTypeStats[$type->value] = [
+                'label' => $type->label(),
+                'count' => User::where('user_type', $type->value)->count(),
+            ];
+        }
+
+        // Users by school
+        $bySchool = User::whereNotNull('school_id')
+            ->with('school:id,school_name')
+            ->get()
+            ->groupBy('school_id')
+            ->map(function ($users, $schoolId) {
+                $school = $users->first()->school;
+
+                return [
+                    'school_id' => $schoolId,
+                    'school_name' => $school ? $school->school_name : 'Unknown School',
+                    'count' => $users->count(),
+                ];
+            })
+            ->sortByDesc('count')
+            ->values()
+            ->take(10); // Top 10 schools by user count
+
+        $statistics = [
+            'total' => User::count(),
+            'active' => User::where('is_active', true)->count(),
+            'inactive' => User::where('is_active', false)->count(),
+            'recent' => User::where('created_at', '>=', now()->subDays(30))->count(),
+            'by_type' => $userTypeStats,
+            'by_school' => $bySchool,
+        ];
+
         return Inertia::render('Users/Index', [
             'users' => $users,
             'filters' => $request->only(['user_type', 'school_id', 'is_active', 'role', 'search', 'sort_by', 'sort_direction']),
             'schools' => $schools,
             'roles' => $roles,
             'userTypes' => $userTypes,
+            'statistics' => $statistics,
         ]);
     }
 

@@ -60,9 +60,45 @@ class RoleController extends Controller
             return $role;
         });
 
+        // Popular roles (most users assigned)
+        $popularRoles = Role::withCount('users')
+            ->orderByDesc('users_count')
+            ->limit(5)
+            ->get()
+            ->map(function ($role) {
+                return [
+                    'name' => $role->name,
+                    'display_name' => ucwords(str_replace('_', ' ', $role->name)),
+                    'users_count' => $role->users_count,
+                    'guard_name' => $role->guard_name,
+                ];
+            });
+
+        // Roles by guard
+        $byGuard = Role::select('guard_name')
+            ->selectRaw('count(*) as count')
+            ->groupBy('guard_name')
+            ->get()
+            ->mapWithKeys(function ($item) {
+                return [$item->guard_name => $item->count];
+            });
+
+        // Calculate statistics
+        $statistics = [
+            'total' => Role::count(),
+            'with_users' => Role::has('users')->count(),
+            'without_users' => Role::doesntHave('users')->count(),
+            'with_permissions' => Role::has('permissions')->count(),
+            'total_permissions' => Permission::count(),
+            'recent' => Role::where('created_at', '>=', now()->subDays(30))->count(),
+            'popular_roles' => $popularRoles,
+            'by_guard' => $byGuard,
+        ];
+
         return Inertia::render('Roles/Index', [
             'roles' => $roles,
             'filters' => $request->only(['guard_name', 'search', 'has_users', 'sort_by', 'sort_direction']),
+            'statistics' => $statistics,
         ]);
     }
 

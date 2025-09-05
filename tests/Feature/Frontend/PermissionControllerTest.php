@@ -52,6 +52,7 @@ class PermissionControllerTest extends TestCase
                 ->has('permissions.data')
                 ->has('filters')
                 ->has('categories')
+                ->has('statistics')
             );
     }
 

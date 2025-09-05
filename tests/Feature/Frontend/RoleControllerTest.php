@@ -41,6 +41,7 @@ class RoleControllerTest extends TestCase
                 ->component('Roles/Index')
                 ->has('roles.data')
                 ->has('filters')
+                ->has('statistics')
             );
     }
 
