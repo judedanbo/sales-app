@@ -175,9 +175,12 @@ function handleFiltersUpdate(newFilters: SchoolFilters) {
 }
 
 function handleSchoolCreated(school: School) {
-    // Refresh the page to show the new school
-
-    router.reload({ only: ['schools'] });
+    // Refresh the page to show the new school while preserving filters
+    router.reload({
+        data: getFilteredParameters(localFilters.value),
+        preserveScroll: true,
+        only: ['schools'],
+    });
 }
 
 function handlePageChange(page: number) {

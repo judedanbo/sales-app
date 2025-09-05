@@ -12,11 +12,26 @@ import {
 } from '@/components/ui/dropdown-menu';
 import Pagination from '@/components/ui/Pagination.vue';
 import { Skeleton } from '@/components/ui/skeleton';
-import { show, index } from '@/routes/schools';
+import { index, show } from '@/routes/schools';
 import type { PaginatedData, School, SchoolFilters } from '@/types';
 import { Link, router } from '@inertiajs/vue3';
-import { ChevronDown, ChevronUp, Download, Edit as EditIcon, Eye, MoreHorizontal, School as SchoolIcon, Trash2 } from 'lucide-vue-next';
+import {
+    Calendar,
+    ChevronDown,
+    ChevronUp,
+    Download,
+    Edit as EditIcon,
+    Eye,
+    GraduationCap,
+    MapPin,
+    MoreHorizontal,
+    Phone,
+    School as SchoolIcon,
+    Trash2,
+} from 'lucide-vue-next';
 import { computed, ref } from 'vue';
+import SchoolAcademicYearModal from './SchoolAcademicYearModal.vue';
+import SchoolClassModal from './SchoolClassModal.vue';
 import SchoolEditModal from './SchoolEditModal.vue';
 
 interface Props {
@@ -42,12 +57,43 @@ const emit = defineEmits<Emits>();
 const showEditModal = ref(false);
 const schoolToEdit = ref<School | null>(null);
 
+// Class modal state
+const showClassModal = ref(false);
+const schoolForClass = ref<School | null>(null);
+
+// Academic year modal state
+const showAcademicYearModal = ref(false);
+const schoolForAcademicYear = ref<School | null>(null);
+
 // Selection helpers
 const isSelected = (schoolId: number) => props.selectedSchools.includes(schoolId);
 
 const isAllSelected = computed(() => props.schools.data.length > 0 && props.selectedSchools.length === props.schools.data.length);
 
 const isIndeterminate = computed(() => props.selectedSchools.length > 0 && props.selectedSchools.length < props.schools.data.length);
+
+// Helper function to get filtered parameters (same as in Index.vue)
+function getFilteredParameters(filters: SchoolFilters) {
+    const defaults: SchoolFilters = {
+        search: '',
+        school_type: '',
+        is_active: '',
+        board_affiliation: '',
+        sort_by: 'school_name',
+        sort_direction: 'asc',
+    };
+
+    const filtered: Partial<SchoolFilters> = {};
+
+    Object.entries(filters).forEach(([key, value]) => {
+        const typedKey = key as keyof SchoolFilters;
+        if (value !== '' && value !== defaults[typedKey]) {
+            filtered[typedKey] = value;
+        }
+    });
+
+    return filtered;
+}
 
 // Format date
 function formatDate(date: string | undefined) {
@@ -98,8 +144,40 @@ function handleEdit(school: School) {
 }
 
 function handleSchoolUpdated(school: School) {
-    // Refresh the schools data
-    router.reload({ only: ['schools'] });
+    // Refresh the schools data while preserving filters
+    router.reload({
+        data: getFilteredParameters(props.filters),
+        preserveScroll: true,
+        only: ['schools'],
+    });
+}
+
+function handleAddClass(school: School) {
+    schoolForClass.value = school;
+    showClassModal.value = true;
+}
+
+function handleClassCreated() {
+    showClassModal.value = false;
+    router.reload({
+        data: getFilteredParameters(props.filters),
+        preserveScroll: true,
+        only: ['schools'],
+    });
+}
+
+function handleAddAcademicYear(school: School) {
+    schoolForAcademicYear.value = school;
+    showAcademicYearModal.value = true;
+}
+
+function handleAcademicYearCreated() {
+    showAcademicYearModal.value = false;
+    router.reload({
+        data: getFilteredParameters(props.filters),
+        preserveScroll: true,
+        only: ['schools'],
+    });
 }
 </script>
 
@@ -270,6 +348,29 @@ function handleSchoolUpdated(school: School) {
                                             <EditIcon class="mr-2 h-4 w-4" />
                                             Edit
                                         </DropdownMenuItem>
+
+                                        <DropdownMenuSeparator />
+
+                                        <DropdownMenuItem @click="() => console.log('Add Contact:', school.id)">
+                                            <Phone class="mr-2 h-4 w-4" />
+                                            Add Contact
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem @click="() => console.log('Add Address:', school.id)">
+                                            <MapPin class="mr-2 h-4 w-4" />
+                                            Add Address
+                                        </DropdownMenuItem>
+
+                                        <DropdownMenuSeparator />
+
+                                        <DropdownMenuItem @click="handleAddAcademicYear(school)">
+                                            <Calendar class="mr-2 h-4 w-4" />
+                                            Add Academic Year
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem @click="handleAddClass(school)">
+                                            <GraduationCap class="mr-2 h-4 w-4" />
+                                            Add Class
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
                                         <DropdownMenuItem class="text-red-600 dark:text-red-400" @click="handleDelete(school)">
                                             <Trash2 class="mr-2 h-4 w-4" />
                                             Delete
@@ -288,4 +389,15 @@ function handleSchoolUpdated(school: School) {
 
     <!-- Edit School Modal -->
     <SchoolEditModal :open="showEditModal" :school="schoolToEdit" @update:open="showEditModal = $event" @school-updated="handleSchoolUpdated" />
+
+    <!-- Add Class Modal -->
+    <SchoolClassModal :open="showClassModal" :school="schoolForClass" @update:open="showClassModal = $event" @class-created="handleClassCreated" />
+
+    <!-- Add Academic Year Modal -->
+    <SchoolAcademicYearModal
+        :open="showAcademicYearModal"
+        :school="schoolForAcademicYear"
+        @update:open="showAcademicYearModal = $event"
+        @academic-year-created="handleAcademicYearCreated"
+    />
 </template>

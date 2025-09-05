@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\AcademicYearController;
+use App\Http\Controllers\Api\SchoolClassController;
 use App\Http\Controllers\Api\SchoolController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -41,5 +43,20 @@ Route::prefix('schools')->name('api.schools.')->group(function () {
         
         // Bulk operations
         Route::post('bulk/update-status', [SchoolController::class, 'bulkUpdateStatus'])->name('bulk_update_status');
+        
+        // School Classes routes
+        Route::get('{school}/classes', [SchoolClassController::class, 'index'])->name('classes.index');
+        Route::post('{school}/classes', [SchoolClassController::class, 'store'])->name('classes.store');
+        Route::get('{school}/classes/{class}', [SchoolClassController::class, 'show'])->name('classes.show');
+        Route::put('{school}/classes/{class}', [SchoolClassController::class, 'update'])->name('classes.update');
+        Route::delete('{school}/classes/{class}', [SchoolClassController::class, 'destroy'])->name('classes.destroy');
+        
+        // Academic Years routes
+        Route::get('{school}/academic-years', [AcademicYearController::class, 'index'])->name('academic_years.index');
+        Route::post('{school}/academic-years', [AcademicYearController::class, 'store'])->name('academic_years.store');
+        Route::get('{school}/academic-years/{academicYear}', [AcademicYearController::class, 'show'])->name('academic_years.show');
+        Route::put('{school}/academic-years/{academicYear}', [AcademicYearController::class, 'update'])->name('academic_years.update');
+        Route::delete('{school}/academic-years/{academicYear}', [AcademicYearController::class, 'destroy'])->name('academic_years.destroy');
+        Route::post('{school}/academic-years/{academicYear}/set-current', [AcademicYearController::class, 'setCurrent'])->name('academic_years.set_current');
     // });
 });

@@ -128,3 +128,31 @@ export interface SchoolFilters {
     sort_by?: string;
     sort_direction?: 'asc' | 'desc';
 }
+
+export interface SchoolClass {
+    id: number;
+    school_id: number;
+    class_name: string;
+    class_code: string;
+    grade_level: number;
+    min_age?: number | null;
+    max_age?: number | null;
+    order_sequence: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string | null;
+    school?: School;
+}
+
+export interface AcademicYear {
+    id: number;
+    school_id: number;
+    year_name: string;
+    start_date: string;
+    end_date: string;
+    is_current: boolean;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string | null;
+    school?: School;
+}

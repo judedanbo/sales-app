@@ -77,6 +77,11 @@ class School extends Model
         return $this->hasMany(SchoolClass::class);
     }
 
+    public function classes(): HasMany
+    {
+        return $this->schoolClasses();
+    }
+
     public function scopeActive($query)
     {
         return $query->where('is_active', SchoolStatus::Active);
