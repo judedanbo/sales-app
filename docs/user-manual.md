@@ -6,12 +6,13 @@
 2. [Dashboard](#dashboard)
 3. [Schools Management](#schools-management)
 4. [Navigation](#navigation)
-5. [Settings](#settings)
-6. [Authentication](#authentication)
-7. [API Reference](#api-reference)
-8. [Troubleshooting](#troubleshooting)
-9. [Keyboard Shortcuts](#keyboard-shortcuts)
-10. [FAQ](#faq)
+5. [User Management](#user-management)
+6. [Settings](#settings)
+7. [Authentication](#authentication)
+8. [API Reference](#api-reference)
+9. [Troubleshooting](#troubleshooting)
+10. [Keyboard Shortcuts](#keyboard-shortcuts)
+11. [FAQ](#faq)
 
 ---
 
@@ -147,6 +148,158 @@ The application features a collapsible sidebar navigation system:
 
 ---
 
+## User Management
+
+The User Management system provides comprehensive role-based access control to ensure proper authorization and security throughout the application.
+
+### User Types and Roles
+
+The system supports seven distinct user types, each with specific permissions and capabilities:
+
+#### System-Wide Users
+- **Staff**: Basic sales personnel
+  - Create and manage sales transactions
+  - View products and inventory
+  - Access their own sales history
+  
+- **Admin**: Department administrators  
+  - Full CRUD operations on products and inventory
+  - User management capabilities
+  - Sales voiding and comprehensive reporting
+  - Settings management
+
+- **Audit**: Read-only audit personnel
+  - Complete read-only access to all data
+  - Audit trail and activity log access
+  - Export capabilities for compliance reporting
+
+- **System Admin**: Full system access
+  - All permissions across the entire system
+  - Cross-school management capabilities
+  - Role and permission management
+  - System administration functions
+
+#### School-Specific Users
+- **School Admin**: School-level administrators
+  - School data management and updates
+  - School official and staff management
+  - Academic year and class setup
+  - School-specific reporting
+
+- **Principal**: Academic leadership
+  - School operations oversight
+  - Academic year and class management
+  - Staff viewing and basic reporting
+
+- **Teacher**: Educational staff
+  - Class management within their school
+  - Limited school data access
+  - Basic operational functions
+
+### User Profile Management
+
+#### Profile Information
+Each user profile includes:
+- **Basic Information**: Name, email, phone number
+- **Professional Details**: Department, bio, qualifications
+- **School Association**: Linked school for school-specific users
+- **Activity Tracking**: Last login, account status
+- **Audit Trail**: Created by, updated by information
+
+#### Account Status
+- **Active/Inactive**: Control user access to the system
+- **School Association**: Automatic assignment for school-specific roles
+- **Role Assignment**: Automatic role assignment based on user type
+
+### Permission System
+
+#### Granular Permissions
+The system uses 34 distinct permissions across key areas:
+
+**Sales Management**
+- Create, view, edit, void sales transactions
+- Access to all sales or personal sales only
+
+**Product & Inventory**  
+- Product CRUD operations
+- Inventory viewing and management
+- Stock movement tracking
+
+**User Administration**
+- Create, view, edit, delete users
+- Role and permission management
+
+**School Management**
+- School CRUD operations
+- School official and class management
+- Academic year setup and management
+
+**Reporting & Audit**
+- View and export reports
+- Access audit logs and activity trails
+- System monitoring capabilities
+
+**System Administration**
+- Settings management
+- Role and permission configuration
+- Full system access
+
+#### Automatic Role Assignment
+- Users are automatically assigned roles based on their user type
+- Roles can be verified and updated through the user profile
+- Permission checks are performed throughout the application
+
+### User Account Creation
+
+#### Admin-Created Accounts
+1. Administrators can create accounts for other users
+2. Select appropriate user type during creation
+3. Assign school association for school-specific users
+4. Set initial profile information
+5. User receives welcome email with login instructions
+
+#### Self-Registration (If Enabled)
+1. Users can register with basic information
+2. Email verification required
+3. Default role assignment (typically Staff)
+4. Admin approval may be required
+
+### Security Features
+
+#### Access Control
+- Role-based page access restrictions
+- API endpoint permission validation
+- Feature-level permission checks
+
+#### Account Security
+- Strong password requirements
+- Email verification for new accounts
+- Account lockout protection
+- Login attempt tracking
+
+#### Audit Trail
+- All user actions are logged
+- Permission changes are tracked
+- Login/logout activity monitoring
+- Data modification history
+
+### Managing User Accounts
+
+#### For Administrators
+1. **View Users**: Access comprehensive user listing
+2. **Create Users**: Add new accounts with appropriate roles
+3. **Edit Users**: Update profile information and permissions
+4. **Deactivate Users**: Temporarily disable access
+5. **Role Management**: Assign and modify user permissions
+
+#### For Users
+1. **Profile Updates**: Modify personal information
+2. **Password Changes**: Update login credentials
+3. **View Permissions**: Understand your access level
+4. **Activity History**: Review your login and activity history
+
+---
+
 ## Settings
 
 Customize your account and application preferences in the Settings section.
@@ -204,9 +357,10 @@ Customize your account and application preferences in the Settings section.
 
 The application provides a comprehensive REST API for programmatic access.
 
-### Base URL
+### Base URLs
 ```
-/api/schools
+/api/schools  - Schools management
+/api/users    - User management (Admin access required)
 ```
 
 ### Authentication
@@ -232,6 +386,21 @@ The application provides a comprehensive REST API for programmatic access.
 
 #### Statistics
 - `GET /api/schools/stats` - Get school statistics
+
+#### User Management API
+- `GET /api/users` - List all users (Admin only)
+- `POST /api/users` - Create a new user account
+- `GET /api/users/{id}` - Get specific user details
+- `PUT /api/users/{id}` - Update user information
+- `DELETE /api/users/{id}` - Deactivate a user account
+- `POST /api/users/{id}/activate` - Activate user account
+- `POST /api/users/{id}/assign-role` - Assign role to user
+- `GET /api/users/{id}/permissions` - Get user permissions
+
+#### User Type and Role Management
+- `GET /api/user-types` - List available user types
+- `GET /api/roles` - List all roles and permissions
+- `POST /api/roles/{role}/assign-permission` - Assign permission to role
 
 ### Request/Response Format
 - All API requests and responses use JSON format
