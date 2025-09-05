@@ -1,12 +1,7 @@
 <script setup lang="ts">
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { School } from '@/types';
-import {
-    Building2,
-    GraduationCap,
-    School as SchoolIcon,
-    Users,
-} from 'lucide-vue-next';
+import { Building2, GraduationCap, School as SchoolIcon, Users } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 interface Props {
@@ -19,7 +14,7 @@ const props = defineProps<Props>();
 // Computed stats from the provided schools
 const stats = computed(() => ({
     totalSchools: props.totalCount ?? props.schools.length,
-    activeSchools: props.schools.filter(s => s.is_active).length,
+    activeSchools: props.schools.filter((s) => s.is_active).length,
     totalStudents: props.schools.reduce((sum, s) => sum + (s.total_students || 0), 0),
     totalTeachers: props.schools.reduce((sum, s) => sum + (s.total_teachers || 0), 0),
 }));

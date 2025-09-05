@@ -20,7 +20,7 @@ class SchoolCollection extends ResourceCollection
                 'total_count' => $this->collection->count(),
                 'filters_applied' => [
                     'school_type' => $request->get('school_type'),
-                    'is_active' => $request->get('is_active'),
+                    'status' => $request->get('status'),
                     'search' => $request->get('search'),
                     'board_affiliation' => $request->get('board_affiliation'),
                 ],
@@ -28,7 +28,7 @@ class SchoolCollection extends ResourceCollection
                     'sort_by' => $request->get('sort_by', 'school_name'),
                     'sort_direction' => $request->get('sort_direction', 'asc'),
                 ],
-            ]
+            ],
         ];
     }
 

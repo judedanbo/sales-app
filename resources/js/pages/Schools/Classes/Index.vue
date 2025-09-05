@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
+import SchoolClassModal from '@/components/schools/SchoolClassModal.vue';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import Badge from '@/components/ui/badge.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import Badge from '@/components/ui/badge.vue';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -12,19 +12,10 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import SchoolClassModal from '@/components/schools/SchoolClassModal.vue';
-import type { AcademicYear, PaginatedData, School, SchoolClass } from '@/types';
-import { Head, Link, router } from '@inertiajs/vue3';
-import { 
-    BookOpen, 
-    Edit, 
-    GraduationCap, 
-    MoreHorizontal, 
-    Plus, 
-    School as SchoolIcon, 
-    Trash2,
-    Users
-} from 'lucide-vue-next';
+import AppLayout from '@/layouts/AppLayout.vue';
+import type { School, SchoolClass } from '@/types';
+import { Head, router } from '@inertiajs/vue3';
+import { BookOpen, Edit, GraduationCap, MoreHorizontal, Plus, School as SchoolIcon, Trash2, Users } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 interface Props {
@@ -120,7 +111,11 @@ const getAgeRange = (schoolClass: SchoolClass): string => {
                     </CardHeader>
                     <CardContent>
                         <div class="text-2xl font-bold">
-                            {{ classes.length > 0 ? `${Math.min(...classes.map(c => c.grade_level))}-${Math.max(...classes.map(c => c.grade_level))}` : 'N/A' }}
+                            {{
+                                classes.length > 0
+                                    ? `${Math.min(...classes.map((c) => c.grade_level))}-${Math.max(...classes.map((c) => c.grade_level))}`
+                                    : 'N/A'
+                            }}
                         </div>
                     </CardContent>
                 </Card>
@@ -150,7 +145,7 @@ const getAgeRange = (schoolClass: SchoolClass): string => {
 
             <!-- Classes Grid -->
             <div v-if="sortedClasses.length > 0" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <Card v-for="schoolClass in sortedClasses" :key="schoolClass.id" class="hover:shadow-md transition-shadow">
+                <Card v-for="schoolClass in sortedClasses" :key="schoolClass.id" class="transition-shadow hover:shadow-md">
                     <CardHeader class="flex flex-row items-start justify-between space-y-0 pb-2">
                         <div class="space-y-1">
                             <CardTitle class="text-lg">{{ schoolClass.class_name }}</CardTitle>
@@ -183,12 +178,12 @@ const getAgeRange = (schoolClass: SchoolClass): string => {
                             <span class="text-sm text-muted-foreground">Grade Level</span>
                             <Badge variant="secondary">Grade {{ schoolClass.grade_level }}</Badge>
                         </div>
-                        
+
                         <div class="flex items-center justify-between">
                             <span class="text-sm text-muted-foreground">Age Range</span>
                             <span class="text-sm">{{ getAgeRange(schoolClass) }}</span>
                         </div>
-                        
+
                         <div class="flex items-center justify-between">
                             <span class="text-sm text-muted-foreground">Order</span>
                             <span class="text-sm">{{ schoolClass.order_sequence }}</span>
@@ -199,11 +194,9 @@ const getAgeRange = (schoolClass: SchoolClass): string => {
 
             <!-- Empty State -->
             <Card v-else class="flex flex-col items-center justify-center py-16">
-                <GraduationCap class="h-16 w-16 text-muted-foreground mb-4" />
-                <CardTitle class="text-xl mb-2">No Classes Yet</CardTitle>
-                <CardDescription class="text-center mb-6">
-                    Get started by adding the first class for {{ school.school_name }}.
-                </CardDescription>
+                <GraduationCap class="mb-4 h-16 w-16 text-muted-foreground" />
+                <CardTitle class="mb-2 text-xl">No Classes Yet</CardTitle>
+                <CardDescription class="mb-6 text-center"> Get started by adding the first class for {{ school.school_name }}. </CardDescription>
                 <Button @click="showCreateModal = true">
                     <Plus class="mr-2 h-4 w-4" />
                     Add First Class
@@ -212,11 +205,6 @@ const getAgeRange = (schoolClass: SchoolClass): string => {
         </div>
 
         <!-- Create Class Modal -->
-        <SchoolClassModal 
-            :open="showCreateModal" 
-            :school="school" 
-            @update:open="showCreateModal = $event" 
-            @class-created="handleClassCreated" 
-        />
+        <SchoolClassModal :open="showCreateModal" :school="school" @update:open="showCreateModal = $event" @class-created="handleClassCreated" />
     </AppLayout>
 </template>

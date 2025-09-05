@@ -57,8 +57,9 @@ class StoreSchoolRequest extends FormRequest
                 'before:today',
                 'after:1800-01-01', // Reasonable minimum date
             ],
-            'is_active' => [
-                'boolean',
+            'status' => [
+                'string',
+                'in:active,inactive',
             ],
         ];
     }
@@ -95,7 +96,7 @@ class StoreSchoolRequest extends FormRequest
             'school_type' => 'school type',
             'board_affiliation' => 'board affiliation',
             'established_date' => 'established date',
-            'is_active' => 'active status',
+            'status' => 'status',
         ];
     }
 }

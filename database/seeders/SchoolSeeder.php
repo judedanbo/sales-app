@@ -21,7 +21,7 @@ class SchoolSeeder extends Seeder
             'school_type' => SchoolType::PRIMARY,
             'board_affiliation' => BoardAffiliation::CBSE,
             'established_date' => '1995-06-15',
-            'is_active' => true,
+            'status' => 'active',
         ]);
 
         School::factory()->create([
@@ -30,7 +30,7 @@ class SchoolSeeder extends Seeder
             'school_type' => SchoolType::SECONDARY,
             'board_affiliation' => BoardAffiliation::ICSE,
             'established_date' => '1987-04-10',
-            'is_active' => true,
+            'status' => 'active',
         ]);
 
         School::factory()->create([
@@ -39,7 +39,7 @@ class SchoolSeeder extends Seeder
             'school_type' => SchoolType::HIGHER_SECONDARY,
             'board_affiliation' => BoardAffiliation::IB,
             'established_date' => '2010-08-20',
-            'is_active' => true,
+            'status' => 'active',
         ]);
 
         // Create random schools for testing

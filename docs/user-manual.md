@@ -81,10 +81,12 @@ The Schools module is the core of the application, providing comprehensive schoo
 - **Bulk Operations**: Select multiple schools for batch actions
 
 #### Filtering Options
-- **Search Bar**: Type to filter schools by name or details
+- **Search Bar**: Type to filter schools by name or details (with 500ms debounce for smooth typing)
 - **School Type**: Filter by Primary, Secondary, Higher Secondary, etc.
 - **Status**: Active or Inactive schools
 - **Board Affiliation**: CBSE, ICSE, State Board, etc.
+- **Filter Preservation**: All filters are preserved when selecting different options
+- **Clear Filters**: Click "Clear Filters" button to reset all filters at once
 
 #### Table Features
 - **Pagination**: Navigate through large datasets (15 schools per page)
@@ -540,8 +542,12 @@ For additional help or support:
 
 - **Application**: Sales Management System
 - **Version**: 1.0
-- **Last Updated**: 2025
+- **Last Updated**: January 5, 2025
 - **Framework**: Laravel 12 + Vue 3 + Inertia.js
+- **Recent Updates**: 
+  - Fixed filter state management in Schools Index page
+  - Enhanced filter preservation across all selections
+  - Improved search debouncing for better user experience
 
 ---
 

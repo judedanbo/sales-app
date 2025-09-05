@@ -5,13 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSchoolRequest;
 use App\Http\Requests\UpdateSchoolRequest;
-use App\Http\Resources\SchoolResource;
 use App\Http\Resources\SchoolCollection;
+use App\Http\Resources\SchoolResource;
 use App\Models\School;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class SchoolController extends Controller
 {
@@ -27,8 +26,8 @@ class SchoolController extends Controller
             $query->where('school_type', $request->school_type);
         }
 
-        if ($request->filled('is_active')) {
-            $query->where('is_active', $request->boolean('is_active'));
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
         }
 
         if ($request->filled('board_affiliation')) {
@@ -39,14 +38,14 @@ class SchoolController extends Controller
             $search = $request->search;
             $query->where(function (Builder $q) use ($search) {
                 $q->where('school_name', 'like', "%{$search}%")
-                  ->orWhere('school_code', 'like', "%{$search}%");
+                    ->orWhere('school_code', 'like', "%{$search}%");
             });
         }
 
         // Apply sorting
         $sortBy = $request->get('sort_by', 'school_name');
         $sortDirection = $request->get('sort_direction', 'asc');
-        
+
         if (in_array($sortBy, ['school_name', 'school_code', 'school_type', 'established_date', 'created_at'])) {
             $query->orderBy($sortBy, $sortDirection);
         }
@@ -105,7 +104,7 @@ class SchoolController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'School deleted successfully'
+            'message' => 'School deleted successfully',
         ]);
     }
 
@@ -120,7 +119,7 @@ class SchoolController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'School restored successfully',
-            'data' => $school
+            'data' => $school,
         ]);
     }
 
@@ -134,7 +133,7 @@ class SchoolController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'School permanently deleted'
+            'message' => 'School permanently deleted',
         ]);
     }
 
@@ -156,7 +155,7 @@ class SchoolController extends Controller
                 'last_page' => $schools->lastPage(),
                 'per_page' => $schools->perPage(),
                 'total' => $schools->total(),
-            ]
+            ],
         ]);
     }
 
@@ -178,7 +177,7 @@ class SchoolController extends Controller
                 'last_page' => $schools->lastPage(),
                 'per_page' => $schools->perPage(),
                 'total' => $schools->total(),
-            ]
+            ],
         ]);
     }
 
@@ -190,16 +189,16 @@ class SchoolController extends Controller
         $validated = $request->validate([
             'school_ids' => 'required|array',
             'school_ids.*' => 'integer|exists:schools,id',
-            'is_active' => 'required|boolean',
+            'status' => 'required|string|in:active,inactive',
         ]);
 
         $updatedCount = School::whereIn('id', $validated['school_ids'])
-            ->update(['is_active' => $validated['is_active']]);
+            ->update(['status' => $validated['status']]);
 
         return response()->json([
             'success' => true,
             'message' => "Updated {$updatedCount} schools",
-            'updated_count' => $updatedCount
+            'updated_count' => $updatedCount,
         ]);
     }
 
@@ -210,8 +209,8 @@ class SchoolController extends Controller
     {
         $stats = [
             'total_schools' => School::count(),
-            'active_schools' => School::where('is_active', true)->count(),
-            'inactive_schools' => School::where('is_active', false)->count(),
+            'active_schools' => School::where('status', 'active')->count(),
+            'inactive_schools' => School::where('status', 'inactive')->count(),
             'deleted_schools' => School::onlyTrashed()->count(),
             'by_type' => School::selectRaw('school_type, COUNT(*) as count')
                 ->groupBy('school_type')
@@ -224,7 +223,7 @@ class SchoolController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $stats
+            'data' => $stats,
         ]);
     }
 }

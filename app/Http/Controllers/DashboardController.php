@@ -19,8 +19,8 @@ class DashboardController extends Controller
     {
         // Basic stats
         $totalSchools = School::count();
-        $activeSchools = School::where('is_active', true)->count();
-        $inactiveSchools = School::where('is_active', false)->count();
+        $activeSchools = School::where('status', 'active')->count();
+        $inactiveSchools = School::where('status', 'inactive')->count();
 
         // Student and teacher totals
         // $totalStudents = School::sum('total_students') ?: 0;

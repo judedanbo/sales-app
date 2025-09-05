@@ -23,7 +23,7 @@ class School extends Model
             'board_affiliation' => BoardAffiliation::class,
             // 'medium_of_instruction' => MediumOfInstruction::class,
             'established_date' => 'date',
-            'is_active' => SchoolStatus::class,
+            'status' => SchoolStatus::class,
         ];
     }
 
@@ -39,7 +39,7 @@ class School extends Model
         // 'total_teachers',
         // 'website',
         // 'description',
-        'is_active',
+        'status',
     ];
 
     public function contacts(): HasMany
@@ -84,7 +84,7 @@ class School extends Model
 
     public function scopeActive($query)
     {
-        return $query->where('is_active', SchoolStatus::Active);
+        return $query->where('status', SchoolStatus::Active);
     }
 
     public function scopeByType($query, string $type)

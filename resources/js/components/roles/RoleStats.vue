@@ -1,0 +1,103 @@
+<script setup lang="ts">
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import type { RoleStatistics } from '@/types';
+import { Key, Shield, ShieldCheck, ShieldX } from 'lucide-vue-next';
+
+interface Props {
+    statistics: RoleStatistics;
+}
+
+const props = defineProps<Props>();
+</script>
+
+<template>
+    <div class="grid gap-4 md:grid-cols-4">
+        <Card>
+            <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle class="text-sm font-medium">Total Roles</CardTitle>
+                <Shield class="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div class="text-2xl font-bold">{{ statistics.total_roles.toLocaleString() }}</div>
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle class="text-sm font-medium">With Users</CardTitle>
+                <ShieldCheck class="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div class="text-2xl font-bold text-green-600">{{ statistics.roles_with_users.toLocaleString() }}</div>
+                <p class="text-xs text-muted-foreground">
+                    {{ statistics.total_roles > 0 ? Math.round((statistics.roles_with_users / statistics.total_roles) * 100) : 0 }}% have users
+                </p>
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle class="text-sm font-medium">Without Users</CardTitle>
+                <ShieldX class="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div class="text-2xl font-bold text-orange-600">{{ statistics.roles_without_users.toLocaleString() }}</div>
+                <p class="text-xs text-muted-foreground">
+                    {{ statistics.total_roles > 0 ? Math.round((statistics.roles_without_users / statistics.total_roles) * 100) : 0 }}% unused
+                </p>
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle class="text-sm font-medium">Total Permissions</CardTitle>
+                <Key class="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div class="text-2xl font-bold text-blue-600">{{ statistics.total_permissions.toLocaleString() }}</div>
+                <p class="text-xs text-muted-foreground">Available permissions</p>
+            </CardContent>
+        </Card>
+    </div>
+
+    <!-- Popular Roles -->
+    <div v-if="statistics.popular_roles?.length" class="mt-4">
+        <Card>
+            <CardHeader>
+                <CardTitle class="text-lg">Most Used Roles</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div class="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                    <div
+                        v-for="role in statistics.popular_roles.slice(0, 6)"
+                        :key="role.name"
+                        class="flex items-center justify-between rounded-lg bg-muted/30 p-3"
+                    >
+                        <div>
+                            <div class="font-medium">{{ role.name }}</div>
+                            <div class="text-sm text-muted-foreground">{{ role.users_count }} users</div>
+                        </div>
+                        <Shield class="h-4 w-4 text-muted-foreground" />
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    </div>
+
+    <!-- Roles by Guard -->
+    <div v-if="Object.keys(statistics.roles_by_guard).length > 1" class="mt-4">
+        <Card>
+            <CardHeader>
+                <CardTitle class="text-lg">Roles by Guard</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div class="grid gap-3 md:grid-cols-3 lg:grid-cols-4">
+                    <div v-for="(count, guardName) in statistics.roles_by_guard" :key="guardName" class="rounded-lg bg-muted/30 p-3 text-center">
+                        <div class="text-2xl font-bold">{{ count }}</div>
+                        <div class="text-sm text-muted-foreground capitalize">{{ guardName }}</div>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    </div>
+</template>

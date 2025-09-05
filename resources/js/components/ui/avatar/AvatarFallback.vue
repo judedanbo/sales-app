@@ -1,23 +1,15 @@
 <script setup lang="ts">
-import { cn } from '@/lib/utils'
-import { AvatarFallback, type AvatarFallbackProps } from 'reka-ui'
-import { computed, type HTMLAttributes } from 'vue'
+interface Props {
+    class?: string;
+}
 
-const props = defineProps<AvatarFallbackProps & { class?: HTMLAttributes['class'] }>()
-
-const delegatedProps = computed(() => {
-  const { class: _, ...delegated } = props
-
-  return delegated
-})
+const props = withDefaults(defineProps<Props>(), {
+    class: '',
+});
 </script>
 
 <template>
-  <AvatarFallback
-    data-slot="avatar-fallback"
-    v-bind="delegatedProps"
-    :class="cn('bg-muted flex size-full items-center justify-center rounded-full', props.class)"
-  >
-    <slot />
-  </AvatarFallback>
+    <div :class="`flex h-full w-full items-center justify-center rounded-full bg-muted ${props.class}`">
+        <slot />
+    </div>
 </template>

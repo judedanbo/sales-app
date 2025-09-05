@@ -30,8 +30,30 @@ export interface User {
     email: string;
     avatar?: string;
     email_verified_at: string | null;
+    user_type?: UserType;
+    user_type_label?: string;
+    user_type_description?: string;
+    school_id?: number | null;
+    school?: School;
+    phone?: string | null;
+    department?: string | null;
+    bio?: string | null;
+    is_active: boolean;
+    last_login_at?: string | null;
+    display_name?: string;
+    roles?: Role[];
+    permissions?: Permission[];
+    all_permissions?: string[];
+    school_official?: SchoolOfficial;
+    is_school_user?: boolean;
+    is_system_user?: boolean;
+    can_manage_schools?: boolean;
+    can_manage_users?: boolean;
+    created_by?: number | null;
+    updated_by?: number | null;
     created_at: string;
     updated_at: string;
+    deleted_at?: string | null;
 }
 
 export type BreadcrumbItemType = BreadcrumbItem;
@@ -49,7 +71,7 @@ export interface School {
     total_teachers?: number;
     website?: string;
     description?: string;
-    is_active: boolean;
+    status: 'active' | 'inactive';
     created_at: string;
     updated_at: string;
     deleted_at?: string | null;
@@ -123,7 +145,7 @@ export interface PaginatedData<T> {
 export interface SchoolFilters {
     search?: string;
     school_type?: string;
-    is_active?: string;
+    status?: string;
     board_affiliation?: string;
     sort_by?: string;
     sort_direction?: 'asc' | 'desc';
@@ -155,4 +177,128 @@ export interface AcademicYear {
     updated_at: string;
     deleted_at?: string | null;
     school?: School;
+}
+
+// User Management Types
+export type UserType = 'staff' | 'admin' | 'audit' | 'school_admin' | 'principal' | 'teacher' | 'system_admin';
+
+export interface UserTypeOption {
+    value: UserType;
+    label: string;
+    description?: string;
+}
+
+export interface Role {
+    id: number;
+    name: string;
+    guard_name: string;
+    display_name?: string;
+    users_count?: number;
+    permissions_count?: number;
+    permissions?: Permission[];
+    users?: User[];
+    sample_users?: User[];
+    permission_groups?: PermissionGroup[];
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Permission {
+    id: number;
+    name: string;
+    guard_name: string;
+    display_name?: string;
+    category?: string;
+    category_display?: string;
+    action?: string;
+    action_display?: string;
+    roles_count?: number;
+    roles?: Role[];
+    sample_roles?: Role[];
+    users_count?: number;
+    source?: 'direct' | 'role' | 'unknown';
+    created_at: string;
+    updated_at: string;
+}
+
+export interface PermissionGroup {
+    group: string;
+    category?: string;
+    display_name: string;
+    permissions: Permission[];
+    count: number;
+}
+
+export interface UserFilters {
+    search?: string;
+    user_type?: UserType;
+    school_id?: number;
+    is_active?: string;
+    role?: string;
+    sort_by?: string;
+    sort_direction?: 'asc' | 'desc';
+}
+
+export interface RoleFilters {
+    search?: string;
+    guard_name?: string;
+    has_users?: string;
+    sort_by?: string;
+    sort_direction?: 'asc' | 'desc';
+}
+
+export interface PermissionFilters {
+    search?: string;
+    guard_name?: string;
+    category?: string;
+    has_roles?: string;
+    sort_by?: string;
+    sort_direction?: 'asc' | 'desc';
+}
+
+export interface UserStatistics {
+    total_users: number;
+    active_users: number;
+    inactive_users: number;
+    users_by_type: Record<
+        UserType,
+        {
+            label: string;
+            count: number;
+        }
+    >;
+    users_by_school: Record<string, number>;
+}
+
+export interface RoleStatistics {
+    total_roles: number;
+    roles_with_users: number;
+    roles_without_users: number;
+    total_permissions: number;
+    roles_by_guard: Record<string, number>;
+    popular_roles: Array<{
+        name: string;
+        users_count: number;
+    }>;
+}
+
+export interface PermissionStatistics {
+    total_permissions: number;
+    permissions_with_roles: number;
+    permissions_without_roles: number;
+    total_roles: number;
+    usage_percentage: number;
+    permissions_by_guard: Record<string, number>;
+    permissions_by_category: Array<{
+        category: string;
+        display_name: string;
+        count: number;
+        percentage?: number;
+    }>;
+    most_used_permissions: Array<{
+        name: string;
+        display_name: string;
+        roles_count: number;
+        category: string;
+    }>;
 }

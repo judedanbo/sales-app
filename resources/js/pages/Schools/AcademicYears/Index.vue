@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
+import SchoolAcademicYearModal from '@/components/schools/SchoolAcademicYearModal.vue';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import Badge from '@/components/ui/badge.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import Badge from '@/components/ui/badge.vue';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -12,21 +12,21 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import SchoolAcademicYearModal from '@/components/schools/SchoolAcademicYearModal.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
 import type { AcademicYear, School } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
-import { 
+import {
     Calendar,
     CalendarCheck,
-    CalendarDays, 
+    CalendarDays,
     CheckCircle2,
-    Edit, 
-    MoreHorizontal, 
-    Plus, 
-    School as SchoolIcon, 
+    Edit,
+    MoreHorizontal,
+    Plus,
+    School as SchoolIcon,
     Star,
     Trash2,
-    Users
+    Users,
 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
@@ -57,7 +57,7 @@ const sortedAcademicYears = computed(() => {
 });
 
 const currentAcademicYear = computed(() => {
-    return props.academicYears.find(year => year.is_current);
+    return props.academicYears.find((year) => year.is_current);
 });
 
 const handleAcademicYearCreated = () => {
@@ -79,9 +79,13 @@ const handleDelete = (academicYear: AcademicYear) => {
 
 const handleSetCurrent = (academicYear: AcademicYear) => {
     if (confirm(`Set "${academicYear.year_name}" as the current academic year?`)) {
-        router.post(`/schools/${props.school.id}/academic-years/${academicYear.id}/set-current`, {}, {
-            preserveScroll: true,
-        });
+        router.post(
+            `/schools/${props.school.id}/academic-years/${academicYear.id}/set-current`,
+            {},
+            {
+                preserveScroll: true,
+            },
+        );
     }
 };
 
@@ -101,18 +105,18 @@ const getYearStatus = (academicYear: AcademicYear): { label: string; variant: 'd
     if (academicYear.is_current) {
         return { label: 'Current', variant: 'default' };
     }
-    
+
     const now = new Date();
     const startDate = new Date(academicYear.start_date);
     const endDate = new Date(academicYear.end_date);
-    
+
     if (now < startDate) {
         return { label: 'Upcoming', variant: 'outline' };
     }
     if (now > endDate) {
         return { label: 'Completed', variant: 'secondary' };
     }
-    
+
     return { label: 'Active', variant: 'outline' };
 };
 </script>
@@ -123,10 +127,7 @@ const getYearStatus = (academicYear: AcademicYear): { label: string; variant: 'd
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="space-y-6 p-8">
             <!-- Header Section -->
-            <PageHeader 
-                :title="`Academic Years - ${school.school_name}`" 
-                description="Manage academic years and set the current active year"
-            >
+            <PageHeader :title="`Academic Years - ${school.school_name}`" description="Manage academic years and set the current active year">
                 <template #action>
                     <Button @click="showCreateModal = true">
                         <Plus class="mr-2 h-4 w-4" />
@@ -146,7 +147,7 @@ const getYearStatus = (academicYear: AcademicYear): { label: string; variant: 'd
                         <div class="text-2xl font-bold">{{ academicYears.length }}</div>
                     </CardContent>
                 </Card>
-                
+
                 <Card>
                     <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle class="text-sm font-medium">Current Year</CardTitle>
@@ -158,7 +159,7 @@ const getYearStatus = (academicYear: AcademicYear): { label: string; variant: 'd
                         </div>
                     </CardContent>
                 </Card>
-                
+
                 <Card>
                     <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle class="text-sm font-medium">School</CardTitle>
@@ -169,7 +170,7 @@ const getYearStatus = (academicYear: AcademicYear): { label: string; variant: 'd
                         <div class="text-xs text-muted-foreground">{{ school.school_code }}</div>
                     </CardContent>
                 </Card>
-                
+
                 <Card>
                     <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle class="text-sm font-medium">School Type</CardTitle>
@@ -186,25 +187,28 @@ const getYearStatus = (academicYear: AcademicYear): { label: string; variant: 'd
 
             <!-- Academic Years List -->
             <div v-if="sortedAcademicYears.length > 0" class="space-y-4">
-                <Card v-for="academicYear in sortedAcademicYears" :key="academicYear.id" 
-                      :class="['hover:shadow-md transition-shadow', academicYear.is_current ? 'ring-2 ring-primary' : '']">
+                <Card
+                    v-for="academicYear in sortedAcademicYears"
+                    :key="academicYear.id"
+                    :class="['transition-shadow hover:shadow-md', academicYear.is_current ? 'ring-2 ring-primary' : '']"
+                >
                     <CardHeader class="flex flex-row items-start justify-between space-y-0 pb-4">
                         <div class="space-y-2">
                             <div class="flex items-center gap-2">
                                 <CardTitle class="text-xl">{{ academicYear.year_name }}</CardTitle>
-                                <Star v-if="academicYear.is_current" class="h-5 w-5 text-yellow-500 fill-current" />
+                                <Star v-if="academicYear.is_current" class="h-5 w-5 fill-current text-yellow-500" />
                             </div>
                             <CardDescription class="text-base">
                                 {{ getDateRange(academicYear) }}
                             </CardDescription>
                         </div>
-                        
+
                         <div class="flex items-center gap-2">
                             <Badge :variant="getYearStatus(academicYear).variant">
                                 <CheckCircle2 v-if="academicYear.is_current" class="mr-1 h-3 w-3" />
                                 {{ getYearStatus(academicYear).label }}
                             </Badge>
-                            
+
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" size="sm">
@@ -218,18 +222,12 @@ const getYearStatus = (academicYear: AcademicYear): { label: string; variant: 'd
                                         <Edit class="mr-2 h-4 w-4" />
                                         Edit
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem 
-                                        v-if="!academicYear.is_current" 
-                                        @click="handleSetCurrent(academicYear)"
-                                    >
+                                    <DropdownMenuItem v-if="!academicYear.is_current" @click="handleSetCurrent(academicYear)">
                                         <CalendarCheck class="mr-2 h-4 w-4" />
                                         Set as Current
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem 
-                                        class="text-red-600 dark:text-red-400" 
-                                        @click="handleDelete(academicYear)"
-                                    >
+                                    <DropdownMenuItem class="text-red-600 dark:text-red-400" @click="handleDelete(academicYear)">
                                         <Trash2 class="mr-2 h-4 w-4" />
                                         Delete
                                     </DropdownMenuItem>
@@ -237,7 +235,7 @@ const getYearStatus = (academicYear: AcademicYear): { label: string; variant: 'd
                             </DropdownMenu>
                         </div>
                     </CardHeader>
-                    
+
                     <CardContent class="pt-0">
                         <div class="grid gap-4 md:grid-cols-3">
                             <div class="flex items-center gap-2">
@@ -247,7 +245,7 @@ const getYearStatus = (academicYear: AcademicYear): { label: string; variant: 'd
                                     <div class="text-xs text-muted-foreground">{{ formatDate(academicYear.start_date) }}</div>
                                 </div>
                             </div>
-                            
+
                             <div class="flex items-center gap-2">
                                 <CalendarDays class="h-4 w-4 text-muted-foreground" />
                                 <div>
@@ -255,7 +253,7 @@ const getYearStatus = (academicYear: AcademicYear): { label: string; variant: 'd
                                     <div class="text-xs text-muted-foreground">{{ formatDate(academicYear.end_date) }}</div>
                                 </div>
                             </div>
-                            
+
                             <div class="flex items-center gap-2">
                                 <CheckCircle2 class="h-4 w-4 text-muted-foreground" />
                                 <div>
@@ -270,9 +268,9 @@ const getYearStatus = (academicYear: AcademicYear): { label: string; variant: 'd
 
             <!-- Empty State -->
             <Card v-else class="flex flex-col items-center justify-center py-16">
-                <Calendar class="h-16 w-16 text-muted-foreground mb-4" />
-                <CardTitle class="text-xl mb-2">No Academic Years Yet</CardTitle>
-                <CardDescription class="text-center mb-6">
+                <Calendar class="mb-4 h-16 w-16 text-muted-foreground" />
+                <CardTitle class="mb-2 text-xl">No Academic Years Yet</CardTitle>
+                <CardDescription class="mb-6 text-center">
                     Get started by adding the first academic year for {{ school.school_name }}.
                 </CardDescription>
                 <Button @click="showCreateModal = true">
@@ -283,11 +281,11 @@ const getYearStatus = (academicYear: AcademicYear): { label: string; variant: 'd
         </div>
 
         <!-- Create Academic Year Modal -->
-        <SchoolAcademicYearModal 
-            :open="showCreateModal" 
-            :school="school" 
-            @update:open="showCreateModal = $event" 
-            @academic-year-created="handleAcademicYearCreated" 
+        <SchoolAcademicYearModal
+            :open="showCreateModal"
+            :school="school"
+            @update:open="showCreateModal = $event"
+            @academic-year-created="handleAcademicYearCreated"
         />
     </AppLayout>
 </template>

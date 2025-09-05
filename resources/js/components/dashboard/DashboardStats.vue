@@ -1,14 +1,7 @@
 <script setup lang="ts">
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Progress from '@/components/ui/progress.vue';
-import { 
-    Building2, 
-    Users, 
-    GraduationCap, 
-    AlertTriangle,
-    TrendingUp,
-    Database 
-} from 'lucide-vue-next';
+import { AlertTriangle, Building2, Database, TrendingUp, Users } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 interface Props {
@@ -28,10 +21,8 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const activePercentage = computed(() => 
-    props.stats.total_schools > 0 
-        ? Math.round((props.stats.active_schools / props.stats.total_schools) * 100) 
-        : 0
+const activePercentage = computed(() =>
+    props.stats.total_schools > 0 ? Math.round((props.stats.active_schools / props.stats.total_schools) * 100) : 0,
 );
 
 const formatNumber = (num: number) => {
@@ -88,18 +79,14 @@ const formatNumber = (num: number) => {
         <!-- Schools Needing Attention -->
         <Card v-if="stats.schools_needing_attention > 0" class="border-orange-200 dark:border-orange-800">
             <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle class="text-sm font-medium text-orange-700 dark:text-orange-300">
-                    Needs Attention
-                </CardTitle>
+                <CardTitle class="text-sm font-medium text-orange-700 dark:text-orange-300"> Needs Attention </CardTitle>
                 <AlertTriangle class="h-4 w-4 text-orange-500" />
             </CardHeader>
             <CardContent>
                 <div class="text-2xl font-bold text-orange-600 dark:text-orange-400">
                     {{ stats.schools_needing_attention }}
                 </div>
-                <div class="text-xs text-muted-foreground">
-                    Schools with missing data or inactive
-                </div>
+                <div class="text-xs text-muted-foreground">Schools with missing data or inactive</div>
             </CardContent>
         </Card>
     </div>

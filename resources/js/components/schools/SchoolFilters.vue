@@ -24,30 +24,27 @@ const emit = defineEmits<Emits>();
 // Computed properties for v-model
 const searchModel = computed({
     get: () => props.filters.search,
-    set: (value: string) => emit('update:filters', { ...props.filters, search: value })
+    set: (value: string) => emit('update:filters', { search: value }),
 });
 
 const schoolTypeModel = computed({
     get: () => props.filters.school_type,
-    set: (value: string) => emit('update:filters', { ...props.filters, school_type: value })
+    set: (value: string) => emit('update:filters', { school_type: value }),
 });
 
 const boardAffiliationModel = computed({
     get: () => props.filters.board_affiliation,
-    set: (value: string) => emit('update:filters', { ...props.filters, board_affiliation: value })
+    set: (value: string) => emit('update:filters', { board_affiliation: value }),
 });
 
-const isActiveModel = computed({
-    get: () => props.filters.is_active,
-    set: (value: string) => emit('update:filters', { ...props.filters, is_active: value })
+const statusModel = computed({
+    get: () => props.filters.status,
+    set: (value: string) => emit('update:filters', { status: value }),
 });
 
 // Check if any filters are active
 const hasFilters = computed(() => {
-    return props.filters.search || 
-           props.filters.school_type || 
-           props.filters.is_active || 
-           props.filters.board_affiliation;
+    return props.filters.search || props.filters.school_type || props.filters.status || props.filters.board_affiliation;
 });
 
 function clearFilters() {
@@ -92,18 +89,13 @@ function clearFilters() {
                 </select>
 
                 <!-- Status Filter -->
+
                 <select
-                    v-model="isActiveModel"
+                    v-model="statusModel"
                     class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
                 >
                     <option value="">All Status</option>
-                    <option
-                        v-for="status in props.schoolStatuses"
-                        :key="status.value"
-                        :value="status.value"
-                    >
-                        {{ status.label }}
-                    </option>
+                    <option v-for="status in props.schoolStatuses" :key="status.value" :value="status.value">{{ status.label }}</option>
                 </select>
             </div>
 

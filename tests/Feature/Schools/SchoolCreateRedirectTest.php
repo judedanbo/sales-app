@@ -15,7 +15,7 @@ it('creates a school via regular request and redirects to show page', function (
         'school_type' => SchoolType::PRIMARY->value,
         'board_affiliation' => null,
         'established_date' => null,
-        'is_active' => true,
+        'status' => 'active',
     ];
 
     $response = $this->actingAs($user)
@@ -39,7 +39,7 @@ it('handles modal creation with Inertia request headers and redirects to index',
         'school_name' => 'Modal Test School',
         'school_code' => 'MTS001',
         'school_type' => SchoolType::PRIMARY->value,
-        'is_active' => true,
+        'status' => 'active',
     ];
 
     $response = $this->actingAs($user)
@@ -81,7 +81,7 @@ it('sets success message after school creation', function () {
         'school_name' => 'Success Test School',
         'school_code' => 'STS001',
         'school_type' => SchoolType::PRIMARY->value,
-        'is_active' => true,
+        'status' => 'active',
     ];
 
     $response = $this->actingAs($user)

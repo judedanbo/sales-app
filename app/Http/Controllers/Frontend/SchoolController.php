@@ -37,8 +37,8 @@ class SchoolController extends Controller
             $query->where('school_type', $filters['school_type']);
         }
 
-        if (! empty($filters['is_active'])) {
-            $query->where('is_active', $filters['is_active']);
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
         }
 
         if (! empty($filters['board_affiliation'])) {
@@ -62,7 +62,7 @@ class SchoolController extends Controller
             'filters' => [
                 'search' => $filters['search'] ?? '',
                 'school_type' => $filters['school_type'] ?? '',
-                'is_active' => $filters['is_active'] ?? '',
+                'status' => $filters['status'] ?? '',
                 'board_affiliation' => $filters['board_affiliation'] ?? '',
                 'sort_by' => $sortBy,
                 'sort_direction' => $sortDirection,
@@ -118,7 +118,7 @@ class SchoolController extends Controller
             // 'total_teachers' => 'nullable|integer|min:0',2
             // 'website' => 'nullable|url|max:255',
             // 'description' => 'nullable|string',
-            'is_active' => 'boolean',
+            'status' => 'string|in:active,inactive',
         ]);
 
         $school = School::create($validated);
@@ -161,7 +161,7 @@ class SchoolController extends Controller
             // 'total_teachers' => 'nullable|integer|min:0',
             'website' => 'nullable|url|max:255',
             'description' => 'nullable|string',
-            'is_active' => 'boolean',
+            'status' => 'string|in:active,inactive',
         ]);
 
         $school->update($validated);
@@ -192,8 +192,8 @@ class SchoolController extends Controller
     {
         $stats = [
             'total_schools' => School::count(),
-            'active_schools' => School::where('is_active', true)->count(),
-            'inactive_schools' => School::where('is_active', false)->count(),
+            'active_schools' => School::where('status', 'active')->count(),
+            'inactive_schools' => School::where('status', 'inactive')->count(),
             'recent_schools' => School::latest()->take(5)->get(),
             'by_type' => School::selectRaw('school_type, COUNT(*) as count')
                 ->groupBy('school_type')

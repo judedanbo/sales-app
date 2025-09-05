@@ -24,21 +24,21 @@ class SchoolFactory extends Factory
             'school_type' => $this->faker->randomElement(SchoolType::cases()),
             'board_affiliation' => $this->faker->optional(0.8)->randomElement(BoardAffiliation::cases()),
             'established_date' => $this->faker->dateTimeBetween('-50 years', '-1 year'),
-            'is_active' => $this->faker->boolean(90), // 90% chance of being active
+            'status' => $this->faker->randomElement(['active', 'inactive']), // Random status
         ];
     }
 
     public function active(): static
     {
         return $this->state(fn (array $attributes) => [
-            'is_active' => true,
+            'status' => 'active',
         ]);
     }
 
     public function inactive(): static
     {
         return $this->state(fn (array $attributes) => [
-            'is_active' => false,
+            'status' => 'inactive',
         ]);
     }
 

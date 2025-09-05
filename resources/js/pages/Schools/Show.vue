@@ -3,28 +3,14 @@ import SchoolEditModal from '@/components/schools/SchoolEditModal.vue';
 import Badge from '@/components/ui/badge.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import Separator from '@/components/ui/separator/Separator.vue';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import Separator from '@/components/ui/separator/Separator.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { index as schoolsIndex, show, destroy } from '@/routes/schools';
+import { destroy, index as schoolsIndex, show } from '@/routes/schools';
 import { type BreadcrumbItem, type School } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
-import { 
-    Building2, 
-    Calendar, 
-    Edit, 
-    ExternalLink, 
-    Globe, 
-    MapPin, 
-    Phone, 
-    Mail, 
-    User, 
-    Trash2,
-    FileText,
-    Users,
-    GraduationCap
-} from 'lucide-vue-next';
-import { ref, computed } from 'vue';
+import { Building2, Calendar, Edit, ExternalLink, FileText, Globe, GraduationCap, Mail, MapPin, Phone, Trash2, User, Users } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 
 interface Props {
     school: School;
@@ -140,11 +126,7 @@ const formatAddressType = (type: string) => {
                     <Edit class="mr-2 h-4 w-4" />
                     Edit
                 </Button>
-                <Button 
-                    variant="destructive" 
-                    @click="handleDelete" 
-                    :disabled="isDeleting"
-                >
+                <Button variant="destructive" @click="handleDelete" :disabled="isDeleting">
                     <Trash2 class="mr-2 h-4 w-4" />
                     {{ isDeleting ? 'Deleting...' : 'Delete' }}
                 </Button>
@@ -169,7 +151,7 @@ const formatAddressType = (type: string) => {
                     </div>
                 </CardHeader>
                 <CardContent class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                         <div class="space-y-2">
                             <div class="text-sm font-medium text-muted-foreground">School Type</div>
                             <div class="flex items-center gap-2">
@@ -177,7 +159,7 @@ const formatAddressType = (type: string) => {
                                 {{ formatSchoolType(school.school_type) }}
                             </div>
                         </div>
-                        
+
                         <div class="space-y-2">
                             <div class="text-sm font-medium text-muted-foreground">Board Affiliation</div>
                             <div class="flex items-center gap-2">
@@ -185,7 +167,7 @@ const formatAddressType = (type: string) => {
                                 {{ formatBoardAffiliation(school.board_affiliation) }}
                             </div>
                         </div>
-                        
+
                         <div class="space-y-2">
                             <div class="text-sm font-medium text-muted-foreground">Established</div>
                             <div class="flex items-center gap-2">
@@ -193,23 +175,23 @@ const formatAddressType = (type: string) => {
                                 {{ formatDate(school.established_date) }}
                             </div>
                         </div>
-                        
+
                         <div v-if="school.website" class="space-y-2">
                             <div class="text-sm font-medium text-muted-foreground">Website</div>
                             <div class="flex items-center gap-2">
                                 <Globe class="h-4 w-4" />
-                                <a 
-                                    :href="school.website" 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
-                                    class="text-primary hover:underline flex items-center gap-1"
+                                <a
+                                    :href="school.website"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="flex items-center gap-1 text-primary hover:underline"
                                 >
                                     Visit Website
                                     <ExternalLink class="h-3 w-3" />
                                 </a>
                             </div>
                         </div>
-                        
+
                         <div v-if="school.total_students" class="space-y-2">
                             <div class="text-sm font-medium text-muted-foreground">Total Students</div>
                             <div class="flex items-center gap-2">
@@ -217,7 +199,7 @@ const formatAddressType = (type: string) => {
                                 {{ school.total_students.toLocaleString() }}
                             </div>
                         </div>
-                        
+
                         <div v-if="school.total_teachers" class="space-y-2">
                             <div class="text-sm font-medium text-muted-foreground">Total Teachers</div>
                             <div class="flex items-center gap-2">
@@ -226,11 +208,11 @@ const formatAddressType = (type: string) => {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div v-if="school.description" class="space-y-2">
                         <Separator />
                         <div>
-                            <div class="text-sm font-medium text-muted-foreground mb-2">Description</div>
+                            <div class="mb-2 text-sm font-medium text-muted-foreground">Description</div>
                             <p class="text-sm leading-relaxed">{{ school.description }}</p>
                         </div>
                     </div>
@@ -246,12 +228,8 @@ const formatAddressType = (type: string) => {
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div 
-                            v-for="contact in school.contacts" 
-                            :key="contact.id"
-                            class="flex items-center justify-between p-3 border rounded-lg"
-                        >
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div v-for="contact in school.contacts" :key="contact.id" class="flex items-center justify-between rounded-lg border p-3">
                             <div class="flex items-center gap-3">
                                 <Mail v-if="contact.contact_type === 'email'" class="h-4 w-4 text-muted-foreground" />
                                 <Phone v-else class="h-4 w-4 text-muted-foreground" />
@@ -260,9 +238,7 @@ const formatAddressType = (type: string) => {
                                     <div class="text-sm text-muted-foreground">{{ formatContactType(contact.contact_type) }}</div>
                                 </div>
                             </div>
-                            <Badge v-if="contact.is_primary" variant="secondary" class="text-xs">
-                                Primary
-                            </Badge>
+                            <Badge v-if="contact.is_primary" variant="secondary" class="text-xs"> Primary </Badge>
                         </div>
                     </div>
                 </CardContent>
@@ -277,19 +253,13 @@ const formatAddressType = (type: string) => {
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div 
-                            v-for="address in school.addresses" 
-                            :key="address.id"
-                            class="p-4 border rounded-lg space-y-2"
-                        >
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div v-for="address in school.addresses" :key="address.id" class="space-y-2 rounded-lg border p-4">
                             <div class="flex items-center justify-between">
                                 <div class="font-medium">{{ formatAddressType(address.address_type) }}</div>
-                                <Badge v-if="address.is_primary" variant="secondary" class="text-xs">
-                                    Primary
-                                </Badge>
+                                <Badge v-if="address.is_primary" variant="secondary" class="text-xs"> Primary </Badge>
                             </div>
-                            <div class="text-sm space-y-1">
+                            <div class="space-y-1 text-sm">
                                 <div>{{ address.address_line1 }}</div>
                                 <div v-if="address.address_line2">{{ address.address_line2 }}</div>
                                 <div>{{ address.city }}, {{ address.state }}</div>
@@ -310,13 +280,9 @@ const formatAddressType = (type: string) => {
                 </CardHeader>
                 <CardContent>
                     <div class="space-y-4">
-                        <div 
-                            v-for="management in school.management" 
-                            :key="management.id"
-                            class="p-4 border rounded-lg"
-                        >
-                            <div class="font-medium mb-2">{{ management.management_type }}</div>
-                            <div v-if="management.organization_name" class="text-sm text-muted-foreground mb-1">
+                        <div v-for="management in school.management" :key="management.id" class="rounded-lg border p-4">
+                            <div class="mb-2 font-medium">{{ management.management_type }}</div>
+                            <div v-if="management.organization_name" class="mb-1 text-sm text-muted-foreground">
                                 Organization: {{ management.organization_name }}
                             </div>
                             <div v-if="management.registration_number" class="text-sm text-muted-foreground">
@@ -336,12 +302,8 @@ const formatAddressType = (type: string) => {
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div 
-                            v-for="official in school.officials" 
-                            :key="official.id"
-                            class="p-4 border rounded-lg space-y-2"
-                        >
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div v-for="official in school.officials" :key="official.id" class="space-y-2 rounded-lg border p-4">
                             <div class="flex items-center justify-between">
                                 <div class="font-medium">{{ official.name }}</div>
                                 <Badge :variant="official.is_active ? 'default' : 'secondary'" class="text-xs">
@@ -369,7 +331,7 @@ const formatAddressType = (type: string) => {
                 <CardHeader>
                     <CardTitle class="text-sm">Record Information</CardTitle>
                 </CardHeader>
-                <CardContent class="text-sm text-muted-foreground space-y-2">
+                <CardContent class="space-y-2 text-sm text-muted-foreground">
                     <div>Created: {{ formatDate(school.created_at) }}</div>
                     <div>Last Updated: {{ formatDate(school.updated_at) }}</div>
                 </CardContent>
@@ -377,10 +339,6 @@ const formatAddressType = (type: string) => {
         </div>
 
         <!-- Edit Modal -->
-        <SchoolEditModal 
-            v-model:open="isEditModalOpen"
-            :school="school"
-            @school-updated="handleSchoolUpdated"
-        />
+        <SchoolEditModal v-model:open="isEditModalOpen" :school="school" @school-updated="handleSchoolUpdated" />
     </AppLayout>
 </template>

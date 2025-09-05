@@ -30,15 +30,27 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-// Local filter state
+// Local filter state - initialize from props
 const localFilters = ref<SchoolFilters>({
     search: props.filters.search || '',
     school_type: props.filters.school_type || '',
-    is_active: props.filters.is_active || '',
+    status: props.filters.status || '',
     board_affiliation: props.filters.board_affiliation || '',
     sort_by: props.filters.sort_by || 'school_name',
     sort_direction: props.filters.sort_direction || 'asc',
 });
+
+// Update local filters when props change (after navigation)
+watch(() => props.filters, (newFilters) => {
+    localFilters.value = {
+        search: newFilters.search || '',
+        school_type: newFilters.school_type || '',
+        status: newFilters.status || '',
+        board_affiliation: newFilters.board_affiliation || '',
+        sort_by: newFilters.sort_by || 'school_name',
+        sort_direction: newFilters.sort_direction || 'asc',
+    };
+}, { immediate: true });
 
 const isLoading = ref(false);
 const selectedSchools = ref<number[]>([]);
@@ -74,10 +86,10 @@ watch(
     },
 );
 
-// Debounced search function
+// Debounced search function with longer delay to prevent early triggers
 const debouncedSearch = useDebounceFn(() => {
     applyFilters();
-}, 300);
+}, 500);
 
 // Watch for changes in local filters
 watch(
@@ -88,7 +100,7 @@ watch(
             debouncedSearch();
         } else if (
             newFilters.school_type !== oldFilters?.school_type ||
-            newFilters.is_active !== oldFilters?.is_active ||
+            newFilters.status !== oldFilters?.status ||
             newFilters.board_affiliation !== oldFilters?.board_affiliation
         ) {
             applyFilters();
@@ -102,7 +114,7 @@ function getFilteredParameters(filters: SchoolFilters) {
     const defaults = {
         search: '',
         school_type: '',
-        is_active: '',
+        status: '',
         board_affiliation: '',
         sort_by: 'school_name',
         sort_direction: 'asc',
@@ -123,10 +135,32 @@ function getFilteredParameters(filters: SchoolFilters) {
 // Apply filters to the server
 function applyFilters() {
     isLoading.value = true;
-    router.reload({
-        data: getFilteredParameters(localFilters.value),
+
+    // Include all current filter values, not just changed ones
+    const params: Record<string, any> = {};
+    
+    if (localFilters.value.search) {
+        params.search = localFilters.value.search;
+    }
+    if (localFilters.value.school_type) {
+        params.school_type = localFilters.value.school_type;
+    }
+    if (localFilters.value.status) {
+        params.status = localFilters.value.status;
+    }
+    if (localFilters.value.board_affiliation) {
+        params.board_affiliation = localFilters.value.board_affiliation;
+    }
+    if (localFilters.value.sort_by && localFilters.value.sort_by !== 'school_name') {
+        params.sort_by = localFilters.value.sort_by;
+    }
+    if (localFilters.value.sort_direction && localFilters.value.sort_direction !== 'asc') {
+        params.sort_direction = localFilters.value.sort_direction;
+    }
+
+    router.get('/schools', params, {
         preserveScroll: true,
-        only: ['schools'],
+        preserveState: true,
         onFinish: () => {
             isLoading.value = false;
         },
@@ -136,14 +170,37 @@ function applyFilters() {
 // Handle pagination without URL parameters
 function goToPage(page: number) {
     isLoading.value = true;
-    const filteredData = getFilteredParameters(localFilters.value);
-    router.reload({
-        data: {
-            ...filteredData,
-            page: page,
-        },
+
+    // Include all current filter values
+    const params: Record<string, any> = {};
+    
+    if (localFilters.value.search) {
+        params.search = localFilters.value.search;
+    }
+    if (localFilters.value.school_type) {
+        params.school_type = localFilters.value.school_type;
+    }
+    if (localFilters.value.status) {
+        params.status = localFilters.value.status;
+    }
+    if (localFilters.value.board_affiliation) {
+        params.board_affiliation = localFilters.value.board_affiliation;
+    }
+    if (localFilters.value.sort_by && localFilters.value.sort_by !== 'school_name') {
+        params.sort_by = localFilters.value.sort_by;
+    }
+    if (localFilters.value.sort_direction && localFilters.value.sort_direction !== 'asc') {
+        params.sort_direction = localFilters.value.sort_direction;
+    }
+    
+    // Add page parameter if it's not the first page
+    if (page > 1) {
+        params.page = page;
+    }
+
+    router.get('/schools', params, {
         preserveScroll: true,
-        only: ['schools'],
+        preserveState: true,
         onFinish: () => {
             isLoading.value = false;
         },
@@ -171,15 +228,35 @@ function handleDelete(school: School) {
 }
 
 function handleFiltersUpdate(newFilters: SchoolFilters) {
-    localFilters.value = { ...newFilters };
+    localFilters.value = { ...localFilters.value, ...newFilters };
 }
 
 function handleSchoolCreated(school: School) {
     // Refresh the page to show the new school while preserving filters
-    router.reload({
-        data: getFilteredParameters(localFilters.value),
+    const params: Record<string, any> = {};
+    
+    if (localFilters.value.search) {
+        params.search = localFilters.value.search;
+    }
+    if (localFilters.value.school_type) {
+        params.school_type = localFilters.value.school_type;
+    }
+    if (localFilters.value.status) {
+        params.status = localFilters.value.status;
+    }
+    if (localFilters.value.board_affiliation) {
+        params.board_affiliation = localFilters.value.board_affiliation;
+    }
+    if (localFilters.value.sort_by && localFilters.value.sort_by !== 'school_name') {
+        params.sort_by = localFilters.value.sort_by;
+    }
+    if (localFilters.value.sort_direction && localFilters.value.sort_direction !== 'asc') {
+        params.sort_direction = localFilters.value.sort_direction;
+    }
+
+    router.get('/schools', params, {
         preserveScroll: true,
-        only: ['schools'],
+        preserveState: true,
     });
 }
 
@@ -191,7 +268,7 @@ const clearFilters = () => {
     localFilters.value = {
         search: '',
         school_type: '',
-        is_active: '',
+        status: '',
         board_affiliation: '',
         sort_by: 'school_name',
         sort_direction: 'asc',

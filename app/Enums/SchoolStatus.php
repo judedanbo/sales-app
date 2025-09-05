@@ -2,10 +2,10 @@
 
 namespace App\Enums;
 
-enum SchoolStatus: int
+enum SchoolStatus: string
 {
-    case Active = 1;
-    case Inactive = 0;
+    case Active = 'active';
+    case Inactive = 'inactive';
 
     public function label(): string
     {
@@ -17,9 +17,11 @@ enum SchoolStatus: int
 
     public static function options(): array
     {
-        return collect(self::cases())->map(fn ($case) => [
-            'value' => $case->value,
-            'label' => $case->label(),
-        ])->toArray();
+        $options = [];
+        foreach (self::cases() as $case) {
+            $options[$case->value] = $case->label();
+        }
+
+        return $options;
     }
 }

@@ -18,11 +18,11 @@ return new class extends Migration
             $table->string('school_type');
             $table->string('board_affiliation')->nullable();
             $table->date('established_date')->nullable();
-            $table->boolean('is_active')->default(true);
+            $table->string('status', 10)->default('active');
             $table->timestamps();
             $table->softDeletes();
-            
-            $table->index(['is_active', 'school_type']);
+
+            $table->index(['status', 'school_type']);
             $table->index('school_code');
         });
     }

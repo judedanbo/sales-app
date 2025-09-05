@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import SchoolStats from '@/components/schools/SchoolStats.vue';
 import SchoolsTable from '@/components/schools/SchoolsTable.vue';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { index } from '@/routes/schools';
 import { type BreadcrumbItem, type PaginatedData, type School, type SchoolFilters } from '@/types';
@@ -116,10 +116,7 @@ function handlePageChange(page: number) {
             </div>
 
             <!-- Stats Cards - Using the reusable component -->
-            <SchoolStats 
-                :schools="recentSchools.data" 
-                :total-count="stats.total_schools" 
-            />
+            <SchoolStats :schools="recentSchools.data" :total-count="stats.total_schools" />
 
             <!-- Additional Dashboard Stats -->
             <div class="grid gap-4 md:grid-cols-2">
@@ -152,7 +149,7 @@ function handlePageChange(page: number) {
                     <CardContent>
                         <div class="space-y-2">
                             <div v-for="(count, board) in stats.by_board" :key="board" class="flex justify-between">
-                                <span class="uppercase text-xs font-medium">{{ board }}</span>
+                                <span class="text-xs font-medium uppercase">{{ board }}</span>
                                 <span class="font-medium">{{ count }}</span>
                             </div>
                         </div>
@@ -166,7 +163,7 @@ function handlePageChange(page: number) {
                     <h3 class="text-lg font-semibold">Recent Schools</h3>
                     <p class="text-sm text-muted-foreground">Recently added schools in the system</p>
                 </div>
-                
+
                 <SchoolsTable
                     :schools="recentSchools"
                     :filters="mockFilters"

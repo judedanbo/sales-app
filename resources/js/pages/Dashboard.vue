@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
 import DashboardStats from '@/components/dashboard/DashboardStats.vue';
-import SchoolsChart from '@/components/dashboard/SchoolsChart.vue';
 import RecentSchools from '@/components/dashboard/RecentSchools.vue';
+import SchoolsChart from '@/components/dashboard/SchoolsChart.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem, type School } from '@/types';
 import { Head } from '@inertiajs/vue3';

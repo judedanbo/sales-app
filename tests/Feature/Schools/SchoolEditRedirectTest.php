@@ -23,7 +23,7 @@ it('updates a school via regular request and redirects to show page', function (
         'established_date' => null,
         'website' => null,
         'description' => null,
-        'is_active' => true,
+        'status' => 'active',
     ];
 
     $response = $this->actingAs($user)
@@ -58,7 +58,7 @@ it('handles modal edit with Inertia request headers and redirects to index', fun
         'established_date' => null,
         'website' => null,
         'description' => null,
-        'is_active' => false,
+        'status' => 'inactive',
     ];
 
     $response = $this->actingAs($user)
@@ -78,7 +78,7 @@ it('handles modal edit with Inertia request headers and redirects to index', fun
         'school_name' => 'Modal Updated School',
         'school_code' => 'MUS001',
         'school_type' => SchoolType::K12->value,
-        'is_active' => false,
+        'status' => 'inactive',
     ]);
 });
 
@@ -97,7 +97,7 @@ it('sets success message after school update', function () {
         'established_date' => null,
         'website' => null,
         'description' => null,
-        'is_active' => true,
+        'status' => 'active',
     ];
 
     $response = $this->actingAs($user)
@@ -117,7 +117,7 @@ it('validates required fields during update', function () {
         'school_name' => '', // Required field empty
         'school_code' => '', // Required field empty
         'school_type' => 'invalid_type',
-        'is_active' => true,
+        'status' => 'active',
     ];
 
     $response = $this->actingAs($user)
@@ -144,7 +144,7 @@ it('validates unique school code during update excluding current school', functi
         'established_date' => null,
         'website' => null,
         'description' => null,
-        'is_active' => true,
+        'status' => 'active',
     ];
 
     $response = $this->actingAs($user)
@@ -170,7 +170,7 @@ it('allows keeping the same school code during update', function () {
         'established_date' => null,
         'website' => null,
         'description' => null,
-        'is_active' => true,
+        'status' => 'active',
     ];
 
     $response = $this->actingAs($user)

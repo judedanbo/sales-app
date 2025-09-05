@@ -24,13 +24,7 @@ function goToPage(page: number) {
     <div v-if="schools.last_page > 1" class="mt-6 flex items-center justify-between">
         <div class="text-sm text-muted-foreground">Page {{ schools.current_page }} of {{ schools.last_page }}</div>
         <div class="flex gap-2">
-            <Button 
-                v-if="schools.current_page > 1" 
-                variant="outline" 
-                size="sm"
-                @click="goToPage(schools.current_page - 1)"
-                :disabled="isLoading"
-            >
+            <Button v-if="schools.current_page > 1" variant="outline" size="sm" @click="goToPage(schools.current_page - 1)" :disabled="isLoading">
                 <ChevronLeft class="h-4 w-4" />
                 Previous
             </Button>
@@ -39,9 +33,9 @@ function goToPage(page: number) {
                 Previous
             </Button>
 
-            <Button 
-                v-if="schools.current_page < schools.last_page" 
-                variant="outline" 
+            <Button
+                v-if="schools.current_page < schools.last_page"
+                variant="outline"
                 size="sm"
                 @click="goToPage(schools.current_page + 1)"
                 :disabled="isLoading"
