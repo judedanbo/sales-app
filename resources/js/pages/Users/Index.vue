@@ -17,7 +17,7 @@ import {
     type UserStatistics,
     type UserTypeOption,
 } from '@/types';
-import { Head, router } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
 import { useDebounceFn } from '@vueuse/core';
 import { Plus } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
@@ -208,6 +208,15 @@ function handleUserCreated(user: User) {
     });
 }
 
+function handleUserUpdated(user: User) {
+    // Refresh the page to show updated user data while preserving filters
+    router.reload({
+        data: getFilteredParameters(localFilters.value),
+        preserveScroll: true,
+        only: ['users', 'statistics'],
+    });
+}
+
 function handlePageChange(page: number) {
     goToPage(page);
 }
@@ -227,7 +236,7 @@ const clearFilters = () => {
 </script>
 
 <template>
-    <Head title="Users" />
+    <!-- <Head title="Users" /> -->
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="space-y-6 p-8">
@@ -259,6 +268,7 @@ const clearFilters = () => {
                 :users="props.users"
                 :filters="localFilters"
                 :selected-users="selectedUsers"
+                :available-roles="props.roles"
                 :is-loading="isLoading"
                 @sort="handleSort"
                 @delete="handleDelete"
@@ -267,6 +277,7 @@ const clearFilters = () => {
                 @select-all="selectAll"
                 @clear-selection="clearSelection"
                 @page-change="handlePageChange"
+                @role-updated="handleUserUpdated"
             />
         </div>
 

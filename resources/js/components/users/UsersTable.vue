@@ -34,11 +34,13 @@ import {
 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import UserFormModal from './UserFormModal.vue';
+import UserRoleModal from './UserRoleModal.vue';
 
 interface Props {
     users: PaginatedData<User>;
     filters: UserFilters;
     selectedUsers: number[];
+    availableRoles: Role[];
     isLoading?: boolean;
 }
 
@@ -50,6 +52,7 @@ interface Emits {
     (e: 'select-all'): void;
     (e: 'clear-selection'): void;
     (e: 'page-change', page: number): void;
+    (e: 'role-updated', user: User): void;
 }
 
 const props = defineProps<Props>();
@@ -58,6 +61,10 @@ const emit = defineEmits<Emits>();
 // Edit modal state
 const showEditModal = ref(false);
 const userToEdit = ref<User | null>(null);
+
+// Role management modal state
+const showRoleModal = ref(false);
+const userToManageRoles = ref<User | null>(null);
 
 // Selection helpers
 const isSelected = (userId: number) => props.selectedUsers.includes(userId);
@@ -154,6 +161,23 @@ function handleEdit(user: User) {
 
 function handleUserUpdated(user: User) {
     // Refresh the users data while preserving filters
+    router.reload({
+        data: getFilteredParameters(props.filters),
+        preserveScroll: true,
+        only: ['users'],
+    });
+}
+
+// Role management handlers
+function handleManageRoles(user: User) {
+    userToManageRoles.value = user;
+    showRoleModal.value = true;
+}
+
+function handleRoleUpdated(user: User) {
+    emit('role-updated', user);
+
+    // Refresh the table data while preserving filters
     router.reload({
         data: getFilteredParameters(props.filters),
         preserveScroll: true,
@@ -349,7 +373,7 @@ function handleUserUpdated(user: User) {
 
                                             <DropdownMenuSeparator />
 
-                                            <DropdownMenuItem @click="() => console.log('Manage Roles:', user.id)">
+                                            <DropdownMenuItem @click="handleManageRoles(user)">
                                                 <Shield class="mr-2 h-4 w-4" />
                                                 Manage Roles
                                             </DropdownMenuItem>
@@ -389,5 +413,14 @@ function handleUserUpdated(user: User) {
         :roles="[]"
         @update:open="showEditModal = $event"
         @user-updated="handleUserUpdated"
+    />
+
+    <!-- Role Management Modal -->
+    <UserRoleModal
+        :open="showRoleModal"
+        :user="userToManageRoles"
+        :available-roles="availableRoles"
+        @update:open="showRoleModal = $event"
+        @role-updated="handleRoleUpdated"
     />
 </template>

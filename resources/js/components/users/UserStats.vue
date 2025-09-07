@@ -41,10 +41,10 @@ const props = defineProps<Props>();
                 <UserMinus class="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div class="text-2xl font-bold text-orange-600">{{ statistics.inactive.toLocaleString() }}</div>
+                <!-- <div class="text-2xl font-bold text-orange-600">{{ statistics.inactive.toLocaleString() }}</div>
                 <p class="text-xs text-muted-foreground">
                     {{ statistics.total_users > 0 ? Math.round((statistics.inactive / statistics.total) * 100) : 0 }}% of total
-                </p>
+                </p> -->
             </CardContent>
         </Card>
 

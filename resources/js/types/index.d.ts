@@ -261,10 +261,13 @@ export interface UserStatistics {
     active: number;
     inactive: number;
     recent: number;
-    by_type: Record<string, {
-        label: string;
-        count: number;
-    }>;
+    by_type: Record<
+        string,
+        {
+            label: string;
+            count: number;
+        }
+    >;
     by_school: Array<{
         school_id: number;
         school_name: string;
