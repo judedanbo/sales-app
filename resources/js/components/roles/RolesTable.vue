@@ -19,12 +19,14 @@ import { Link, router } from '@inertiajs/vue3';
 import { ChevronDown, ChevronUp, Download, Edit as EditIcon, Eye, Key, MoreHorizontal, Plus, Shield, Trash2, Users } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import RoleFormModal from './RoleFormModal.vue';
+import RoleUsersModal from './RoleUsersModal.vue';
 
 interface Props {
     roles: PaginatedData<Role>;
     filters: RoleFilters;
     selectedRoles: number[];
     isLoading?: boolean;
+    availableUsers: User[];
 }
 
 interface Emits {
@@ -42,6 +44,11 @@ const emit = defineEmits<Emits>();
 // Edit modal state
 const showEditModal = ref(false);
 const roleToEdit = ref<Role | null>(null);
+
+// Users modal state
+const showUsersModal = ref(false);
+const roleForUsers = ref<Role | null>(null);
+// const availableUsers = ref<User[]>([]);
 
 // Selection helpers
 const isSelected = (roleId: number) => props.selectedRoles.includes(roleId);
@@ -124,7 +131,39 @@ function handleRoleUpdated(role: Role) {
     // Refresh the roles data while preserving filters
     router.reload({
         data: getFilteredParameters(props.filters),
-        preserveScroll: true,
+        only: ['roles'],
+    });
+}
+
+function handleManageUsers(role: Role) {
+    // Get role details with users and available users using router.get for partial data loading
+    roleForUsers.value = role;
+    showUsersModal.value = true;
+    // TODO fetch availableUsers for the role. This is all users not assigned to this role
+    // availableUsers.value = []; // Clear previous available users
+    // router.get(
+    //     show(role).url,
+    //     {},
+    //     {
+    //         only: ['role', 'availableUsers'],
+    //         preserveState: true,
+    //         onSuccess: (page: any) => {
+    //             // Extract the role data with users and availableUsers from the page props
+    //             const roleData = page.props.role;
+    //             const availableUsersData = page.props.availableUsers;
+
+    //             roleForUsers.value = roleData;
+    //             availableUsers.value = availableUsersData || [];
+    //             showUsersModal.value = true;
+    //         },
+    //     },
+    // );
+}
+
+function handleUsersUpdated() {
+    // Refresh the roles data while preserving filters
+    router.reload({
+        data: getFilteredParameters(props.filters),
         only: ['roles'],
     });
 }
@@ -297,9 +336,9 @@ function handleRoleUpdated(role: Role) {
 
                                         <DropdownMenuSeparator />
 
-                                        <DropdownMenuItem @click="() => console.log('View Users:', role.id)">
+                                        <DropdownMenuItem @click="handleManageUsers(role)">
                                             <Users class="mr-2 h-4 w-4" />
-                                            View Users
+                                            Manage Users
                                         </DropdownMenuItem>
 
                                         <DropdownMenuItem @click="() => console.log('Manage Permissions:', role.id)">
@@ -327,11 +366,22 @@ function handleRoleUpdated(role: Role) {
 
     <!-- Edit Role Modal -->
     <RoleFormModal
+        v-if="roleToEdit"
         :open="showEditModal"
         :role="roleToEdit"
         :permissions="[]"
         :guard-names="[]"
         @update:open="showEditModal = $event"
         @role-updated="handleRoleUpdated"
+    />
+
+    <!-- Manage Users Modal -->
+    <RoleUsersModal
+        v-if="roleForUsers"
+        :open="showUsersModal"
+        :role="roleForUsers"
+        :available-users="availableUsers"
+        @update:open="showUsersModal = $event"
+        @users-updated="handleUsersUpdated"
     />
 </template>

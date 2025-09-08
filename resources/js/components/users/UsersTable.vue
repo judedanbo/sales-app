@@ -410,7 +410,7 @@ function handleRoleUpdated(user: User) {
         :user="userToEdit"
         :user-types="[]"
         :schools="[]"
-        :roles="[]"
+        :roles="availableRoles"
         @update:open="showEditModal = $event"
         @user-updated="handleUserUpdated"
     />

@@ -77,9 +77,7 @@ const props = defineProps<Props>();
                     >
                         <div>
                             <div class="font-medium">{{ role.display_name || role.name }}</div>
-                            <div class="text-sm text-muted-foreground">
-                                {{ role.users_count }} users • {{ role.guard_name }}
-                            </div>
+                            <div class="text-sm text-muted-foreground">{{ role.users_count }} users • {{ role.guard_name }}</div>
                         </div>
                         <Shield class="h-4 w-4 text-muted-foreground" />
                     </div>

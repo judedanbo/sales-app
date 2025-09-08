@@ -73,6 +73,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('{role}/permissions', [RoleController::class, 'permissions'])->name('permissions');
         Route::post('{role}/sync-permissions', [RoleController::class, 'syncPermissions'])->name('sync-permissions');
         Route::get('{role}/users', [RoleController::class, 'users'])->name('users');
+        Route::get('{role}/available-users', [RoleController::class, 'availableUsers'])->name('available-users');
         Route::post('{role}/assign-users', [RoleController::class, 'assignUsers'])->name('assign-users');
         Route::delete('{role}/remove-users', [RoleController::class, 'removeUsers'])->name('remove-users');
     });

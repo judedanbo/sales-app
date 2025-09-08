@@ -78,7 +78,7 @@ watch(
             localUser.value = { ...newUser, roles: [...(newUser.roles || [])] };
         }
     },
-    { deep: true }
+    { deep: true },
 );
 
 // Event handlers
@@ -93,7 +93,7 @@ async function assignSelectedRoles() {
 
     try {
         const rolesToAssign = [...selectedRolesToAdd.value];
-        
+
         for (const roleName of rolesToAssign) {
             await router.post(
                 `/users/${props.user.id}/assign-role`,
@@ -104,7 +104,7 @@ async function assignSelectedRoles() {
                     preserveScroll: true,
                     onSuccess: () => {
                         // Move role from available to current in local copy
-                        const roleToMove = props.availableRoles.find(r => r.name === roleName);
+                        const roleToMove = props.availableRoles.find((r) => r.name === roleName);
                         if (roleToMove && localUser.value) {
                             // Add to user's roles
                             if (!localUser.value.roles) {
@@ -120,13 +120,13 @@ async function assignSelectedRoles() {
         }
 
         // Refresh user data to ensure consistency
-        router.reload({ 
+        router.reload({
             only: ['users'],
             onSuccess: () => {
                 if (props.user) {
                     emit('role-updated', props.user);
                 }
-            }
+            },
         });
     } catch (error) {
         console.error('Error assigning roles:', error);
@@ -142,7 +142,7 @@ async function removeSelectedRoles() {
 
     try {
         const rolesToRemove = [...selectedRolesToRemove.value];
-        
+
         for (const roleName of rolesToRemove) {
             await router.delete(`/users/${props.user.id}/remove-role`, {
                 data: { role: roleName },
@@ -150,7 +150,7 @@ async function removeSelectedRoles() {
                 onSuccess: () => {
                     // Remove from user's current roles in local copy
                     if (localUser.value && localUser.value.roles) {
-                        localUser.value.roles = localUser.value.roles.filter(r => r.name !== roleName);
+                        localUser.value.roles = localUser.value.roles.filter((r) => r.name !== roleName);
                     }
                     // Clear from selection
                     selectedRolesToRemove.value = selectedRolesToRemove.value.filter((r) => r !== roleName);
@@ -159,13 +159,13 @@ async function removeSelectedRoles() {
         }
 
         // Refresh user data to ensure consistency
-        router.reload({ 
+        router.reload({
             only: ['users'],
             onSuccess: () => {
                 if (props.user) {
                     emit('role-updated', props.user);
                 }
-            }
+            },
         });
     } catch (error) {
         console.error('Error removing roles:', error);
@@ -186,19 +186,19 @@ async function quickRemoveRole(roleName: string) {
             onSuccess: () => {
                 // Remove from user's current roles immediately in local copy
                 if (localUser.value && localUser.value.roles) {
-                    localUser.value.roles = localUser.value.roles.filter(r => r.name !== roleName);
+                    localUser.value.roles = localUser.value.roles.filter((r) => r.name !== roleName);
                 }
             },
         });
 
         // Refresh user data to ensure consistency
-        router.reload({ 
+        router.reload({
             only: ['users'],
             onSuccess: () => {
                 if (props.user) {
                     emit('role-updated', props.user);
                 }
-            }
+            },
         });
     } catch (error) {
         console.error('Error removing role:', error);
@@ -222,7 +222,7 @@ async function quickAssignRole(roleName: string) {
                 preserveScroll: true,
                 onSuccess: () => {
                     // Move role from available to current immediately in local copy
-                    const roleToMove = props.availableRoles.find(r => r.name === roleName);
+                    const roleToMove = props.availableRoles.find((r) => r.name === roleName);
                     if (roleToMove && localUser.value) {
                         // Add to user's roles
                         if (!localUser.value.roles) {
@@ -235,13 +235,13 @@ async function quickAssignRole(roleName: string) {
         );
 
         // Refresh user data to ensure consistency
-        router.reload({ 
+        router.reload({
             only: ['users'],
             onSuccess: () => {
                 if (props.user) {
                     emit('role-updated', props.user);
                 }
-            }
+            },
         });
     } catch (error) {
         console.error('Error assigning role:', error);

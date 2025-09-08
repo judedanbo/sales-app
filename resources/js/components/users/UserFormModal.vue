@@ -173,7 +173,7 @@ const toggleRole = (roleId: number) => {
                 </SheetDescription>
             </SheetHeader>
 
-            <div class="mt-6 px-1">
+            <div class="mt-6 px-8">
                 <form @submit.prevent="handleSubmit" class="space-y-4">
                     <!-- Basic Information -->
                     <div class="space-y-4">
@@ -341,7 +341,7 @@ const toggleRole = (roleId: number) => {
 
                         <!-- Status -->
                         <div class="flex items-center space-x-2">
-                            <Switch id="is_active" v-model:checked="form.is_active" />
+                            <Switch id="is_active" v-model="form.is_active" />
                             <Label for="is_active">Active</Label>
                         </div>
                     </div>

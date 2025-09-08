@@ -109,11 +109,12 @@ class UserController extends Controller
             'by_school' => $bySchool,
         ];
 
+        // dd($roles->toArray());
         return Inertia::render('Users/Index', [
             'users' => $users,
             'filters' => $request->only(['user_type', 'school_id', 'is_active', 'role', 'search', 'sort_by', 'sort_direction']),
             'schools' => $schools,
-            'roles' => $roles,
+            'roles' => $roles->toArray(),
             'userTypes' => $userTypes,
             'statistics' => $statistics,
         ]);

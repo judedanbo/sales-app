@@ -7,6 +7,7 @@ import PageHeader from '@/components/ui/PageHeader.vue';
 import Separator from '@/components/ui/separator/Separator.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { destroy, index as schoolsIndex, show } from '@/routes/schools';
+import { index as classesIndex } from '@/routes/schools/classes';
 import { type BreadcrumbItem, type School } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
 import { Building2, Calendar, Edit, ExternalLink, FileText, Globe, GraduationCap, Mail, MapPin, Phone, Trash2, User, Users } from 'lucide-vue-next';
@@ -122,6 +123,11 @@ const formatAddressType = (type: string) => {
 
         <PageHeader :title="school.school_name" :breadcrumbs="breadcrumbs">
             <template #actions>
+                <Button variant="outline" as="a" :href="classesIndex(school.id).url">
+                    <GraduationCap class="mr-2 h-4 w-4" />
+                    View Classes
+                </Button>
+
                 <Button variant="outline" @click="handleEdit">
                     <Edit class="mr-2 h-4 w-4" />
                     Edit

@@ -127,6 +127,26 @@ class RoleController extends Controller
             'by_guard' => $byGuard,
         ];
 
+        // Get all available users for user assignment
+        $availableUsers = \App\Models\User::with('school:id,school_name')
+            ->orderBy('name')
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'user_type' => $user->user_type,
+                    'is_active' => $user->is_active,
+                    'school' => $user->school ? [
+                        'id' => $user->school->id,
+                        'school_name' => $user->school->school_name,
+                    ] : null,
+                    'created_at' => $user->created_at,
+                ];
+            });
+        
+
         return Inertia::render('Roles/Index', [
             'roles' => $roles,
             'filters' => $request->only(['guard_name', 'search', 'has_users', 'sort_by', 'sort_direction']),
@@ -134,6 +154,7 @@ class RoleController extends Controller
             'allPermissions' => $allPermissions,
             'permissionGroups' => $permissionGroups,
             'guardNames' => $guardNames,
+            'availableUsers' => $availableUsers,
         ]);
     }
 
@@ -208,6 +229,7 @@ class RoleController extends Controller
                 'group' => ucfirst($group),
                 'permissions' => $permissions->map(function ($permission) {
                     return [
+                        'id' => $permission->id,
                         'name' => $permission->name,
                         'display_name' => ucwords(str_replace('_', ' ', $permission->name)),
                     ];
@@ -215,9 +237,54 @@ class RoleController extends Controller
             ];
         })->values();
 
+        // Get all guard names
+        $guardNames = Role::select('guard_name')
+            ->distinct()
+            ->orderBy('guard_name')
+            ->pluck('guard_name')
+            ->toArray();
+
+        // Get all permissions for the permissions modal
+        $allPermissions = Permission::orderBy('name')->get()->map(function ($permission) {
+            $parts = explode('_', $permission->name);
+            $category = $parts[0] ?? 'other';
+
+            return [
+                'id' => $permission->id,
+                'name' => $permission->name,
+                'display_name' => ucwords(str_replace('_', ' ', $permission->name)),
+                'guard_name' => $permission->guard_name,
+                'category' => ucfirst($category),
+                'created_at' => $permission->created_at,
+                'updated_at' => $permission->updated_at,
+            ];
+        });
+
+        // Get all available users for user assignment
+        $availableUsers = \App\Models\User::with('school:id,school_name')
+            ->orderBy('name')
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'user_type' => $user->user_type,
+                    'is_active' => $user->is_active,
+                    'school' => $user->school ? [
+                        'id' => $user->school->id,
+                        'school_name' => $user->school->school_name,
+                    ] : null,
+                    'created_at' => $user->created_at,
+                ];
+            });
+
         return Inertia::render('Roles/Show', [
             'role' => $role,
             'permissionGroups' => $permissionGroups,
+            'guardNames' => $guardNames,
+            'allPermissions' => $allPermissions,
+            'availableUsers' => $availableUsers,
         ]);
     }
 
@@ -431,6 +498,38 @@ class RoleController extends Controller
             'allPermissions' => $allPermissions,
             'permissionGroups' => $permissionGroups,
             'statistics' => $statistics,
+        ]);
+    }
+
+    /**
+     * Get available users for a role (users not assigned to this role).
+     */
+    public function availableUsers(Role $role): \Illuminate\Http\JsonResponse
+    {
+        $availableUsers = \App\Models\User::with('school:id,school_name')
+            ->whereDoesntHave('roles', function ($query) use ($role) {
+                $query->where('id', $role->id);
+            })
+            ->orderBy('name')
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'user_type' => $user->user_type,
+                    'is_active' => $user->is_active,
+                    'school' => $user->school ? [
+                        'id' => $user->school->id,
+                        'school_name' => $user->school->school_name,
+                    ] : null,
+                    'created_at' => $user->created_at,
+                ];
+            });
+
+        return response()->json([
+            'data' => $availableUsers,
+            'message' => 'Available users retrieved successfully',
         ]);
     }
 

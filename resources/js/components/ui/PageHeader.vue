@@ -19,6 +19,6 @@ defineSlots<{
             <h2 class="text-2xl font-bold tracking-tight">{{ title }}</h2>
             <p v-if="description" class="text-muted-foreground">{{ description }}</p>
         </div>
-        <slot name="action" />
+        <slot name="actions" />
     </div>
 </template>
