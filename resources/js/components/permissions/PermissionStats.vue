@@ -90,6 +90,23 @@ const props = defineProps<Props>();
         </Card>
     </div>
 
+    <!-- Permissions by Guard -->
+    <div v-if="statistics.by_guard && Object.keys(statistics.by_guard).length > 1" class="mt-4">
+        <Card>
+            <CardHeader>
+                <CardTitle class="text-lg">Permissions by Guard</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div class="grid gap-3 md:grid-cols-3 lg:grid-cols-4">
+                    <div v-for="(count, guardName) in statistics.by_guard" :key="guardName" class="rounded-lg bg-muted/30 p-3 text-center">
+                        <div class="text-2xl font-bold">{{ count }}</div>
+                        <div class="text-sm text-muted-foreground capitalize">{{ guardName }}</div>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    </div>
+
     <!-- Most Used Permissions -->
     <div v-if="statistics.most_used?.length" class="mt-4">
         <Card>

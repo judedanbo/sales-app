@@ -50,12 +50,14 @@ const props = defineProps<Props>();
 
         <Card>
             <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle class="text-sm font-medium">Total Permissions</CardTitle>
+                <CardTitle class="text-sm font-medium">With Permissions</CardTitle>
                 <Key class="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div class="text-2xl font-bold text-blue-600">{{ statistics.total_permissions.toLocaleString() }}</div>
-                <p class="text-xs text-muted-foreground">Available permissions</p>
+                <div class="text-2xl font-bold text-blue-600">{{ statistics.with_permissions.toLocaleString() }}</div>
+                <p class="text-xs text-muted-foreground">
+                    {{ statistics.total > 0 ? Math.round((statistics.with_permissions / statistics.total) * 100) : 0 }}% have permissions
+                </p>
             </CardContent>
         </Card>
     </div>
@@ -74,8 +76,10 @@ const props = defineProps<Props>();
                         class="flex items-center justify-between rounded-lg bg-muted/30 p-3"
                     >
                         <div>
-                            <div class="font-medium">{{ role.name }}</div>
-                            <div class="text-sm text-muted-foreground">{{ role.users_count }} users</div>
+                            <div class="font-medium">{{ role.display_name || role.name }}</div>
+                            <div class="text-sm text-muted-foreground">
+                                {{ role.users_count }} users • {{ role.guard_name }}
+                            </div>
                         </div>
                         <Shield class="h-4 w-4 text-muted-foreground" />
                     </div>

@@ -229,6 +229,8 @@ export interface PermissionGroup {
     count: number;
 }
 
+export type Permissions = Permission[];
+
 export interface UserFilters {
     search?: string;
     user_type?: UserType;
@@ -303,6 +305,7 @@ export interface PermissionStatistics {
         count: number;
         percentage: number;
     }>;
+    by_guard?: Record<string, number>;
     most_used: Array<{
         name: string;
         display_name: string;

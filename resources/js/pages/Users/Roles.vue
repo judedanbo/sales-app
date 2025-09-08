@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import PageHeader from '@/components/ui/PageHeader.vue';
-import { ScrollArea } from '@/components/ui/scroll-area';
+// import ScrollArea from '@/components/ui/scroll-area/ScrollArea.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem, Role, User } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
@@ -254,7 +254,7 @@ function goBack() {
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <ScrollArea class="h-96">
+                        <div class="h-96 overflow-y-auto">
                             <div v-if="currentRoles.length === 0" class="py-12 text-center">
                                 <Shield class="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
                                 <h3 class="mb-2 font-medium">No roles assigned</h3>
@@ -295,7 +295,7 @@ function goBack() {
                                     </Button>
                                 </div>
                             </div>
-                        </ScrollArea>
+                        </div>
                     </CardContent>
                 </Card>
 
@@ -317,7 +317,7 @@ function goBack() {
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <ScrollArea class="h-96">
+                        <div class="h-96 overflow-y-auto">
                             <div v-if="availableToAdd.length === 0" class="py-12 text-center">
                                 <Check class="mx-auto mb-4 h-12 w-12 text-green-500" />
                                 <h3 class="mb-2 font-medium">All roles assigned</h3>
@@ -358,7 +358,7 @@ function goBack() {
                                     </Button>
                                 </div>
                             </div>
-                        </ScrollArea>
+                        </div>
                     </CardContent>
                 </Card>
             </div>

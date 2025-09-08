@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { index } from '@/routes/roles';
-import { type BreadcrumbItem, type PaginatedData, type Role, type RoleFilters, type RoleStatistics } from '@/types';
+import { type BreadcrumbItem, type PaginatedData, type Permissions, type Role, type RoleFilters, type RoleStatistics } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
 import { useDebounceFn } from '@vueuse/core';
 import { Shield } from 'lucide-vue-next';

@@ -115,6 +115,14 @@ class PermissionController extends Controller
                 ];
             });
 
+        // Permissions by guard
+        $permissionsByGuard = Permission::groupBy('guard_name')
+            ->selectRaw('guard_name, count(*) as count')
+            ->get()
+            ->mapWithKeys(function ($item) {
+                return [$item->guard_name => $item->count];
+            });
+
         $statistics = [
             'total' => $totalPermissions,
             'with_roles' => $withRoles,
@@ -122,6 +130,7 @@ class PermissionController extends Controller
             'categories' => $categories->count(),
             'usage_percentage' => $totalPermissions > 0 ? round(($withRoles / $totalPermissions) * 100, 1) : 0,
             'by_category' => $permissionsByCategory,
+            'by_guard' => $permissionsByGuard,
             'most_used' => $mostUsedPermissions,
         ];
 

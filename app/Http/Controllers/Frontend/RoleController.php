@@ -84,23 +84,27 @@ class RoleController extends Controller
             });
 
         // Get all permissions grouped by category
-        $allPermissions = Permission::orderBy('name')->get();
-        $permissionGroups = $allPermissions->groupBy(function ($permission) {
-            $parts = explode('_', $permission->name);
+        $allPermissions = Permission::orderBy('name')->get()->map(function ($permission) {
+            $category = $this->getCategory($permission->name);
 
-            return $parts[0] ?? 'other';
-        })->map(function ($permissions, $category) {
+            return [
+                'id' => $permission->id,
+                'name' => $permission->name,
+                'display_name' => ucwords(str_replace('_', ' ', $permission->name)),
+                'guard_name' => $permission->guard_name,
+                'category' => $category,
+                'category_display' => ucfirst($category),
+                'created_at' => $permission->created_at,
+                'updated_at' => $permission->updated_at,
+            ];
+        });
+
+        $permissionGroups = $allPermissions->groupBy('category')->map(function ($permissions, $category) {
             return [
                 'category' => $category,
                 'display_name' => ucfirst($category),
                 'count' => $permissions->count(),
-                'permissions' => $permissions->map(function ($permission) {
-                    return [
-                        'name' => $permission->name,
-                        'display_name' => ucwords(str_replace('_', ' ', $permission->name)),
-                        'guard_name' => $permission->guard_name,
-                    ];
-                })->values(),
+                'permissions' => $permissions->values(),
             ];
         })->sortByDesc('count')->values();
 
@@ -428,5 +432,15 @@ class RoleController extends Controller
             'permissionGroups' => $permissionGroups,
             'statistics' => $statistics,
         ]);
+    }
+
+    /**
+     * Get category from permission name.
+     */
+    private function getCategory(string $name): string
+    {
+        $parts = explode('_', $name);
+
+        return $parts[0] ?? 'other';
     }
 }

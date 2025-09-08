@@ -4,7 +4,7 @@ import Badge from '@/components/ui/badge.vue';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
+// import ScrollArea from '@/components/ui/scroll-area/ScrollArea.vue';
 import { Separator } from '@/components/ui/separator';
 import type { Role, User } from '@/types';
 import { router } from '@inertiajs/vue3';
@@ -321,7 +321,7 @@ function toggleRoleToRemove(roleName: string) {
                             </Button>
                         </div>
 
-                        <ScrollArea class="h-64 rounded-md border p-4">
+                        <div class="h-64 overflow-y-auto rounded-md border p-4">
                             <div v-if="currentRoles.length === 0" class="py-8 text-center">
                                 <Shield class="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
                                 <p class="text-sm text-muted-foreground">No roles assigned</p>
@@ -357,7 +357,7 @@ function toggleRoleToRemove(roleName: string) {
                                     </Button>
                                 </div>
                             </div>
-                        </ScrollArea>
+                        </div>
                     </div>
 
                     <!-- Available Roles -->
@@ -369,7 +369,7 @@ function toggleRoleToRemove(roleName: string) {
                             </Button>
                         </div>
 
-                        <ScrollArea class="h-64 rounded-md border p-4">
+                        <div class="h-64 overflow-y-auto rounded-md border p-4">
                             <div v-if="availableToAdd.length === 0" class="py-8 text-center">
                                 <Check class="mx-auto mb-2 h-8 w-8 text-green-500" />
                                 <p class="text-sm text-muted-foreground">All roles assigned</p>
@@ -405,7 +405,7 @@ function toggleRoleToRemove(roleName: string) {
                                     </Button>
                                 </div>
                             </div>
-                        </ScrollArea>
+                        </div>
                     </div>
                 </div>
             </div>
