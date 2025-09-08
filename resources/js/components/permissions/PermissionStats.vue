@@ -18,7 +18,9 @@ const props = defineProps<Props>();
                 <Key class="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div class="text-2xl font-bold">{{ statistics.total.toLocaleString() }}</div>
+                <div class="text-2xl font-bold">
+                    {{ props.statistics.total.toLocaleString() }}
+                </div>
             </CardContent>
         </Card>
 
@@ -28,7 +30,7 @@ const props = defineProps<Props>();
                 <KeyRound class="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div class="text-2xl font-bold text-green-600">{{ statistics.with_roles.toLocaleString() }}</div>
+                <div class="text-2xl font-bold text-green-600">{{ props.statistics.with_roles.toLocaleString() }}</div>
                 <p class="text-xs text-muted-foreground">
                     {{ statistics.total > 0 ? Math.round((statistics.with_roles / statistics.total) * 100) : 0 }}% assigned
                 </p>
@@ -61,6 +63,7 @@ const props = defineProps<Props>();
     </div>
 
     <!-- Categories Breakdown -->
+    <!-- {{ statistics.by_category }} -->
     <div v-if="statistics.by_category?.length" class="mt-4">
         <Card>
             <CardHeader>
@@ -74,7 +77,7 @@ const props = defineProps<Props>();
                         class="flex items-center justify-between rounded-lg bg-muted/30 p-3"
                     >
                         <div>
-                            <div class="font-medium">{{ category.display_name }}</div>
+                            <div class="font-medium">{{ category.label }}</div>
                             <div class="text-sm text-muted-foreground">{{ category.count }} permissions</div>
                         </div>
                         <div class="text-right">

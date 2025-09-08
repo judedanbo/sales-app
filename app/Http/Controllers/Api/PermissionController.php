@@ -89,20 +89,24 @@ class PermissionController extends Controller
         $permissions = $query->orderBy('name')->get();
 
         // Group permissions by category (first word before underscore)
+        $totalPermissions = $permissions->count();
         $grouped = $permissions->groupBy(function ($permission) {
             $parts = explode('_', $permission->name);
 
             return $parts[0] ?? 'other';
-        })->map(function ($permissions, $category) {
+        })->map(function ($permissions, $category) use ($totalPermissions) {
+            $count = $permissions->count();
+
             return [
                 'category' => $category,
                 'display_name' => ucfirst($category),
                 'permissions' => $permissions->map(function ($permission) {
                     return new PermissionResource($permission);
                 }),
-                'count' => $permissions->count(),
+                'count' => $count,
+                'percentage' => $totalPermissions > 0 ? round(($count / $totalPermissions) * 100, 1) : 0,
             ];
-        })->values();
+        })->sortByDesc('count')->values();
 
         return response()->json([
             'data' => $grouped,
@@ -117,18 +121,22 @@ class PermissionController extends Controller
     public function categories(): JsonResponse
     {
         $permissions = Permission::select('name')->get();
+        $totalPermissions = Permission::count();
 
         $categories = $permissions->map(function ($permission) {
             $parts = explode('_', $permission->name);
 
             return $parts[0] ?? 'other';
-        })->unique()->sort()->values()->map(function ($category) {
+        })->unique()->sort()->values()->map(function ($category) use ($totalPermissions) {
+            $count = Permission::where('name', 'like', "{$category}_%")->count();
+
             return [
                 'value' => $category,
                 'label' => ucfirst($category),
-                'count' => Permission::where('name', 'like', "{$category}_%")->count(),
+                'count' => $count,
+                'percentage' => $totalPermissions > 0 ? round(($count / $totalPermissions) * 100, 1) : 0,
             ];
-        });
+        })->sortByDesc('count');
 
         return response()->json([
             'data' => $categories,
@@ -259,12 +267,16 @@ class PermissionController extends Controller
 
                 return $parts[0] ?? 'other';
             })->map(function ($permissions, $category) {
+                $count = $permissions->count();
+                $totalPermissions = Permission::count();
+
                 return [
                     'category' => $category,
                     'display_name' => ucfirst($category),
-                    'count' => $permissions->count(),
+                    'count' => $count,
+                    'percentage' => $totalPermissions > 0 ? round(($count / $totalPermissions) * 100, 1) : 0,
                 ];
-            })->values(),
+            })->sortByDesc('count')->values(),
             'most_used_permissions' => Permission::withCount('roles')
                 ->orderByDesc('roles_count')
                 ->limit(10)

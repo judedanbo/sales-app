@@ -154,9 +154,17 @@ The application features a collapsible sidebar navigation system:
 
 The User Management system provides comprehensive role-based access control to ensure proper authorization and security throughout the application.
 
+### Role and Permission System
+
+The application now features an advanced role-based access control system with:
+- **15 hierarchical roles** from Guest to Super Admin
+- **83 granular permissions** organized into 10 categories
+- **Real-time role assignment** with immediate UI updates
+- **Permission analytics** showing usage statistics and distribution percentages
+
 ### User Types and Roles
 
-The system supports seven distinct user types, each with specific permissions and capabilities:
+The system supports fifteen distinct roles, each with specific permissions and capabilities:
 
 #### System-Wide Users
 - **Staff**: Basic sales personnel
@@ -404,6 +412,15 @@ The application provides a comprehensive REST API for programmatic access.
 - `GET /api/roles` - List all roles and permissions
 - `POST /api/roles/{role}/assign-permission` - Assign permission to role
 
+#### Permission Management API
+- `GET /api/permissions` - List all permissions with filtering
+- `GET /api/permissions/statistics` - Permission analytics with percentages
+- `GET /api/permissions/grouped` - Permissions grouped by category
+- `GET /api/permissions/categories` - Permission categories with distribution
+- `GET /api/permissions/by-role/{role}` - Role-specific permissions
+- `GET /api/permissions/by-user/{user}` - User-specific permissions
+- `POST /api/permissions/check-user/{user}` - Check user permission
+
 ### Request/Response Format
 - All API requests and responses use JSON format
 - Include `Content-Type: application/json` header
@@ -541,13 +558,16 @@ For additional help or support:
 ## Version Information
 
 - **Application**: Sales Management System
-- **Version**: 1.0
-- **Last Updated**: January 5, 2025
+- **Version**: 1.1.0
+- **Last Updated**: September 8, 2025
 - **Framework**: Laravel 12 + Vue 3 + Inertia.js
 - **Recent Updates**: 
-  - Fixed filter state management in Schools Index page
-  - Enhanced filter preservation across all selections
-  - Improved search debouncing for better user experience
+  - **v1.1.0**: Enhanced role system with 15 roles and 83 permissions
+  - **v1.1.0**: Added permission analytics with percentage calculations
+  - **v1.1.0**: Implemented comprehensive Permission API endpoints
+  - **v1.1.0**: Real-time role management with instant UI updates
+  - **v1.0.0**: Fixed filter state management in Schools Index page
+  - **v1.0.0**: Enhanced filter preservation across all selections
 
 ---
 

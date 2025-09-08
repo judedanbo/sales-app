@@ -17,6 +17,7 @@ interface Props {
     roles: PaginatedData<Role>;
     filters: RoleFilters;
     statistics: RoleStatistics;
+    guardNames: string[];
 }
 
 const props = defineProps<Props>();
@@ -208,9 +209,11 @@ const clearFilters = () => {
 
             <!-- Stats Cards -->
             <!-- {{ props.statistics }} -->
+            {{ props }}
             <RoleStats :statistics="props.statistics" />
 
             <!-- Filters Section -->
+            <!-- {{ props }} -->
             <RoleFiltersComponent
                 :filters="localFilters"
                 :guard-names="props.guardNames"

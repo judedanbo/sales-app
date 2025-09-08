@@ -76,20 +76,23 @@ class PermissionController extends Controller
         });
 
         // Calculate statistics
+        $totalPermissions = Permission::count();
+        $withRoles = Permission::has('roles')->count();
+
         $permissionsByCategory = Permission::get()->groupBy(function ($permission) {
             $parts = explode('_', $permission->name);
 
             return $parts[0] ?? 'other';
-        })->map(function ($permissions, $category) {
+        })->map(function ($permissions, $category) use ($totalPermissions) {
+            $count = $permissions->count();
+
             return [
                 'category' => $category,
                 'label' => ucfirst($category),
-                'count' => $permissions->count(),
+                'count' => $count,
+                'percentage' => $totalPermissions > 0 ? round(($count / $totalPermissions) * 100, 1) : 0,
             ];
-        })->values();
-
-        $totalPermissions = Permission::count();
-        $withRoles = Permission::has('roles')->count();
+        })->sortByDesc('count')->values();
 
         // Most used permissions
         $mostUsedPermissions = Permission::withCount('roles')

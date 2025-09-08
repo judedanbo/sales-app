@@ -74,6 +74,49 @@ Navigate to `/users` or click "Users" in the main navigation menu.
 ### Accessing Role Management
 Navigate to `/roles` or access through the Users section.
 
+### Role System Overview
+
+The application features a comprehensive role-based access control system with 15 hierarchical roles and 83 granular permissions organized into 10 categories:
+
+#### Available Roles (by hierarchy level):
+1. **Super Admin** - Complete system control (83 permissions)
+2. **System Admin** - Full access except critical operations (80 permissions)
+3. **School Admin** - Full school management (24 permissions)
+4. **Principal** - School oversight with approval authority (12 permissions)
+5. **Academic Coordinator** - Academic program management (7 permissions)
+6. **Department Head** - Department-specific management (9 permissions)
+7. **Sales Manager** - Complete sales operations (20 permissions)
+8. **Sales Rep** - Personal sales management (4 permissions)
+9. **Finance Officer** - Financial operations (11 permissions)
+10. **HR Manager** - Human resources management (9 permissions)
+11. **IT Support** - Technical support (7 permissions)
+12. **Data Analyst** - Analytics and reporting (14 permissions)
+13. **Auditor** - Compliance and audit (11 permissions)
+14. **Teacher** - Class and student management (4 permissions)
+15. **Staff** - Basic operational access (3 permissions)
+16. **Guest** - Very limited read-only access (3 permissions)
+
+#### Permission Categories:
+- **Users** (7 permissions): User account management
+- **Roles** (6 permissions): Role and permission management
+- **Schools** (11 permissions): School data management
+- **Sales** (10 permissions): Sales transaction management
+- **Products/Inventory** (7 permissions): Product and stock management
+- **Finance** (7 permissions): Financial operations
+- **Reports** (6 permissions): Analytics and reporting
+- **HR** (5 permissions): Human resources
+- **Communication** (4 permissions): Messaging and announcements
+- **System** (10 permissions): System administration
+- **Support** (4 permissions): Help and support management
+
+### Permission Statistics and Analytics
+
+The system provides detailed permission analytics:
+- **Distribution by Category**: Visual representation showing percentage breakdown of permissions (e.g., Manage: 30.1%, View: 27.7%)
+- **Usage Tracking**: Most and least used permissions
+- **Role Coverage**: Permissions assigned to roles vs. unused permissions
+- **Permission Hierarchy**: Understanding which roles have access to specific features
+
 ### Managing User Roles
 
 #### Opening the Role Manager
@@ -144,11 +187,30 @@ The modal displays two main sections:
 4. Assign permissions to the role
 5. Save the new role
 
+### Permission Management and Analytics
+
+#### Viewing Permission Details
+- **Permission Index**: View all permissions with filtering and search capabilities
+- **Category Breakdown**: Permissions grouped by category with percentage distribution
+- **Role Assignment**: See which roles have specific permissions
+- **Usage Statistics**: Identify most and least used permissions
+
+#### Permission API Endpoints
+- `GET /api/permissions` - List all permissions with pagination and filtering
+- `GET /api/permissions/statistics` - Comprehensive permission analytics
+- `GET /api/permissions/grouped` - Permissions grouped by category with percentages
+- `GET /api/permissions/categories` - List all permission categories with counts
+- `GET /api/permissions/by-role/{role}` - Permissions assigned to specific role
+- `GET /api/permissions/by-user/{user}` - All permissions for specific user
+- `POST /api/permissions/check-user/{user}` - Check if user has specific permission
+
 ### Role Permissions
 Each role can have multiple permissions assigned:
 - View permissions by clicking on a role
 - Add/remove permissions as needed
 - Changes take effect immediately
+- Permission distribution analytics available
+- Real-time permission usage tracking
 
 ## School Management
 
@@ -245,5 +307,22 @@ Access via `/settings/appearance`:
 
 ---
 
+## Recent Updates
+
+### Version 1.1.0 - September 2025
+- **Enhanced Role System**: Added comprehensive 15-role hierarchy with 83 granular permissions
+- **Permission Analytics**: Implemented percentage-based permission distribution analytics
+- **API Enhancements**: Added new permission management API endpoints with statistics
+- **Real-time Updates**: Improved UserRoleModal with immediate role assignment/removal updates
+- **Documentation**: Updated user manual with detailed permission system documentation
+
+### Version 1.0.0 - September 2025
+- Initial release with core functionality
+- User management system
+- School management features
+- Basic role and permission system
+
+---
+
 *Last Updated: September 2025*
-*Version: 1.0.0*
+*Version: 1.1.0*

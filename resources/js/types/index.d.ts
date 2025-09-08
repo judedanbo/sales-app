@@ -301,6 +301,7 @@ export interface PermissionStatistics {
         category: string;
         label: string;
         count: number;
+        percentage: number;
     }>;
     most_used: Array<{
         name: string;
