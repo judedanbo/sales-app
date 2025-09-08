@@ -594,6 +594,7 @@ The frontend components have been significantly enhanced to leverage the new API
   - **v1.1.0**: Vue component enhancements with improved API utilization
   - **v1.1.0**: Guard-based permission statistics and categorized displays
   - **v1.1.0**: TypeScript integration for better type safety
+  - **v1.1.0**: Created SampleUsersSeeder with test users for each role
   - **v1.0.0**: Fixed filter state management in Schools Index page
   - **v1.0.0**: Enhanced filter preservation across all selections
 

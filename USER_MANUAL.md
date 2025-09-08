@@ -389,6 +389,7 @@ The application's Vue.js frontend components have been enhanced to better utiliz
 - **Vue Component Enhancements**: Updated frontend components to utilize new API endpoints with improved statistics displays
 - **Frontend Performance**: Enhanced role and permission components with better data structure utilization and TypeScript type safety
 - **UI Improvements**: Added guard-based permission statistics and improved role statistics with display names
+- **Sample Data**: Created SampleUsersSeeder with realistic test users for each role type
 - **Documentation**: Updated user manual with detailed permission system documentation and new API endpoints
 
 ### Version 1.0.0 - September 2025
