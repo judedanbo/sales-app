@@ -75,6 +75,13 @@ class PermissionController extends Controller
             ];
         });
 
+        // Get all guard names
+        $guardNames = Permission::select('guard_name')
+            ->distinct()
+            ->orderBy('guard_name')
+            ->pluck('guard_name')
+            ->toArray();
+
         // Calculate statistics
         $totalPermissions = Permission::count();
         $withRoles = Permission::has('roles')->count();
@@ -122,6 +129,7 @@ class PermissionController extends Controller
             'permissions' => $permissions,
             'filters' => $request->only(['guard_name', 'search', 'category', 'has_roles', 'sort_by', 'sort_direction']),
             'categories' => $categories,
+            'guardNames' => $guardNames,
             'statistics' => $statistics,
         ]);
     }

@@ -69,6 +69,7 @@ Route::middleware(['auth'])->group(function () {
     // Role Management Frontend Routes
     Route::resource('roles', RoleController::class);
     Route::prefix('roles')->name('roles.')->group(function () {
+        Route::get('all-permissions', [RoleController::class, 'allPermissions'])->name('all-permissions');
         Route::get('{role}/permissions', [RoleController::class, 'permissions'])->name('permissions');
         Route::post('{role}/sync-permissions', [RoleController::class, 'syncPermissions'])->name('sync-permissions');
         Route::get('{role}/users', [RoleController::class, 'users'])->name('users');

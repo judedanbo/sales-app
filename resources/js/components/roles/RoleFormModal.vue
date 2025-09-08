@@ -213,7 +213,7 @@ watch(
                 </SheetDescription>
             </SheetHeader>
 
-            <div class="mt-6 px-1">
+            <div class="mt-6 px-8">
                 <form @submit.prevent="handleSubmit" class="space-y-6">
                     <!-- Basic Information -->
                     <div class="space-y-4">

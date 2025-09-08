@@ -54,7 +54,43 @@ class PermissionController extends Controller
         $perPage = $request->get('per_page', 50); // Higher default for permissions
         $permissions = $query->paginate(min($perPage, 200));
 
-        return new PermissionCollection($permissions);
+        // Get additional data if requested
+        $includeMetadata = $request->boolean('include_metadata', false);
+        $additionalData = [];
+
+        if ($includeMetadata) {
+            $guardNames = Permission::select('guard_name')
+                ->distinct()
+                ->orderBy('guard_name')
+                ->pluck('guard_name')
+                ->toArray();
+
+            $categories = Permission::get()->map(function ($permission) {
+                $parts = explode('_', $permission->name);
+
+                return $parts[0] ?? 'other';
+            })->unique()->sort()->values()->toArray();
+
+            $additionalData = [
+                'guard_names' => $guardNames,
+                'categories' => $categories,
+                'total_permissions' => Permission::count(),
+                'permissions_with_roles' => Permission::has('roles')->count(),
+            ];
+        }
+
+        $collection = new PermissionCollection($permissions);
+
+        if (! empty($additionalData)) {
+            return response()->json([
+                'data' => $collection->resource->items(),
+                'links' => $collection->resource->linkCollection(),
+                'meta' => $collection->resource->metaData(),
+                ...$additionalData,
+            ]);
+        }
+
+        return $collection;
     }
 
     /**
@@ -242,6 +278,34 @@ class PermissionController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+            ],
+        ]);
+    }
+
+    /**
+     * Get all available guard names for permissions.
+     */
+    public function guardNames(): JsonResponse
+    {
+        $guardNames = Permission::select('guard_name')
+            ->distinct()
+            ->orderBy('guard_name')
+            ->pluck('guard_name')
+            ->toArray();
+
+        // Get count of permissions per guard
+        $guardStats = Permission::groupBy('guard_name')
+            ->selectRaw('guard_name, count(*) as count')
+            ->get()
+            ->mapWithKeys(function ($item) {
+                return [$item->guard_name => $item->count];
+            });
+
+        return response()->json([
+            'data' => [
+                'guard_names' => $guardNames,
+                'guard_statistics' => $guardStats,
+                'total_guards' => count($guardNames),
             ],
         ]);
     }

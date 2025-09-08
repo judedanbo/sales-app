@@ -52,7 +52,36 @@ class RoleController extends Controller
         $perPage = $request->get('per_page', 15);
         $roles = $query->paginate(min($perPage, 100));
 
-        return new RoleCollection($roles);
+        // Get additional data if requested
+        $includeMetadata = $request->boolean('include_metadata', false);
+        $additionalData = [];
+
+        if ($includeMetadata) {
+            $guardNames = Role::select('guard_name')
+                ->distinct()
+                ->orderBy('guard_name')
+                ->pluck('guard_name')
+                ->toArray();
+
+            $additionalData = [
+                'guard_names' => $guardNames,
+                'total_roles' => Role::count(),
+                'roles_with_users' => Role::has('users')->count(),
+            ];
+        }
+
+        $collection = new RoleCollection($roles);
+
+        if (! empty($additionalData)) {
+            return response()->json([
+                'data' => $collection->resource->items(),
+                'links' => $collection->resource->linkCollection(),
+                'meta' => $collection->resource->metaData(),
+                ...$additionalData,
+            ]);
+        }
+
+        return $collection;
     }
 
     /**
@@ -248,6 +277,34 @@ class RoleController extends Controller
         return response()->json([
             'data' => new RoleResource($role),
             'message' => "{$count} users removed from role successfully.",
+        ]);
+    }
+
+    /**
+     * Get all available guard names.
+     */
+    public function guardNames(): JsonResponse
+    {
+        $guardNames = Role::select('guard_name')
+            ->distinct()
+            ->orderBy('guard_name')
+            ->pluck('guard_name')
+            ->toArray();
+
+        // Get count of roles per guard
+        $guardStats = Role::groupBy('guard_name')
+            ->selectRaw('guard_name, count(*) as count')
+            ->get()
+            ->mapWithKeys(function ($item) {
+                return [$item->guard_name => $item->count];
+            });
+
+        return response()->json([
+            'data' => [
+                'guard_names' => $guardNames,
+                'guard_statistics' => $guardStats,
+                'total_guards' => count($guardNames),
+            ],
         ]);
     }
 

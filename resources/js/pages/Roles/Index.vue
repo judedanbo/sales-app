@@ -18,6 +18,7 @@ interface Props {
     filters: RoleFilters;
     statistics: RoleStatistics;
     guardNames: string[];
+    allPermissions: Permissions;
 }
 
 const props = defineProps<Props>();
@@ -209,11 +210,9 @@ const clearFilters = () => {
 
             <!-- Stats Cards -->
             <!-- {{ props.statistics }} -->
-            {{ props }}
             <RoleStats :statistics="props.statistics" />
 
             <!-- Filters Section -->
-            <!-- {{ props }} -->
             <RoleFiltersComponent
                 :filters="localFilters"
                 :guard-names="props.guardNames"
@@ -239,7 +238,7 @@ const clearFilters = () => {
         <!-- Create Role Modal -->
         <RoleFormModal
             :open="showCreateModal"
-            :permissions="props.permissions"
+            :permissions="props.allPermissions"
             :guard-names="props.guardNames"
             @update:open="showCreateModal = $event"
             @role-created="handleRoleCreated"

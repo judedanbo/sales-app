@@ -20,6 +20,11 @@
 - [x] Role filtering and search
 - [x] Role permissions management
 - [x] Guard-based role separation
+- [x] Enhanced API endpoints with permissions and guard names metadata
+- [x] Permission grouping and categorization system
+- [x] Comprehensive role statistics and analytics
+- [x] Guard names management across controllers
+- [x] API endpoints for permission data aggregation
 
 ### School Management System
 - [x] School CRUD operations
@@ -51,6 +56,19 @@
 - [x] Database query optimization
 
 ## In Progress 🚧
+
+### Frontend Integration (High Priority)
+- [ ] Update RoleFormModal component to utilize new permissions API data
+- [ ] Enhance Roles/Index.vue with guardNames and permissions filtering
+- [ ] Implement grouped permissions display in role creation/editing
+- [ ] Update Permissions/Index.vue to leverage new guardNames functionality
+- [ ] Create missing permission management Vue pages (Grouped, Statistics, ByRole, ByUser)
+
+### API Testing & Documentation
+- [ ] Write comprehensive Pest tests for new permission API endpoints
+- [ ] Test role controller metadata functionality with include_metadata parameter
+- [ ] Add browser tests for enhanced permission management workflows
+- [ ] Document new API endpoints in OpenAPI specification
 
 ### Performance Optimization
 - [ ] Implement Redis caching for frequently accessed data

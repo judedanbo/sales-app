@@ -197,12 +197,28 @@ The modal displays two main sections:
 
 #### Permission API Endpoints
 - `GET /api/permissions` - List all permissions with pagination and filtering
+  - Add `?include_metadata=true` for additional guard names and statistics
 - `GET /api/permissions/statistics` - Comprehensive permission analytics
 - `GET /api/permissions/grouped` - Permissions grouped by category with percentages
 - `GET /api/permissions/categories` - List all permission categories with counts
+- `GET /api/permissions/guard-names` - List all available guard names with statistics
 - `GET /api/permissions/by-role/{role}` - Permissions assigned to specific role
 - `GET /api/permissions/by-user/{user}` - All permissions for specific user
 - `POST /api/permissions/check-user/{user}` - Check if user has specific permission
+
+#### Role API Endpoints
+- `GET /api/roles` - List all roles with pagination and filtering
+  - Add `?include_metadata=true` for additional permissions and guard names data
+- `GET /api/roles/statistics` - Comprehensive role analytics and usage statistics
+- `GET /api/roles/permissions` - List all available permissions grouped by category
+- `GET /api/roles/guard-names` - List all available guard names with role counts
+- `GET /api/roles/{role}` - Get specific role with permissions and users
+- `POST /api/roles` - Create new role with permission assignments
+- `PUT /api/roles/{role}` - Update role details and permissions
+- `DELETE /api/roles/{role}` - Delete role (only if no users assigned)
+- `POST /api/roles/{role}/sync-permissions` - Synchronize role permissions
+- `POST /api/roles/{role}/assign-users` - Assign multiple users to role
+- `POST /api/roles/{role}/remove-users` - Remove multiple users from role
 
 ### Role Permissions
 Each role can have multiple permissions assigned:
@@ -314,7 +330,11 @@ Access via `/settings/appearance`:
 - **Permission Analytics**: Implemented percentage-based permission distribution analytics
 - **API Enhancements**: Added new permission management API endpoints with statistics
 - **Real-time Updates**: Improved UserRoleModal with immediate role assignment/removal updates
-- **Documentation**: Updated user manual with detailed permission system documentation
+- **Metadata Integration**: Enhanced API controllers with optional metadata parameters for permissions and guard names
+- **Guard Names Management**: Implemented comprehensive guard name tracking across role and permission controllers
+- **Permission Grouping**: Added permission categorization and grouping functionality for better organization
+- **Extended API Coverage**: Added dedicated endpoints for permissions list and guard names in role management
+- **Documentation**: Updated user manual with detailed permission system documentation and new API endpoints
 
 ### Version 1.0.0 - September 2025
 - Initial release with core functionality

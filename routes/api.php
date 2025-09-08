@@ -115,6 +115,12 @@ Route::prefix('roles')->name('api.roles.')->group(function () {
     // User management for roles
     Route::post('{role}/assign-users', [RoleController::class, 'assignUsers'])->name('assign_users');
     Route::post('{role}/remove-users', [RoleController::class, 'removeUsers'])->name('remove_users');
+
+    // Get all permissions
+    Route::get('permissions', [RoleController::class, 'permissions'])->name('permissions');
+
+    // Get all guard names
+    Route::get('guard-names', [RoleController::class, 'guardNames'])->name('guard_names');
     // });
 });
 
@@ -135,5 +141,8 @@ Route::prefix('permissions')->name('api.permissions.')->group(function () {
     Route::get('by-role/{role}', [PermissionController::class, 'byRole'])->name('by_role');
     Route::get('by-user/{user}', [PermissionController::class, 'byUser'])->name('by_user');
     Route::get('check-user/{user}', [PermissionController::class, 'checkUserPermission'])->name('check_user');
+
+    // Get all guard names for permissions
+    Route::get('guard-names', [PermissionController::class, 'guardNames'])->name('guard_names');
     // });
 });

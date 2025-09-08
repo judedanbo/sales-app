@@ -83,6 +83,34 @@ class RoleController extends Controller
                 return [$item->guard_name => $item->count];
             });
 
+        // Get all permissions grouped by category
+        $allPermissions = Permission::orderBy('name')->get();
+        $permissionGroups = $allPermissions->groupBy(function ($permission) {
+            $parts = explode('_', $permission->name);
+
+            return $parts[0] ?? 'other';
+        })->map(function ($permissions, $category) {
+            return [
+                'category' => $category,
+                'display_name' => ucfirst($category),
+                'count' => $permissions->count(),
+                'permissions' => $permissions->map(function ($permission) {
+                    return [
+                        'name' => $permission->name,
+                        'display_name' => ucwords(str_replace('_', ' ', $permission->name)),
+                        'guard_name' => $permission->guard_name,
+                    ];
+                })->values(),
+            ];
+        })->sortByDesc('count')->values();
+
+        // Get all guard names
+        $guardNames = Role::select('guard_name')
+            ->distinct()
+            ->orderBy('guard_name')
+            ->pluck('guard_name')
+            ->toArray();
+
         // Calculate statistics
         $statistics = [
             'total' => Role::count(),
@@ -99,6 +127,9 @@ class RoleController extends Controller
             'roles' => $roles,
             'filters' => $request->only(['guard_name', 'search', 'has_users', 'sort_by', 'sort_direction']),
             'statistics' => $statistics,
+            'allPermissions' => $allPermissions,
+            'permissionGroups' => $permissionGroups,
+            'guardNames' => $guardNames,
         ]);
     }
 
@@ -358,5 +389,44 @@ class RoleController extends Controller
         $count = count($userIds);
 
         return back()->with('success', "{$count} users removed from role successfully.");
+    }
+
+    /**
+     * Show all permissions page.
+     */
+    public function allPermissions(): Response
+    {
+        $allPermissions = Permission::orderBy('name')->get();
+        $permissionGroups = $allPermissions->groupBy(function ($permission) {
+            $parts = explode('_', $permission->name);
+
+            return $parts[0] ?? 'other';
+        })->map(function ($permissions, $category) {
+            return [
+                'category' => $category,
+                'display_name' => ucfirst($category),
+                'count' => $permissions->count(),
+                'permissions' => $permissions->map(function ($permission) {
+                    return [
+                        'name' => $permission->name,
+                        'display_name' => ucwords(str_replace('_', ' ', $permission->name)),
+                        'guard_name' => $permission->guard_name,
+                    ];
+                })->values(),
+            ];
+        })->sortByDesc('count')->values();
+
+        $statistics = [
+            'total_permissions' => $allPermissions->count(),
+            'total_categories' => $permissionGroups->count(),
+            'permissions_with_roles' => Permission::has('roles')->count(),
+            'permissions_without_roles' => Permission::doesntHave('roles')->count(),
+        ];
+
+        return Inertia::render('Roles/AllPermissions', [
+            'allPermissions' => $allPermissions,
+            'permissionGroups' => $permissionGroups,
+            'statistics' => $statistics,
+        ]);
     }
 }

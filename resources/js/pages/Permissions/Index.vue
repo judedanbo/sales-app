@@ -14,6 +14,7 @@ interface Props {
     permissions: PaginatedData<Permission>;
     filters: PermissionFilters;
     statistics: PermissionStatistics;
+    guardNames: string[];
     categories: Array<{ value: string; label: string; display_name: string }>;
 }
 
