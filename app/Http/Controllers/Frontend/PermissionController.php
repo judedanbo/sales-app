@@ -152,7 +152,7 @@ class PermissionController extends Controller
             $query->with('school:id,school_name')->latest()->take(20);
         }]);
 
-        $permission->display_name = ucwords(str_replace('_', $permission->name));
+        $permission->display_name = ucwords(str_replace('_',' ' ,$permission->name));
         $permission->category = $this->getCategory($permission->name);
         $permission->category_display = ucfirst($permission->category);
         $permission->roles_count = $permission->roles->count();
@@ -160,8 +160,15 @@ class PermissionController extends Controller
             return $role->users->count();
         });
 
+        // Get all roles for the modal
+        $allRoles = Role::orderBy('name')->get()->map(function ($role) {
+            $role->display_name = ucwords(str_replace('_', ' ', $role->name));
+            return $role;
+        });
+
         return Inertia::render('Permissions/Show', [
             'permission' => $permission,
+            'allRoles' => $allRoles,
         ]);
     }
 

@@ -311,6 +311,43 @@ class PermissionController extends Controller
     }
 
     /**
+     * Sync roles for a specific permission.
+     */
+    public function syncRoles(Request $request, Permission $permission): JsonResponse
+    {
+        $request->validate([
+            'role_ids' => 'required|array',
+            'role_ids.*' => 'integer|exists:roles,id',
+        ]);
+
+        $roleIds = $request->role_ids;
+        $roles = Role::whereIn('id', $roleIds)->get();
+
+        // Sync roles for this permission
+        $permission->syncRoles($roles);
+
+        // Reload permission with relationships
+        $permission->load(['roles.users' => function ($query) {
+            $query->with('school:id,school_name')->latest()->take(20);
+        }]);
+
+        $permission->display_name = ucwords(str_replace('_', ' ', $permission->name));
+        $permission->category = $this->getCategory($permission->name);
+        $permission->category_display = ucfirst($permission->category);
+        $permission->roles_count = $permission->roles->count();
+        $permission->users_count = $permission->roles->sum(function ($role) {
+            return $role->users->count();
+        });
+
+        return response()->json([
+            'message' => 'Permission roles updated successfully',
+            'permission' => new PermissionResource($permission),
+            'assigned_roles' => $roles->count(),
+            'total_users_affected' => $permission->users_count,
+        ]);
+    }
+
+    /**
      * Get permission statistics.
      */
     public function statistics(): JsonResponse
@@ -355,5 +392,15 @@ class PermissionController extends Controller
         ];
 
         return response()->json($stats);
+    }
+
+    /**
+     * Get category from permission name.
+     */
+    private function getCategory(string $name): string
+    {
+        $parts = explode('_', $name);
+
+        return $parts[0] ?? 'other';
     }
 }

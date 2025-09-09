@@ -137,6 +137,9 @@ Route::prefix('permissions')->name('api.permissions.')->group(function () {
     Route::get('grouped', [PermissionController::class, 'grouped'])->name('grouped');
     Route::get('{permission}', [PermissionController::class, 'show'])->name('show');
 
+    // Role management for permissions
+    Route::post('{permission}/sync-roles', [PermissionController::class, 'syncRoles'])->name('sync_roles');
+
     // Permission queries by role/user
     Route::get('by-role/{role}', [PermissionController::class, 'byRole'])->name('by_role');
     Route::get('by-user/{user}', [PermissionController::class, 'byUser'])->name('by_user');

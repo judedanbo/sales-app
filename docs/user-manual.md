@@ -388,6 +388,80 @@ Permissions are organized into logical categories:
 - Search works on both **permission names** and **display names**
 - **Clear search** to return to category view for broader selection
 
+### Permission Role Management
+
+The application provides comprehensive permission role management through an intuitive modal interface accessible from the Permission details page.
+
+#### Accessing Permission Role Management
+
+##### From Permission Details Page
+1. Navigate to **Permissions** from the sidebar
+2. Click **"View"** on any permission in the permissions table
+3. On the Permission details page, click **"Manage Role Assignments"** in the Quick Actions section
+4. The role management modal will open showing all available roles organized by guard type
+
+#### Using the Permission Role Management Modal
+
+##### Modal Features
+- **Guard-Based Organization**: Roles are grouped by authentication guard (Web, API, etc.)
+- **Search Functionality**: Use the search bar to quickly find specific roles
+- **Bulk Selection**: Select all roles or clear all selections with one click
+- **Visual Progress**: See selection statistics and percentage completion in real-time
+- **Collapsible Groups**: Expand/collapse role groups for better organization
+
+##### Managing Role Assignments
+1. **Search Roles**: Type in the search bar to filter roles by name or display name
+2. **Expand Guards**: Click the arrow next to guard names to view roles in that group
+3. **Select Individual Roles**: Check boxes next to specific roles to assign the permission
+4. **Select All in Group**: Use the group checkbox to select/deselect all roles in a guard
+5. **Bulk Operations**: Use "All" button to select everything or "None" to clear all selections
+6. **Monitor Progress**: Watch the progress bar and percentage indicator showing your selections
+
+##### Guard-Based Organization
+Roles are organized into logical authentication guards:
+- **Web Guard**: Roles used for web-based authentication and session management
+- **API Guard**: Roles used for API authentication and token-based access
+- **Custom Guards**: Any additional authentication guards configured in the system
+
+##### Role Selection Interface
+- **Group Headers**: Show guard type with role count and current selection status
+- **Individual Roles**: Display role name and display name for easy identification
+- **Selection Indicators**: Visual checkboxes with indeterminate states for partial group selections
+- **Color Coding**: Different guards have distinct color schemes for easy identification
+
+##### Saving Changes
+1. After making your role selections, review the **selection statistics** at the top
+2. The progress bar shows the percentage of total roles selected
+3. Click **"Update Role Assignments"** to save your changes
+4. The system will process the changes and provide immediate confirmation
+5. The modal will close automatically upon successful update
+6. The permission details page will refresh to show the updated role assignments
+
+##### Visual Indicators
+- **Selected Roles**: Checked boxes with clear visual confirmation
+- **Group Status**: Shows fully selected, partially selected, or unselected groups
+- **Progress Tracking**: Real-time visual representation of total roles assigned
+- **Guard Badges**: Color-coded badges showing authentication guard types
+- **Loading States**: Clear indicators during processing and updates
+
+#### Best Practices for Role Assignment
+
+##### Strategic Permission Assignment
+- **Principle of Least Privilege**: Only assign permissions to roles that truly need them
+- **Guard Alignment**: Ensure permission assignments align with the appropriate authentication guards
+- **Regular Auditing**: Periodically review and update role assignments to maintain security
+- **Functional Grouping**: Use the guard-based organization to logically group role assignments
+
+##### Bulk Operations Usage
+- Use **"All"** selections sparingly - consider whether every role truly needs the permission
+- Use **guard-level selections** to quickly assign permissions to all roles within an authentication method
+- **Review before saving** - always check the selection statistics before confirming changes
+
+##### Search and Navigation
+- Use **specific role names** in search to quickly locate particular roles
+- Use **guard filtering** by expanding only relevant guard groups
+- **Clear search** to return to full guard view for broader role management
+
 ---
 
 ## Settings
@@ -663,10 +737,16 @@ The frontend components have been significantly enhanced to leverage the new API
 ## Version Information
 
 - **Application**: Sales Management System
-- **Version**: 1.2.0
+- **Version**: 1.3.0
 - **Last Updated**: September 9, 2025
 - **Framework**: Laravel 12 + Vue 3 + Inertia.js
 - **Recent Updates**: 
+  - **v1.3.0**: Implemented Permission Role Management System with comprehensive modal interface
+  - **v1.3.0**: Added Permissions/Show page with detailed permission information and role assignments
+  - **v1.3.0**: Created PermissionRoleModal for managing role assignments from permission details
+  - **v1.3.0**: Enhanced Permission system with guard-based role organization and bulk operations
+  - **v1.3.0**: Added real-time search, visual progress tracking, and smart selection mechanics
+  - **v1.3.0**: Integrated direct API communication with proper error handling and success feedback
   - **v1.2.0**: Enhanced Role Permission Management with modal interface
   - **v1.2.0**: Added "Manage Permissions" functionality to Role Index and Show pages
   - **v1.2.0**: Implemented comprehensive permission modal with search and category organization
