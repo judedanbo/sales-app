@@ -228,6 +228,7 @@ const clearFilters = () => {
                 :selected-roles="selectedRoles"
                 :is-loading="isLoading"
                 :availableUsers="props.availableUsers"
+                :allPermissions="props.allPermissions"
                 @sort="handleSort"
                 @delete="handleDelete"
                 @select="toggleSelection"

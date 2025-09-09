@@ -308,6 +308,86 @@ The system uses 34 distinct permissions across key areas:
 3. **View Permissions**: Understand your access level
 4. **Activity History**: Review your login and activity history
 
+### Role Permission Management
+
+The application provides comprehensive role permission management through an intuitive modal interface accessible from multiple locations throughout the system.
+
+#### Accessing Permission Management
+
+##### From Role Index Page
+1. Navigate to the **Roles** section from the sidebar
+2. Locate the role you want to manage in the roles table
+3. Click the **three dots menu (⋮)** at the end of the role row
+4. Select **"Manage Permissions"** from the dropdown menu
+5. The permission management modal will open with all available permissions
+
+##### From Role Details Page
+1. Navigate to **Roles** and click on a specific role to view details
+2. In the **Quick Actions** section on the right side, click **"Manage Permissions"**
+3. Alternatively, click the **"Permissions"** button in the header action area
+4. The permission management modal will open with the role's current permissions
+
+#### Using the Permission Management Modal
+
+##### Modal Features
+- **Search Functionality**: Use the search bar to quickly find specific permissions
+- **Category Organization**: Permissions are grouped by categories (Users, Roles, Schools, Sales, etc.)
+- **Bulk Selection**: Select all permissions in a category or clear all at once
+- **Visual Progress**: See selection statistics and percentage completion
+- **Real-time Preview**: View current selection count and total permissions
+
+##### Managing Permissions
+1. **Search Permissions**: Type in the search bar to filter permissions by name
+2. **Expand Categories**: Click the arrow next to category names to view permissions
+3. **Select Individual Permissions**: Check boxes next to specific permissions
+4. **Select All in Category**: Use the category checkbox to select/deselect all permissions in a group
+5. **Bulk Operations**: Use "All" button to select everything or "None" to clear all selections
+6. **Monitor Progress**: Watch the progress bar and percentage indicator at the top
+
+##### Category-Based Organization
+Permissions are organized into logical categories:
+- **Users**: User management and profile operations
+- **Roles**: Role and permission administration
+- **Schools**: School data and management operations
+- **Sales**: Transaction and sales-related permissions
+- **Products**: Product catalog and inventory management
+- **Reports**: Reporting and analytics access
+- **System**: System administration and configuration
+- **Audit**: Audit trail and compliance functions
+- **Inventory**: Stock management and tracking
+- **Other**: Miscellaneous system permissions
+
+##### Saving Changes
+1. After making your permission selections, review the **selection statistics**
+2. Click **"Update Permissions"** to save changes
+3. The system will process the changes and provide confirmation
+4. The modal will close automatically upon successful update
+5. The role's permission count will be updated immediately in the interface
+
+##### Visual Indicators
+- **Selected Permissions**: Checked boxes with green checkmarks
+- **Category Status**: Shows partially selected (indeterminate) or fully selected categories
+- **Progress Bar**: Visual representation of total permissions selected
+- **Color-coded Categories**: Each permission category has a distinct color for easy identification
+
+#### Best Practices
+
+##### Permission Assignment
+- **Principle of Least Privilege**: Only assign permissions necessary for the role
+- **Regular Review**: Periodically review and audit role permissions
+- **Category-based Thinking**: Use categories to logically group related permissions
+- **Test Changes**: Verify that users with the updated role can perform required functions
+
+##### Bulk Operations
+- Use **"All"** sparingly - consider if a role truly needs all system permissions
+- Use **category selection** to quickly assign related permissions
+- Review selections before saving to avoid over-privileging roles
+
+##### Searching and Filtering
+- Use **specific keywords** in search to quickly find permissions
+- Search works on both **permission names** and **display names**
+- **Clear search** to return to category view for broader selection
+
 ---
 
 ## Settings
@@ -583,10 +663,16 @@ The frontend components have been significantly enhanced to leverage the new API
 ## Version Information
 
 - **Application**: Sales Management System
-- **Version**: 1.1.0
-- **Last Updated**: September 8, 2025
+- **Version**: 1.2.0
+- **Last Updated**: September 9, 2025
 - **Framework**: Laravel 12 + Vue 3 + Inertia.js
 - **Recent Updates**: 
+  - **v1.2.0**: Enhanced Role Permission Management with modal interface
+  - **v1.2.0**: Added "Manage Permissions" functionality to Role Index and Show pages
+  - **v1.2.0**: Implemented comprehensive permission modal with search and category organization
+  - **v1.2.0**: Added real-time permission statistics and visual progress indicators
+  - **v1.2.0**: Enhanced RolesTable component with integrated permission management
+  - **v1.2.0**: Improved user experience with bulk permission operations and filtering
   - **v1.1.0**: Enhanced role system with 15 roles and 83 permissions
   - **v1.1.0**: Added permission analytics with percentage calculations
   - **v1.1.0**: Implemented comprehensive Permission API endpoints

@@ -14,11 +14,12 @@ import {
 import Pagination from '@/components/ui/Pagination.vue';
 import { Skeleton } from '@/components/ui/skeleton';
 import { index, show } from '@/routes/roles';
-import type { PaginatedData, Role, RoleFilters } from '@/types';
+import type { PaginatedData, Permission, Role, RoleFilters, User } from '@/types';
 import { Link, router } from '@inertiajs/vue3';
 import { ChevronDown, ChevronUp, Download, Edit as EditIcon, Eye, Key, MoreHorizontal, Plus, Shield, Trash2, Users } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import RoleFormModal from './RoleFormModal.vue';
+import RolePermissionsModal from './RolePermissionsModal.vue';
 import RoleUsersModal from './RoleUsersModal.vue';
 
 interface Props {
@@ -27,6 +28,7 @@ interface Props {
     selectedRoles: number[];
     isLoading?: boolean;
     availableUsers: User[];
+    allPermissions?: Permission[];
 }
 
 interface Emits {
@@ -49,6 +51,10 @@ const roleToEdit = ref<Role | null>(null);
 const showUsersModal = ref(false);
 const roleForUsers = ref<Role | null>(null);
 // const availableUsers = ref<User[]>([]);
+
+// Permissions modal state
+const showPermissionsModal = ref(false);
+const roleForPermissions = ref<Role | null>(null);
 
 // Selection helpers
 const isSelected = (roleId: number) => props.selectedRoles.includes(roleId);
@@ -161,6 +167,19 @@ function handleManageUsers(role: Role) {
 }
 
 function handleUsersUpdated() {
+    // Refresh the roles data while preserving filters
+    router.reload({
+        data: getFilteredParameters(props.filters),
+        only: ['roles'],
+    });
+}
+
+function handleManagePermissions(role: Role) {
+    roleForPermissions.value = role;
+    showPermissionsModal.value = true;
+}
+
+function handlePermissionsUpdated() {
     // Refresh the roles data while preserving filters
     router.reload({
         data: getFilteredParameters(props.filters),
@@ -341,7 +360,7 @@ function handleUsersUpdated() {
                                             Manage Users
                                         </DropdownMenuItem>
 
-                                        <DropdownMenuItem @click="() => console.log('Manage Permissions:', role.id)">
+                                        <DropdownMenuItem @click="handleManagePermissions(role)">
                                             <Key class="mr-2 h-4 w-4" />
                                             Manage Permissions
                                         </DropdownMenuItem>
@@ -383,5 +402,15 @@ function handleUsersUpdated() {
         :available-users="availableUsers"
         @update:open="showUsersModal = $event"
         @users-updated="handleUsersUpdated"
+    />
+
+    <!-- Manage Permissions Modal -->
+    <RolePermissionsModal
+        v-if="roleForPermissions"
+        :open="showPermissionsModal"
+        :role="roleForPermissions"
+        :all-permissions="allPermissions"
+        @update:open="showPermissionsModal = $event"
+        @permissions-updated="handlePermissionsUpdated"
     />
 </template>
