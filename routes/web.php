@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentationController;
 use App\Http\Controllers\Frontend\AcademicYearController;
 use App\Http\Controllers\Frontend\AuditController;
+use App\Http\Controllers\Frontend\CategoryController;
 use App\Http\Controllers\Frontend\PermissionController;
 use App\Http\Controllers\Frontend\RoleController;
 use App\Http\Controllers\Frontend\SchoolClassController;
@@ -80,6 +81,34 @@ Route::middleware(['auth', 'verified', 'audit-action:user_access'])->group(funct
                     ->middleware('permission:force_delete_academic_years')
                     ->withTrashed();
             });
+
+        // Category Frontend Routes - Permission-based access
+        Route::middleware(['permission:view_categories'])->group(function () {
+            Route::get('/categories/dashboard', [CategoryController::class, 'dashboard'])->name('categories.dashboard');
+            Route::get('/categories/tree', [CategoryController::class, 'tree'])->name('categories.tree');
+            Route::get('/categories/form-data', [CategoryController::class, 'getFormData'])->name('categories.form-data');
+
+            // Category resource routes with specific permissions
+            Route::get('categories', [CategoryController::class, 'index'])->name('categories.index');
+            Route::get('categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
+            Route::post('categories', [CategoryController::class, 'store'])
+                ->middleware('permission:create_categories')
+                ->name('categories.store');
+            Route::put('categories/{category}', [CategoryController::class, 'update'])
+                ->middleware('permission:edit_categories')
+                ->name('categories.update');
+            Route::delete('categories/{category}', [CategoryController::class, 'destroy'])
+                ->middleware('permission:delete_categories')
+                ->name('categories.destroy');
+
+            // Category-specific actions
+            Route::post('categories/{category}/toggle-status', [CategoryController::class, 'toggleStatus'])
+                ->middleware('permission:manage_category_status')
+                ->name('categories.toggle-status');
+            Route::post('categories/{category}/move', [CategoryController::class, 'move'])
+                ->middleware('permission:manage_category_hierarchy')
+                ->name('categories.move');
+        });
     });
 });
 

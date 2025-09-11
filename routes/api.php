@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AcademicYearController;
 use App\Http\Controllers\Api\AuditController;
+use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\SchoolClassController;
@@ -290,6 +291,64 @@ Route::prefix('permissions')->name('api.permissions.')->group(function () {
 
         // Get all guard names for permissions
         Route::get('guard-names', [PermissionController::class, 'guardNames'])->name('guard_names');
+    });
+});
+
+// Category Management API Routes
+Route::prefix('categories')->name('api.categories.')->group(function () {
+    // Public routes
+    Route::get('statistics', [CategoryController::class, 'statistics'])->name('statistics');
+    Route::get('tree', [CategoryController::class, 'tree'])->name('tree');
+
+    // Protected routes
+    Route::middleware(['auth:sanctum', 'permission:view_categories'])->group(function () {
+        // Standard resource routes
+        Route::get('/', [CategoryController::class, 'index'])->name('index');
+        Route::get('{category}', [CategoryController::class, 'show'])->name('show');
+
+        Route::middleware('permission:create_categories')->group(function () {
+            Route::post('/', [CategoryController::class, 'store'])->name('store');
+        });
+
+        Route::middleware('permission:edit_categories')->group(function () {
+            Route::put('{category}', [CategoryController::class, 'update'])->name('update');
+        });
+
+        Route::middleware('permission:delete_categories')->group(function () {
+            Route::delete('{category}', [CategoryController::class, 'destroy'])->name('destroy');
+        });
+
+        // Additional routes for soft deletes
+        Route::get('with-trashed/list', [CategoryController::class, 'withTrashed'])->name('with_trashed');
+        Route::get('trashed/list', [CategoryController::class, 'onlyTrashed'])->name('only_trashed');
+
+        Route::middleware('permission:restore_categories')->group(function () {
+            Route::post('{id}/restore', [CategoryController::class, 'restore'])->name('restore');
+        });
+
+        Route::middleware('permission:force_delete_categories')->group(function () {
+            Route::delete('{id}/force-delete', [CategoryController::class, 'forceDelete'])->name('force_delete');
+        });
+
+        // Category-specific routes
+        Route::middleware('permission:manage_category_status')->group(function () {
+            Route::post('{category}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('toggle_status');
+        });
+
+        Route::middleware('permission:manage_category_hierarchy')->group(function () {
+            Route::post('{category}/move', [CategoryController::class, 'move'])->name('move');
+            Route::post('reorder', [CategoryController::class, 'reorder'])->name('reorder');
+        });
+
+        // Bulk Category Operations
+        Route::middleware([
+            'permission:bulk_edit_categories',
+            'throttle:10,60',
+            'audit-action:bulk_category_operation',
+            'time-based-access:business_hours',
+        ])->group(function () {
+            Route::post('bulk/update-status', [CategoryController::class, 'bulkUpdateStatus'])->name('bulk_update_status');
+        });
     });
 });
 
