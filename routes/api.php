@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AcademicYearController;
+use App\Http\Controllers\Api\AuditController;
 use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\SchoolClassController;
@@ -147,5 +148,28 @@ Route::prefix('permissions')->name('api.permissions.')->group(function () {
 
     // Get all guard names for permissions
     Route::get('guard-names', [PermissionController::class, 'guardNames'])->name('guard_names');
+    // });
+});
+
+// Audit Management API Routes
+Route::prefix('audits')->name('api.audits.')->group(function () {
+    // Protected routes (temporarily without auth for testing)
+    // Route::middleware('auth:sanctum')->group(function () {
+    // Standard resource routes
+    Route::get('/', [AuditController::class, 'index'])->name('index');
+    Route::get('{audit}', [AuditController::class, 'show'])->name('show');
+
+    // Statistics and analytics
+    Route::get('statistics/summary', [AuditController::class, 'statistics'])->name('statistics');
+
+    // Get audits for specific model/user
+    Route::get('model/{modelType}/{modelId}', [AuditController::class, 'forModel'])->name('for_model');
+    Route::get('user/{userId}', [AuditController::class, 'forUser'])->name('for_user');
+
+    // Timeline view
+    Route::get('timeline/{modelType}/{modelId}', [AuditController::class, 'timeline'])->name('timeline');
+
+    // Get available models
+    Route::get('models/list', [AuditController::class, 'models'])->name('models');
     // });
 });

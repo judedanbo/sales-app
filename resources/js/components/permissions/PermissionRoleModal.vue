@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label';
 import ScrollArea from '@/components/ui/scroll-area/ScrollArea.vue';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import type { Permission, Role } from '@/types';
-import { router } from '@inertiajs/vue3';
 import { AlertCircle, ChevronDown, ChevronRight, Loader2, Search, Shield, ShieldCheck, ShieldOff } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 
@@ -100,9 +99,8 @@ const filteredGroups = computed(() => {
             roles: group.roles.filter(
                 (r) => r.name.toLowerCase().includes(query) || (r.display_name && r.display_name.toLowerCase().includes(query)),
             ),
-            count: group.roles.filter(
-                (r) => r.name.toLowerCase().includes(query) || (r.display_name && r.display_name.toLowerCase().includes(query)),
-            ).length,
+            count: group.roles.filter((r) => r.name.toLowerCase().includes(query) || (r.display_name && r.display_name.toLowerCase().includes(query)))
+                .length,
         }))
         .filter((group) => group.count > 0);
 });
@@ -191,12 +189,12 @@ const handleSubmit = async () => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json',
+                Accept: 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
                 // Add CSRF token if available
                 ...(document.querySelector('meta[name="csrf-token"]') && {
-                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || ''
-                })
+                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
+                }),
             },
             body: JSON.stringify({
                 role_ids: selectedRoleIds,
@@ -214,7 +212,6 @@ const handleSubmit = async () => {
         if (props.permission) {
             emit('roles-updated', props.permission);
         }
-
     } catch (error) {
         console.error('Error updating role assignments:', error);
         errors.value = { general: 'Network error. Please try again.' };
@@ -321,15 +318,8 @@ const getGuardColor = (guard: string) => {
                                         :key="role.id"
                                         class="flex items-center gap-2 rounded p-2 transition-colors hover:bg-background"
                                     >
-                                        <Checkbox
-                                            :model-value="selectedRoles.has(role.id)"
-                                            @update:model-value="() => toggleRole(role.id)"
-                                        />
-                                        <Label
-                                            :for="`role-${role.id}`"
-                                            class="flex-1 cursor-pointer text-sm"
-                                            @click="toggleRole(role.id)"
-                                        >
+                                        <Checkbox :model-value="selectedRoles.has(role.id)" @update:model-value="() => toggleRole(role.id)" />
+                                        <Label :for="`role-${role.id}`" class="flex-1 cursor-pointer text-sm" @click="toggleRole(role.id)">
                                             {{ role.display_name || role.name }}
                                         </Label>
                                     </div>

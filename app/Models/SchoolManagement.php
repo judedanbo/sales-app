@@ -8,11 +8,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Auditable as AuditableTrait;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class SchoolManagement extends Model
+class SchoolManagement extends Model implements Auditable
 {
     /** @use HasFactory<\Database\Factories\SchoolManagementFactory> */
-    use HasFactory, SoftDeletes;
+    use AuditableTrait, HasFactory, SoftDeletes;
 
     protected function casts(): array
     {
@@ -23,6 +25,17 @@ class SchoolManagement extends Model
     }
 
     protected $fillable = [
+        'school_id',
+        'management_type',
+        'ownership_type',
+        'managing_authority',
+        'board_name',
+    ];
+
+    /**
+     * Audit configuration
+     */
+    protected $auditInclude = [
         'school_id',
         'management_type',
         'ownership_type',

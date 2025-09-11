@@ -313,3 +313,73 @@ export interface PermissionStatistics {
         category: string;
     }>;
 }
+
+// Audit-related types
+export interface Audit {
+    id: number;
+    user_type?: string;
+    user_id?: number;
+    user?: User;
+    event: 'created' | 'updated' | 'deleted' | 'restored';
+    auditable_type: string;
+    auditable_id: number;
+    old_values?: Record<string, any>;
+    new_values?: Record<string, any>;
+    url?: string;
+    ip_address?: string;
+    user_agent?: string;
+    tags?: string;
+    created_at: string;
+    updated_at: string;
+    changes_summary?: string[];
+}
+
+export interface AuditFilters {
+    auditable_type?: string;
+    auditable_id?: number;
+    user_id?: number;
+    event?: string;
+    from_date?: string;
+    to_date?: string;
+    search?: string;
+    sort_by?: string;
+    sort_direction?: 'asc' | 'desc';
+}
+
+export interface AuditStatistics {
+    stats: {
+        total_audits: number;
+        today_audits: number;
+        this_week_audits: number;
+        this_month_audits: number;
+    };
+    events_breakdown: Record<string, number>;
+    models_breakdown: Record<string, number>;
+    top_users: Array<{
+        user: User;
+        audit_count: number;
+    }>;
+}
+
+export interface AuditChange {
+    field: string;
+    old_value: any;
+    new_value: any;
+    type: 'added' | 'modified' | 'removed';
+}
+
+export interface AuditModel {
+    class: string;
+    name: string;
+    count: number;
+}
+
+export interface AuditTimelineEntry {
+    id: number;
+    event: string;
+    user?: User;
+    created_at: string;
+    old_values?: Record<string, any>;
+    new_values?: Record<string, any>;
+    changes_summary: string[];
+}

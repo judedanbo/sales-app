@@ -10,11 +10,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Auditable as AuditableTrait;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class School extends Model
+class School extends Model implements Auditable
 {
     /** @use HasFactory<\Database\Factories\SchoolFactory> */
-    use HasFactory, SoftDeletes;
+    use AuditableTrait, HasFactory, SoftDeletes;
 
     protected function casts(): array
     {
@@ -39,6 +41,18 @@ class School extends Model
         // 'total_teachers',
         // 'website',
         // 'description',
+        'status',
+    ];
+
+    /**
+     * Audit configuration
+     */
+    protected $auditInclude = [
+        'school_code',
+        'school_name',
+        'school_type',
+        'board_affiliation',
+        'established_date',
         'status',
     ];
 

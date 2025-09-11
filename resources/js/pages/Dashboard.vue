@@ -2,6 +2,7 @@
 import DashboardStats from '@/components/dashboard/DashboardStats.vue';
 import RecentSchools from '@/components/dashboard/RecentSchools.vue';
 import SchoolsChart from '@/components/dashboard/SchoolsChart.vue';
+import PageHeader from '@/components/ui/PageHeader.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem, type School } from '@/types';
@@ -41,6 +42,9 @@ const breadcrumbs: BreadcrumbItem[] = [
     <Head title="Dashboard" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
+        <template #header>
+            <PageHeader title="Dashboard" description="Application dashboard"> </PageHeader>
+        </template>
         <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-4">
             <!-- Stats Overview -->
             <DashboardStats :stats="stats" />

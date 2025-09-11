@@ -6,13 +6,28 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Auditable as AuditableTrait;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class SchoolClass extends Model
+class SchoolClass extends Model implements Auditable
 {
     /** @use HasFactory<\Database\Factories\SchoolClassFactory> */
-    use HasFactory, SoftDeletes;
+    use AuditableTrait, HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'school_id',
+        'class_name',
+        'class_code',
+        'grade_level',
+        'min_age',
+        'max_age',
+        'order_sequence',
+    ];
+
+    /**
+     * Audit configuration
+     */
+    protected $auditInclude = [
         'school_id',
         'class_name',
         'class_code',

@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentationController;
 use App\Http\Controllers\Frontend\AcademicYearController;
+use App\Http\Controllers\Frontend\AuditController;
 use App\Http\Controllers\Frontend\PermissionController;
 use App\Http\Controllers\Frontend\RoleController;
 use App\Http\Controllers\Frontend\SchoolClassController;
@@ -86,6 +87,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('{permission}', [PermissionController::class, 'show'])->name('show');
         Route::get('by-role/{role}', [PermissionController::class, 'byRole'])->name('by-role');
         Route::get('by-user/{user}', [PermissionController::class, 'byUser'])->name('by-user');
+    });
+
+    // Audit Management Frontend Routes
+    Route::prefix('audits')->name('audits.')->group(function () {
+        Route::get('/', [AuditController::class, 'index'])->name('index');
+        Route::get('dashboard', [AuditController::class, 'dashboard'])->name('dashboard');
+        Route::get('{audit}', [AuditController::class, 'show'])->name('show');
+        Route::get('timeline/{modelType}/{modelId}', [AuditController::class, 'timeline'])->name('timeline');
+        Route::get('user/{userId}', [AuditController::class, 'forUser'])->name('for-user');
     });
 });
 

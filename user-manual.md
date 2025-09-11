@@ -6,8 +6,9 @@
 2. [User Management](#user-management)
 3. [Role Management](#role-management)
 4. [Schools Management](#schools-management)
-5. [Dashboard Overview](#dashboard-overview)
-6. [System Administration](#system-administration)
+5. [Audit Management](#audit-management)
+6. [Dashboard Overview](#dashboard-overview)
+7. [System Administration](#system-administration)
 
 ---
 
@@ -217,6 +218,224 @@ The Schools system provides comprehensive management of educational institutions
 
 ---
 
+## Audit Management
+
+### Understanding the Audit System
+
+The audit system provides comprehensive tracking of all changes made throughout the application. It automatically records:
+
+- **User Actions**: Who performed each action with full user attribution
+- **Data Changes**: Before and after values for all field modifications  
+- **Timestamps**: Precise timing of when changes occurred
+- **Event Types**: Created, updated, deleted, and restored operations
+- **Change Context**: Additional metadata about each modification
+
+### Audit Dashboard
+
+Navigate to "Audits" in the sidebar to access the audit dashboard.
+
+#### Statistics Overview
+
+The dashboard displays key metrics in four main cards:
+
+- **Total Audits**: Complete count of all recorded activities in the system
+- **Today**: Number of activities that occurred today
+- **This Week**: Activities from the current week
+- **This Month**: Activities from the current month
+
+#### Activity Breakdown
+
+**Recent Activity Panel:**
+- Lists the 10 most recent audit records across the entire system
+- Shows event type badges with color coding (Created: green, Updated: blue, Deleted: red)
+- Displays model type and ID (e.g., "User #42", "School #15")
+- Includes user attribution showing who performed the action
+- Provides relative timestamps ("2m ago", "1h ago", "Just now")
+
+**Activity Types Panel:**
+- Visual breakdown of audit events by type
+- Color-coded dots matching event type colors
+- Shows count and percentage distribution for each event type
+- Includes: Created, Updated, Deleted, Restored operations
+
+**Models Activity Panel:**
+- Lists top 6 most active models in the system
+- Shows audit record counts for each model type
+- Helps identify which areas of the system see the most activity
+- Models include: User, School, SchoolContact, SchoolAddress, etc.
+
+**Most Active Users Panel:**
+- Displays top 5 users by audit record count
+- Shows user names with clickable links to their audit timeline
+- Includes total audit count for each user
+- Helps identify power users and system activity patterns
+
+### Individual Record Timeline
+
+#### Accessing Timelines
+
+You can view the complete audit trail for any record by:
+
+1. **From Dashboard**: Click on any user name in the "Most Active Users" section
+2. **Direct Navigation**: Use URLs like `/audits/timeline/User/123` for specific records
+3. **From Record Pages**: Look for "View Audit Trail" links on individual record pages
+
+#### Timeline Interface
+
+**Summary Statistics:**
+- **Total Events**: Complete count of all changes to this record
+- **Created**: Number of creation events (typically 1)
+- **Updates**: Count of modification events
+- **Deletions**: Number of deletion events (soft deletes)
+
+**Visual Timeline:**
+The timeline displays changes in chronological order with:
+
+- **Connecting Line**: Vertical line connecting all events visually
+- **Event Icons**: 
+  - ➕ Plus icon for creation events
+  - ✏️ Edit icon for updates  
+  - 🗑️ Trash icon for deletions
+  - ↩️ Restore icon for restoration events
+- **Color Coding**:
+  - 🟢 Green for created events
+  - 🔵 Blue for updated events
+  - 🔴 Red for deleted events
+  - 🟡 Yellow for restored events
+
+#### Event Details
+
+Each timeline event shows:
+
+**Event Header:**
+- Color-coded badge with event type
+- Relative timestamp ("2h ago")
+- User who performed the action
+
+**Event Description:**
+- Action summary (e.g., "John Smith created this record")
+- Precise timestamp (e.g., "January 15, 2025 at 2:30 PM")
+- Link to view detailed audit record
+
+**Changes Summary:**
+- High-level description of what changed
+- Field count summaries ("Updated 3 fields")
+- List of changed fields when 5 or fewer fields modified
+
+**Field-Level Changes:**
+For records with detailed changes, you'll see:
+- **Field Names**: Clearly labeled for each changed attribute
+- **Old Values**: Previous values with strikethrough formatting
+- **New Values**: Current values highlighted in green
+- **Value Formatting**: 
+  - Null values displayed as "null"
+  - Boolean values shown as "true"/"false"
+  - Complex objects truncated if over 50 characters
+  - Arrays formatted as JSON for readability
+
+### Audit Filtering and Search
+
+#### Available Filters
+
+Navigate to the main audit index to access filtering options:
+
+**Model Type Filter:**
+- Filter by specific model types (User, School, Contact, etc.)
+- Dropdown shows all available auditable models
+- Displays both technical name and user-friendly labels
+
+**Event Type Filter:**
+- Filter by event types: Created, Updated, Deleted, Restored
+- Multiple selection supported
+- Visual badges match the color coding throughout the system
+
+**User Filter:**
+- Filter by specific user who performed actions
+- Searchable dropdown with user names
+- Shows user attribution for all audit records
+
+**Date Range Filters:**
+- From Date: Filter records from specific date forward
+- To Date: Filter records up to specific date
+- Supports date picker interface for easy selection
+
+**Search Functionality:**
+- Global search across audit record content
+- Searches through old values, new values, and metadata
+- Real-time search with debounced input for performance
+- Works in combination with other filters
+
+#### Using Filters
+
+1. **Single Filter**: Select any filter to narrow down results
+2. **Multiple Filters**: Combine filters for precise record location
+3. **Clear Filters**: Reset button to clear all active filters
+4. **URL Preservation**: Filter state maintained in browser URL
+5. **Pagination**: Filtered results properly paginated
+
+### Event Type Reference
+
+#### Created Events
+- **When**: New records are added to the system
+- **Data Captured**: All initial field values
+- **Display**: Green badges and plus icons
+- **Example**: "User created with 5 fields set: name, email, user_type, school_id, is_active"
+
+#### Updated Events  
+- **When**: Existing records are modified
+- **Data Captured**: Both old and new values for changed fields
+- **Display**: Blue badges and edit icons
+- **Example**: "Updated 2 fields - Changed: phone, department"
+
+#### Deleted Events
+- **When**: Records are soft deleted or removed
+- **Data Captured**: All values at time of deletion
+- **Display**: Red badges and trash icons
+- **Example**: "Record deleted with 7 fields"
+
+#### Restored Events
+- **When**: Soft deleted records are restored
+- **Data Captured**: Restoration metadata and any field changes
+- **Display**: Yellow badges and restore icons
+- **Example**: "Record restored"
+
+#### Custom Events
+- **When**: Special application events (login, logout, etc.)
+- **Data Captured**: Event-specific metadata
+- **Display**: Gray badges with clock icons
+- **Example**: "User login: john@example.com"
+
+### Audit Data Privacy and Security
+
+#### Sensitive Data Handling
+- **Excluded Fields**: Passwords, tokens, and sensitive data automatically excluded
+- **Data Retention**: Audit records preserved according to compliance requirements
+- **Access Control**: Audit viewing restricted by role-based permissions
+
+#### User Attribution
+- **Authentication Required**: All audit records linked to authenticated users
+- **System Actions**: Automated processes attributed to "System" user
+- **Anonymous Actions**: Guest actions tracked with session information
+
+### Troubleshooting Audit Issues
+
+#### Missing Audit Records
+- Verify the model implements the Auditable trait
+- Check if the field is excluded from auditing in model configuration
+- Confirm the action occurred after audit system was enabled
+
+#### Performance Considerations
+- Large audit tables may impact query performance
+- Use date range filters for better performance on large datasets
+- Consider archiving old audit records periodically
+
+#### Timeline Not Loading
+- Verify record exists and you have permission to view it
+- Check if audit records exist for the specific record
+- Try refreshing the page or clearing browser cache
+
+---
+
 ## Dashboard Overview
 
 ### Executive Summary
@@ -325,19 +544,29 @@ The dashboard provides real-time insights into:
 - Enhanced search and filtering capabilities
 - Improved user experience with immediate visual feedback
 
+**Audit Management System:**
+- Comprehensive audit trail tracking for all system changes
+- Visual timeline interface with color-coded event types
+- Real-time audit dashboard with statistics and activity monitoring  
+- Advanced filtering and search capabilities across audit records
+- Field-level change tracking with before/after value comparison
+
 **Performance Improvements:**
 - Optimized database queries for faster role loading
 - Enhanced modal state management for smooth interactions
 - Improved table refresh performance after bulk operations
+- Efficient audit data loading with pagination and caching
 
 ### Future Enhancements
 
 - Advanced filtering options for role management
-- Export functionality for user-role assignments
+- Export functionality for user-role assignments and audit records
 - Enhanced analytics dashboard for role utilization
+- Advanced audit reporting with custom date ranges and data export
 - Mobile-responsive improvements for better tablet/phone usage
+- Integration with external compliance systems for audit data
 
 ---
 
 *Last Updated: January 2025*
-*Version: 2.0.0*
+*Version: 2.1.0*

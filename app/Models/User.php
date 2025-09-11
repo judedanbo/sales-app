@@ -10,12 +10,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use OwenIt\Auditing\Auditable as AuditableTrait;
+use OwenIt\Auditing\Contracts\Auditable;
+use OwenIt\Auditing\Models\Audit;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements Auditable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, HasRoles, Notifiable;
+    use AuditableTrait, HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -62,6 +65,15 @@ class User extends Authenticatable
             'last_login_at' => 'datetime',
         ];
     }
+
+    /**
+     * Audit configuration
+     */
+    protected $auditExclude = [
+        'password',
+        'remember_token',
+        'email_verified_at',
+    ];
 
     /**
      * Relationships
@@ -208,4 +220,9 @@ class User extends Authenticatable
             'delete_users',
         ]);
     }
+
+    // public function audits():HasMany
+    // {
+    //     return $this->hasMany(Audit::class);
+    // }
 }
