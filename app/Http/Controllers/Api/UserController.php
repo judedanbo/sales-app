@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\UserType;
+use App\Http\Controllers\Concerns\AuthorizesResourceOperations;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
@@ -18,11 +19,14 @@ use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
+    use AuthorizesResourceOperations;
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        $this->authorizeViewAny(User::class);
         $query = User::with(['school', 'roles', 'permissions']);
 
         // Apply filters
@@ -73,6 +77,7 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request): JsonResponse
     {
+        $this->authorizeCreate(User::class);
         $validated = $request->validated();
 
         // Hash password if provided

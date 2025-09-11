@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\AuthorizesResourceOperations;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSchoolRequest;
 use App\Http\Requests\UpdateSchoolRequest;
@@ -14,11 +15,14 @@ use Illuminate\Http\Request;
 
 class SchoolController extends Controller
 {
+    use AuthorizesResourceOperations;
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        $this->authorizeViewAny(School::class);
         $query = School::with(['contacts', 'addresses', 'management', 'officials', 'documents', 'academicYears', 'schoolClasses']);
 
         // Apply filters
@@ -62,6 +66,7 @@ class SchoolController extends Controller
      */
     public function store(StoreSchoolRequest $request)
     {
+        $this->authorizeCreate(School::class);
         $validated = $request->validated();
         $school = School::create($validated);
         $school->load(['contacts', 'addresses', 'management', 'officials', 'documents', 'academicYears', 'schoolClasses']);
@@ -77,6 +82,7 @@ class SchoolController extends Controller
      */
     public function show(School $school)
     {
+        $this->authorizeView($school);
         $school->load(['contacts', 'addresses', 'management', 'officials', 'documents', 'academicYears', 'schoolClasses']);
 
         return new SchoolResource($school);
@@ -87,6 +93,7 @@ class SchoolController extends Controller
      */
     public function update(UpdateSchoolRequest $request, School $school)
     {
+        $this->authorizeUpdate($school);
         $validated = $request->validated();
         $school->update($validated);
         $school->load(['contacts', 'addresses', 'management', 'officials', 'documents', 'academicYears', 'schoolClasses']);
@@ -100,6 +107,7 @@ class SchoolController extends Controller
      */
     public function destroy(School $school): JsonResponse
     {
+        $this->authorizeDelete($school);
         $school->delete();
 
         return response()->json([
@@ -114,6 +122,7 @@ class SchoolController extends Controller
     public function restore(int $id): JsonResponse
     {
         $school = School::withTrashed()->findOrFail($id);
+        $this->authorizeRestore($school);
         $school->restore();
 
         return response()->json([
@@ -129,6 +138,7 @@ class SchoolController extends Controller
     public function forceDelete(int $id): JsonResponse
     {
         $school = School::withTrashed()->findOrFail($id);
+        $this->authorizeForceDelete($school);
         $school->forceDelete();
 
         return response()->json([
@@ -142,6 +152,7 @@ class SchoolController extends Controller
      */
     public function withTrashed(Request $request): JsonResponse
     {
+        $this->authorizeViewAny(School::class);
         $query = School::withTrashed()->with(['contacts', 'addresses', 'management', 'officials', 'documents', 'academicYears', 'schoolClasses']);
 
         $perPage = min($request->get('per_page', 15), 100);
@@ -164,6 +175,7 @@ class SchoolController extends Controller
      */
     public function onlyTrashed(Request $request): JsonResponse
     {
+        $this->authorizeViewAny(School::class);
         $query = School::onlyTrashed()->with(['contacts', 'addresses', 'management', 'officials', 'documents', 'academicYears', 'schoolClasses']);
 
         $perPage = min($request->get('per_page', 15), 100);
@@ -186,6 +198,8 @@ class SchoolController extends Controller
      */
     public function bulkUpdateStatus(Request $request): JsonResponse
     {
+        $this->authorizeBulkOperation('update', School::class);
+        $this->validateBulkOperationLimits($request->input('school_ids', []));
         $validated = $request->validate([
             'school_ids' => 'required|array',
             'school_ids.*' => 'integer|exists:schools,id',
@@ -207,6 +221,7 @@ class SchoolController extends Controller
      */
     public function statistics(): JsonResponse
     {
+        $this->authorizeStatistics(School::class);
         $stats = [
             'total_schools' => School::count(),
             'active_schools' => School::where('status', 'active')->count(),

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Frontend;
 
+use App\Http\Controllers\Concerns\AuthorizesResourceOperations;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -10,11 +11,14 @@ use OwenIt\Auditing\Models\Audit;
 
 class AuditController extends Controller
 {
+    use AuthorizesResourceOperations;
+
     /**
      * Display a listing of audit records
      */
     public function index(Request $request): Response
     {
+        $this->authorizeAuditAccess();
         $audits = Audit::with(['user'])
             ->orderByDesc('created_at')
             // Apply filters
@@ -44,7 +48,7 @@ class AuditController extends Controller
                 ->pluck('auditable_type')
                 ->filter()
                 ->values()
-                ->map(fn($model) => [
+                ->map(fn ($model) => [
                     'value' => $model,
                     'label' => class_basename($model),
                 ]),
@@ -63,6 +67,7 @@ class AuditController extends Controller
      */
     public function show(Audit $audit): Response
     {
+        $this->authorizeAuditAccess();
         $audit->load(['user']);
 
         return Inertia::render('Audits/Show', [
@@ -77,6 +82,7 @@ class AuditController extends Controller
      */
     public function dashboard(): Response
     {
+        $this->authorizeAuditAccess();
         $stats = [
             'total_audits' => Audit::count(),
             'today_audits' => Audit::whereDate('created_at', today())->count(),
@@ -149,7 +155,9 @@ class AuditController extends Controller
      */
     public function timeline(Request $request, string $modelType, int $modelId): Response
     {
-        $fullModelType = 'App\Models\\' . $modelType;
+        $this->authorizeAuditAccess();
+
+        $fullModelType = 'App\Models\\'.$modelType;
         // dd($fullModelType);
         $audits = Audit::with(['user'])
             ->where('auditable_type', $fullModelType)
@@ -183,6 +191,7 @@ class AuditController extends Controller
      */
     public function forUser(Request $request, int $userId): Response
     {
+        $this->authorizeAuditAccess();
         $query = Audit::with(['user'])
             ->where('user_id', $userId)
             ->orderByDesc('created_at');
@@ -217,9 +226,9 @@ class AuditController extends Controller
         if ($audit->event === 'created') {
             $fields = array_keys($audit->new_values ?? []);
             if (count($fields) > 0) {
-                $summary[] = 'Record created with ' . count($fields) . ' field' . (count($fields) > 1 ? 's' : '');
+                $summary[] = 'Record created with '.count($fields).' field'.(count($fields) > 1 ? 's' : '');
                 if (count($fields) <= 5) {
-                    $summary[] = 'Fields set: ' . implode(', ', $fields);
+                    $summary[] = 'Fields set: '.implode(', ', $fields);
                 }
             } else {
                 $summary[] = 'Record created';
@@ -239,9 +248,9 @@ class AuditController extends Controller
             }
 
             if (count($changedFields) > 0) {
-                $summary[] = 'Updated ' . count($changedFields) . ' field' . (count($changedFields) > 1 ? 's' : '');
+                $summary[] = 'Updated '.count($changedFields).' field'.(count($changedFields) > 1 ? 's' : '');
                 if (count($changedFields) <= 5) {
-                    $summary[] = 'Changed: ' . implode(', ', $changedFields);
+                    $summary[] = 'Changed: '.implode(', ', $changedFields);
                 }
             } else {
                 $summary[] = 'Record updated (no field changes detected)';
@@ -249,7 +258,7 @@ class AuditController extends Controller
         } elseif ($audit->event === 'deleted') {
             $fields = array_keys($audit->old_values ?? []);
             if (count($fields) > 0) {
-                $summary[] = 'Record deleted with ' . count($fields) . ' field' . (count($fields) > 1 ? 's' : '');
+                $summary[] = 'Record deleted with '.count($fields).' field'.(count($fields) > 1 ? 's' : '');
             } else {
                 $summary[] = 'Record deleted';
             }
@@ -258,15 +267,15 @@ class AuditController extends Controller
         } elseif ($audit->event === 'login') {
             $data = $audit->new_values ?? [];
             if (isset($data['user_name'])) {
-                $summary[] = 'User login: ' . $data['user_name'];
+                $summary[] = 'User login: '.$data['user_name'];
             } else {
                 $summary[] = 'User login event';
             }
         } else {
             // Handle other custom events
-            $summary[] = ucfirst($audit->event) . ' event';
+            $summary[] = ucfirst($audit->event).' event';
             if ($audit->new_values && count($audit->new_values) > 0) {
-                $summary[] = 'Data: ' . json_encode($audit->new_values);
+                $summary[] = 'Data: '.json_encode($audit->new_values);
             }
         }
 

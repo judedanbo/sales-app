@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\AuthorizesResourceOperations;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateRoleRequest;
@@ -15,11 +16,14 @@ use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
+    use AuthorizesResourceOperations;
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        $this->requireManagementPermission('view_roles');
         $query = Role::with(['permissions', 'users']);
 
         // Apply filters
@@ -89,6 +93,7 @@ class RoleController extends Controller
      */
     public function store(StoreRoleRequest $request): JsonResponse
     {
+        $this->requireManagementPermission('create_roles');
         $validated = $request->validated();
 
         $role = Role::create($validated);

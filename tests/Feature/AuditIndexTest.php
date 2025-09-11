@@ -8,6 +8,8 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->user = User::factory()->create();
+    // Assign system_admin role which has audit permissions
+    $this->user->assignRole('system_admin');
 });
 
 it('can access audit index page', function () {

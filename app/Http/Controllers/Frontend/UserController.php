@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Enums\UserType;
+use App\Http\Controllers\Concerns\AuthorizesResourceOperations;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
@@ -16,11 +17,14 @@ use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
+    use AuthorizesResourceOperations;
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request): Response
     {
+        $this->authorizeViewAny(User::class);
         $query = User::with(['school', 'roles']);
 
         // Apply filters
@@ -125,6 +129,7 @@ class UserController extends Controller
      */
     public function create(): Response
     {
+        $this->authorizeCreate(User::class);
         $schools = School::select('id', 'school_name')->where('status', 'active')->orderBy('school_name')->get();
         $userTypes = collect(UserType::cases())->map(function ($type) {
             return [
@@ -145,6 +150,7 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request): RedirectResponse
     {
+        $this->authorizeCreate(User::class);
         $validated = $request->validated();
         $validated['created_by'] = auth()->id();
 
@@ -160,6 +166,7 @@ class UserController extends Controller
      */
     public function show(User $user): Response
     {
+        $this->authorizeView($user);
         $user->load(['school', 'roles', 'permissions', 'schoolOfficial', 'sales' => function ($query) {
             $query->latest()->take(10);
         }]);
@@ -174,6 +181,7 @@ class UserController extends Controller
      */
     public function edit(User $user): Response
     {
+        $this->authorizeUpdate($user);
         $user->load(['school', 'roles']);
 
         $schools = School::select('id', 'school_name')->where('status', 'active')->orderBy('school_name')->get();
@@ -197,6 +205,7 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
+        $this->authorizeUpdate($user);
         $validated = $request->validated();
         $validated['updated_by'] = auth()->id();
 
@@ -216,6 +225,7 @@ class UserController extends Controller
      */
     public function destroy(User $user): RedirectResponse
     {
+        $this->authorizeDelete($user);
         // Prevent self-deletion
         if ($user->id === auth()->id()) {
             return redirect()->route('users.index')
@@ -233,6 +243,7 @@ class UserController extends Controller
      */
     public function roles(User $user): Response
     {
+        $this->authorizeRoleManagement($user);
         $user->load(['roles', 'permissions']);
         $availableRoles = Role::all();
 
@@ -247,6 +258,7 @@ class UserController extends Controller
      */
     public function assignRole(Request $request, User $user): RedirectResponse
     {
+        $this->authorizeRoleManagement($user);
         $request->validate([
             'role' => 'required|string|exists:roles,name',
         ]);
@@ -262,6 +274,7 @@ class UserController extends Controller
      */
     public function removeRole(Request $request, User $user): RedirectResponse
     {
+        $this->authorizeRoleManagement($user);
         $request->validate([
             'role' => 'required|string|exists:roles,name',
         ]);
@@ -277,6 +290,7 @@ class UserController extends Controller
      */
     public function activate(User $user): RedirectResponse
     {
+        $this->authorizeUserStatusChange($user);
         $user->update([
             'is_active' => true,
             'updated_by' => auth()->id(),
@@ -290,6 +304,7 @@ class UserController extends Controller
      */
     public function deactivate(User $user): RedirectResponse
     {
+        $this->authorizeUserStatusChange($user);
         // Prevent deactivating current user
         if ($user->id === auth()->id()) {
             return back()->with('error', 'You cannot deactivate your own account.');
@@ -309,6 +324,7 @@ class UserController extends Controller
     public function restore(int $id): RedirectResponse
     {
         $user = User::withTrashed()->findOrFail($id);
+        $this->authorizeRestore($user);
         $user->restore();
 
         return redirect()->route('users.show', $user)

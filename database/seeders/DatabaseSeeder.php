@@ -13,10 +13,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Seed roles and permissions first (required before users)
-        $this->call([
-            RolesAndPermissionsSeeder::class,
-        ]);
 
         // Create test user (legacy)
         User::factory()->create([
@@ -36,14 +32,19 @@ class DatabaseSeeder extends Seeder
             SchoolClassSeeder::class,
         ]);
 
-        // Create sample users with proper roles (after schools are created)
-        $this->call([
-            SampleUsersSeeder::class,
-        ]);
-
         // Keep legacy role seeder for backward compatibility (runs after new system)
         $this->call([
             UserRolesSeeder::class,
+        ]);
+
+        // Seed roles and permissions first (required before users)
+        $this->call([
+            RolesAndPermissionsSeeder::class,
+        ]);
+
+        // Create sample users with proper roles (after schools are created)
+        $this->call([
+            SampleUsersSeeder::class,
         ]);
     }
 }

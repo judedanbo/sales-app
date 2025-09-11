@@ -111,16 +111,20 @@ test('sensitive fields are excluded from user auditing', function () {
 });
 
 test('audit api endpoints return data', function () {
+    // Create authenticated user with audit permissions
+    $authUser = User::factory()->create();
+    $authUser->assignRole('system_admin');
+
     // Create some audit data
     $user = User::factory()->create();
     $school = School::factory()->create();
 
     // Test main index endpoint
-    $response = $this->getJson('/api/audits/');
+    $response = $this->actingAs($authUser)->getJson('/api/audits/');
     $response->assertSuccessful();
 
     // Test statistics endpoint
-    $response = $this->getJson('/api/audits/statistics/summary');
+    $response = $this->actingAs($authUser)->getJson('/api/audits/statistics/summary');
     $response->assertSuccessful();
     $response->assertJsonStructure([
         'stats' => [
@@ -135,29 +139,37 @@ test('audit api endpoints return data', function () {
     ]);
 
     // Test models list endpoint
-    $response = $this->getJson('/api/audits/models/list');
+    $response = $this->actingAs($authUser)->getJson('/api/audits/models/list');
     $response->assertSuccessful();
 });
 
 test('audit filtering works', function () {
+    // Create authenticated user with audit permissions
+    $authUser = User::factory()->create();
+    $authUser->assignRole('system_admin');
+
     $user1 = User::factory()->create(['name' => 'User 1']);
     $user2 = User::factory()->create(['name' => 'User 2']);
     $school = School::factory()->create();
 
     // Test filtering by model type
-    $response = $this->getJson('/api/audits/?auditable_type='.urlencode(User::class));
+    $response = $this->actingAs($authUser)->getJson('/api/audits/?auditable_type='.urlencode(User::class));
     $response->assertSuccessful();
 
     // Test filtering by user
-    $response = $this->getJson("/api/audits/?user_id={$user1->id}");
+    $response = $this->actingAs($authUser)->getJson("/api/audits/?user_id={$user1->id}");
     $response->assertSuccessful();
 
     // Test filtering by event
-    $response = $this->getJson('/api/audits/?event=created');
+    $response = $this->actingAs($authUser)->getJson('/api/audits/?event=created');
     $response->assertSuccessful();
 });
 
 test('audit timeline shows chronological changes', function () {
+    // Create authenticated user with audit permissions
+    $authUser = User::factory()->create();
+    $authUser->assignRole('system_admin');
+
     $user = User::factory()->create(['name' => 'Original Name']);
 
     // Make several updates to create a timeline
@@ -165,7 +177,7 @@ test('audit timeline shows chronological changes', function () {
     $user->update(['name' => 'Second Update']);
     $user->update(['phone' => '1234567890']);
 
-    $response = $this->getJson('/api/audits/timeline/'.urlencode(User::class)."/{$user->id}");
+    $response = $this->actingAs($authUser)->getJson('/api/audits/timeline/'.urlencode(User::class)."/{$user->id}");
     $response->assertSuccessful();
 
     $audits = $response->json();
@@ -180,6 +192,10 @@ test('audit timeline shows chronological changes', function () {
 });
 
 test('user specific audits can be retrieved', function () {
+    // Create authenticated user with audit permissions
+    $authUser = User::factory()->create();
+    $authUser->assignRole('system_admin');
+
     $user1 = User::factory()->create();
     $user2 = User::factory()->create();
 
@@ -187,7 +203,7 @@ test('user specific audits can be retrieved', function () {
     $user1->update(['name' => 'User 1 Updated']);
     $user2->update(['name' => 'User 2 Updated']);
 
-    $response = $this->getJson("/api/audits/user/{$user1->id}");
+    $response = $this->actingAs($authUser)->getJson("/api/audits/user/{$user1->id}");
     $response->assertSuccessful();
 
     $data = $response->json();
@@ -200,6 +216,10 @@ test('user specific audits can be retrieved', function () {
 });
 
 test('model specific audits can be retrieved', function () {
+    // Create authenticated user with audit permissions
+    $authUser = User::factory()->create();
+    $authUser->assignRole('system_admin');
+
     $user = User::factory()->create();
     $school = School::factory()->create();
 
@@ -207,7 +227,7 @@ test('model specific audits can be retrieved', function () {
     $school->update(['school_name' => 'Updated School']);
 
     $userClass = urlencode(User::class);
-    $response = $this->getJson("/api/audits/model/{$userClass}/{$user->id}");
+    $response = $this->actingAs($authUser)->getJson("/api/audits/model/{$userClass}/{$user->id}");
     $response->assertSuccessful();
 
     $data = $response->json();

@@ -526,6 +526,26 @@ The dashboard provides real-time insights into:
 - Check spelling and try partial matches
 - Verify data exists in the system
 
+### Permission-Based Access Issues
+
+**If You Cannot Access Certain Pages:**
+- Verify your user type supports the functionality (SYSTEM_ADMIN for /users, /roles, /permissions)
+- Check if your account has been assigned the appropriate role
+- Super Administrators have unrestricted access to all routes
+- Contact system administrator for role assignment issues
+
+**Time-Based Access Restrictions:**
+- Some routes (like /audits) may have time-based access controls
+- Super Administrators can bypass time restrictions
+- System Administrators may be restricted to business hours (9 AM - 6 PM, Mon-Fri)
+- Emergency override access can be granted by Super Administrators
+
+**Audit Route Specific:**
+- Audit trail access requires: Super Admin, System Admin, Auditor, or School Admin role
+- Super Administrators have 24/7 access to audit functionality
+- Other administrators may be subject to business hours restrictions
+- Contact Super Administrator if you cannot access audit trails
+
 ### Getting Help
 
 - Contact system administrator for access issues
@@ -537,6 +557,20 @@ The dashboard provides real-time insights into:
 ## Updates and Changes
 
 ### Recent Enhancements
+
+**System Administrator Audit Access Fix (January 2025):**
+- Fixed role name mismatches preventing super administrators from accessing audit routes
+- Super administrators can now access /audits, /users, /roles, and /permissions as intended
+- Enhanced time-based access controls with proper super admin overrides
+- Improved error handling for access restrictions with clearer user feedback
+- Fixed middleware configuration issues affecting administrative route access
+
+**Frontend Permission System (January 2025):**
+- Implemented comprehensive Vue.js authorization composables for permission checking
+- Added permission-based conditional rendering throughout the application
+- Enhanced navigation with role-based menu hiding/showing
+- Created PermissionGuard component for advanced access control
+- Integrated real-time permission checking across all Vue components
 
 **Role Users Management System:**
 - Added comprehensive user assignment modal interface

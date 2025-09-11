@@ -15,7 +15,23 @@ class UpdateSchoolRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true; // Add proper authorization logic if needed
+        $user = $this->user();
+        if (! $user) {
+            return false;
+        }
+
+        $school = $this->route('school');
+        if (! $school) {
+            return false;
+        }
+
+        // School users can update their own school
+        if ($user->isSchoolUser() && $user->school_id === $school->id) {
+            return $user->hasPermissionTo('edit_own_school');
+        }
+
+        // System users can update any school
+        return $user->isSystemUser() && $user->hasPermissionTo('edit_schools');
     }
 
     /**

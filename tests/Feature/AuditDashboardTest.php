@@ -8,6 +8,8 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->user = User::factory()->create();
+    // Assign system_admin role which has audit permissions
+    $this->user->assignRole('system_admin');
 });
 
 it('can access audit dashboard page', function () {
@@ -99,7 +101,7 @@ it('provides top users with correct structure', function () {
 it('handles empty data gracefully', function () {
     // Clear all audit data to test empty state
     \OwenIt\Auditing\Models\Audit::truncate();
-    
+
     // Test with no audit data
     $this->actingAs($this->user)
         ->get('/audits/dashboard')

@@ -152,12 +152,23 @@ class User extends Authenticatable implements Auditable
      */
     public function isSystemUser(): bool
     {
-        return in_array($this->user_type, [
-            UserType::STAFF,
-            UserType::ADMIN,
-            UserType::AUDIT,
+        // Check user_type field first
+        $systemUserTypes = [
+            UserType::SUPER_ADMIN,
             UserType::SYSTEM_ADMIN,
-        ]);
+            UserType::STAFF,
+            UserType::ADMIN,        // Legacy
+            UserType::AUDIT,        // Legacy
+        ];
+
+        if (in_array($this->user_type, $systemUserTypes)) {
+            return true;
+        }
+
+        // Fallback: Check if user has system roles (in case user_type is not set correctly)
+        $systemRoles = ['super_admin', 'system_admin', 'admin', 'audit', 'staff'];
+
+        return $this->hasAnyRole($systemRoles);
     }
 
     /**

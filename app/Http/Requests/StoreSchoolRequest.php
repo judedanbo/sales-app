@@ -15,7 +15,13 @@ class StoreSchoolRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true; // Add proper authorization logic if needed
+        // Only system users can create schools
+        $user = $this->user();
+        if (! $user) {
+            return false;
+        }
+
+        return $user->isSystemUser() && $user->hasPermissionTo('create_schools');
     }
 
     /**

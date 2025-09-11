@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PermissionGuard from '@/components/PermissionGuard.vue';
 import SchoolCreateModal from '@/components/schools/SchoolCreateModal.vue';
 import SchoolFiltersComponent from '@/components/schools/SchoolFilters.vue';
 import SchoolsTable from '@/components/schools/SchoolsTable.vue';
@@ -289,10 +290,12 @@ const clearFilters = () => {
             <!-- Header Section -->
             <PageHeader title="Schools" description="Manage your schools and their information">
                 <template #action>
-                    <Button @click="showCreateModal = true">
-                        <Plus class="mr-2 h-4 w-4" />
-                        Add School
-                    </Button>
+                    <PermissionGuard permission="create_schools">
+                        <Button @click="showCreateModal = true">
+                            <Plus class="mr-2 h-4 w-4" />
+                            Add School
+                        </Button>
+                    </PermissionGuard>
                 </template>
             </PageHeader>
 
@@ -325,6 +328,8 @@ const clearFilters = () => {
         </div>
 
         <!-- Create School Modal -->
-        <SchoolCreateModal :open="showCreateModal" @update:open="showCreateModal = $event" @school-created="handleSchoolCreated" />
+        <PermissionGuard permission="create_schools">
+            <SchoolCreateModal :open="showCreateModal" @update:open="showCreateModal = $event" @school-created="handleSchoolCreated" />
+        </PermissionGuard>
     </AppLayout>
 </template>

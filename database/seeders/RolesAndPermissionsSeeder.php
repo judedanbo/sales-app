@@ -31,9 +31,22 @@ class RolesAndPermissionsSeeder extends Seeder
                 'create_users' => 'Create new users',
                 'edit_users' => 'Edit user information',
                 'delete_users' => 'Delete users',
+                'restore_users' => 'Restore soft-deleted users',
+                'force_delete_users' => 'Permanently delete users',
+                'bulk_edit_users' => 'Perform bulk operations on users',
+                'export_users' => 'Export user data',
                 'impersonate_users' => 'Impersonate other users',
                 'manage_user_status' => 'Activate/deactivate users',
                 'reset_passwords' => 'Reset user passwords',
+            ],
+
+            // Profile & Account Management
+            'profile' => [
+                'edit_profile' => 'Edit own profile information',
+                'delete_own_account' => 'Delete own account',
+                'manage_security_settings' => 'Manage security settings',
+                'view_own_activity' => 'View own activity logs',
+                'manage_preferences' => 'Manage personal preferences',
             ],
 
             // Role & Permission Management
@@ -44,6 +57,9 @@ class RolesAndPermissionsSeeder extends Seeder
                 'delete_roles' => 'Delete roles',
                 'assign_roles' => 'Assign roles to users',
                 'manage_permissions' => 'Manage role permissions',
+                'view_permissions' => 'View available permissions',
+                'assign_permissions_to_roles' => 'Assign permissions to roles',
+                'bulk_manage_roles' => 'Perform bulk operations on roles',
             ],
 
             // School Management
@@ -53,10 +69,19 @@ class RolesAndPermissionsSeeder extends Seeder
                 'create_schools' => 'Create new schools',
                 'edit_schools' => 'Edit school information',
                 'delete_schools' => 'Delete schools',
+                'restore_schools' => 'Restore soft-deleted schools',
+                'force_delete_schools' => 'Permanently delete schools',
+                'bulk_edit_schools' => 'Perform bulk operations on schools',
+                'export_schools' => 'Export school data',
+                'assign_school_users' => 'Assign users to schools',
                 'manage_school_staff' => 'Manage school staff assignments',
                 'manage_school_officials' => 'Manage school officials',
                 'manage_school_classes' => 'Manage school classes',
+                'restore_school_classes' => 'Restore soft-deleted classes',
+                'force_delete_school_classes' => 'Permanently delete classes',
                 'manage_academic_years' => 'Manage academic years',
+                'restore_academic_years' => 'Restore soft-deleted academic years',
+                'force_delete_academic_years' => 'Permanently delete academic years',
                 'manage_school_documents' => 'Manage school documents',
                 'approve_school_changes' => 'Approve major school changes',
             ],
@@ -129,11 +154,19 @@ class RolesAndPermissionsSeeder extends Seeder
                 'view_communication_logs' => 'View communication history',
             ],
 
+            // Audit Management
+            'audit' => [
+                'view_audit_trail' => 'View audit log entries',
+                'view_audit_dashboard' => 'View audit analytics dashboard',
+                'export_audit_logs' => 'Export audit data',
+                'view_audit_logs' => 'View detailed audit logs',
+                'manage_audit_settings' => 'Configure audit settings',
+            ],
+
             // System Administration
             'system' => [
                 'view_system_settings' => 'View system settings',
                 'manage_system_settings' => 'Modify system settings',
-                'view_audit_logs' => 'View audit trail',
                 'view_activity_logs' => 'View user activity logs',
                 'manage_integrations' => 'Manage third-party integrations',
                 'manage_backups' => 'Manage system backups',
@@ -185,6 +218,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'system_administration',
             'manage_backups',
             'access_developer_tools',
+            'manage_api_keys',
         ]));
 
         // School Administrator - Full access to assigned schools
@@ -193,14 +227,18 @@ class RolesAndPermissionsSeeder extends Seeder
             ['guard_name' => 'web']
         );
         $schoolAdmin->syncPermissions([
-            'view_users', 'create_users', 'edit_users', 'manage_user_status',
-            'view_roles', 'assign_roles',
+            'view_users', 'create_users', 'edit_users', 'manage_user_status', 'bulk_edit_users', 'export_users',
+            'view_roles', 'assign_roles', 'view_permissions', 'assign_permissions_to_roles',
             'view_schools', 'edit_schools', 'manage_school_staff', 'manage_school_officials',
-            'manage_school_classes', 'manage_academic_years', 'manage_school_documents',
+            'manage_school_classes', 'restore_school_classes', 'force_delete_school_classes',
+            'manage_academic_years', 'restore_academic_years', 'force_delete_academic_years',
+            'manage_school_documents', 'assign_school_users', 'bulk_edit_schools', 'export_schools',
             'view_products', 'view_inventory',
             'view_reports', 'export_reports', 'view_dashboards',
             'view_staff_profiles', 'manage_staff_profiles',
             'send_notifications', 'manage_announcements',
+            'view_audit_trail', 'view_audit_dashboard', 'view_audit_logs', 'export_audit_logs',
+            'edit_profile', 'delete_own_account', 'view_own_activity', 'manage_preferences', 'manage_security_settings',
         ]);
 
         // Principal/Head Teacher - School oversight with limited edit capabilities
@@ -209,13 +247,16 @@ class RolesAndPermissionsSeeder extends Seeder
             ['guard_name' => 'web']
         );
         $principal->syncPermissions([
-            'view_users', 'view_roles',
-            'view_schools', 'manage_school_classes', 'manage_academic_years',
-            'approve_school_changes',
+            'view_users', 'view_roles', 'view_permissions',
+            'view_schools', 'manage_school_classes', 'restore_school_classes',
+            'manage_academic_years', 'restore_academic_years',
+            'approve_school_changes', 'manage_school_documents',
             'view_products', 'view_inventory',
-            'view_reports', 'view_dashboards',
+            'view_reports', 'view_dashboards', 'export_reports',
             'view_staff_profiles',
             'send_notifications', 'manage_announcements',
+            'view_audit_trail', 'view_audit_logs',
+            'edit_profile', 'delete_own_account', 'view_own_activity', 'manage_preferences',
         ]);
 
         // Academic Coordinator - Academic program management
@@ -225,9 +266,13 @@ class RolesAndPermissionsSeeder extends Seeder
         );
         $academicCoordinator->syncPermissions([
             'view_users', 'view_schools',
-            'manage_school_classes', 'manage_academic_years',
-            'view_reports', 'export_reports',
+            'manage_school_classes', 'restore_school_classes',
+            'manage_academic_years', 'restore_academic_years',
+            'manage_school_documents',
+            'view_reports', 'export_reports', 'view_dashboards',
             'view_staff_profiles',
+            'view_audit_trail',
+            'edit_profile', 'delete_own_account', 'view_own_activity', 'manage_preferences',
             'send_notifications',
         ]);
 
@@ -237,11 +282,14 @@ class RolesAndPermissionsSeeder extends Seeder
             ['guard_name' => 'web']
         );
         $departmentHead->syncPermissions([
-            'view_users', 'create_users', 'edit_users',
-            'view_schools', 'manage_school_classes',
-            'view_reports', 'export_reports',
+            'view_users', 'create_users', 'edit_users', 'bulk_edit_users',
+            'view_schools', 'manage_school_classes', 'restore_school_classes',
+            'manage_academic_years',
+            'view_reports', 'export_reports', 'view_dashboards',
             'view_staff_profiles', 'manage_departments',
             'send_notifications',
+            'view_audit_trail',
+            'edit_profile', 'delete_own_account', 'view_own_activity', 'manage_preferences',
         ]);
 
         // Sales Manager - Full sales module access
@@ -250,13 +298,15 @@ class RolesAndPermissionsSeeder extends Seeder
             ['guard_name' => 'web']
         );
         $salesManager->syncPermissions([
-            'view_users', 'create_users', 'edit_users',
+            'view_users', 'create_users', 'edit_users', 'bulk_edit_users', 'export_users',
             'view_all_sales', 'create_sales', 'edit_all_sales', 'delete_sales',
             'void_sales', 'approve_discounts', 'manage_sales_targets', 'view_sales_analytics',
             'view_products', 'edit_products', 'manage_pricing',
             'view_inventory',
             'view_financial_reports', 'manage_invoices',
             'view_reports', 'view_advanced_reports', 'export_reports', 'view_dashboards',
+            'view_audit_trail',
+            'edit_profile', 'delete_own_account', 'view_own_activity', 'manage_preferences',
         ]);
 
         // Sales Representative - Own sales management
@@ -268,6 +318,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'view_own_sales', 'create_sales', 'edit_own_sales',
             'view_products', 'view_inventory',
             'view_reports',
+            'edit_profile', 'delete_own_account', 'view_own_activity', 'manage_preferences',
         ]);
 
         // Finance Officer - Financial operations
@@ -281,6 +332,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'view_budgets', 'manage_budgets', 'approve_expenses', 'export_financial_data',
             'view_reports', 'view_advanced_reports', 'export_reports',
             'view_audit_logs',
+            'edit_profile', 'delete_own_account', 'view_own_activity', 'manage_preferences',
         ]);
 
         // HR Manager - Human resources management
@@ -290,11 +342,14 @@ class RolesAndPermissionsSeeder extends Seeder
         );
         $hrManager->syncPermissions([
             'view_users', 'create_users', 'edit_users', 'manage_user_status',
-            'reset_passwords',
+            'restore_users', 'bulk_edit_users', 'export_users',
+            'reset_passwords', 'impersonate_users',
             'view_staff_profiles', 'manage_staff_profiles', 'manage_leave_requests',
             'view_hr_reports', 'manage_departments',
-            'view_reports', 'export_reports',
-            'send_notifications',
+            'view_reports', 'export_reports', 'view_dashboards',
+            'send_notifications', 'send_bulk_messages',
+            'view_audit_trail', 'view_audit_logs',
+            'edit_profile', 'delete_own_account', 'view_own_activity', 'manage_preferences',
         ]);
 
         // IT Support - Technical support
@@ -308,6 +363,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'view_activity_logs',
             'view_support_tickets', 'manage_support_tickets',
             'access_help_center', 'manage_faqs',
+            'edit_profile', 'delete_own_account', 'view_own_activity', 'manage_preferences',
         ]);
 
         // Data Analyst - Analytics and reporting
@@ -316,13 +372,16 @@ class RolesAndPermissionsSeeder extends Seeder
             ['guard_name' => 'web']
         );
         $dataAnalyst->syncPermissions([
-            'view_users', 'view_schools', 'view_all_schools',
+            'view_users', 'export_users',
+            'view_schools', 'view_all_schools', 'export_schools',
             'view_all_sales', 'view_sales_analytics',
             'view_products', 'view_inventory',
-            'view_financial_reports',
+            'view_financial_reports', 'export_financial_data',
             'view_reports', 'view_advanced_reports', 'create_custom_reports',
             'export_reports', 'schedule_reports', 'view_dashboards',
             'view_hr_reports',
+            'view_audit_trail', 'view_audit_dashboard', 'view_audit_logs', 'export_audit_logs',
+            'edit_profile', 'delete_own_account', 'view_own_activity', 'manage_preferences',
         ]);
 
         // Auditor - Compliance and audit
@@ -331,13 +390,14 @@ class RolesAndPermissionsSeeder extends Seeder
             ['guard_name' => 'web']
         );
         $auditor->syncPermissions([
-            'view_users', 'view_roles',
-            'view_schools', 'view_all_schools',
+            'view_users', 'view_roles', 'view_permissions',
+            'view_schools', 'view_all_schools', 'export_schools',
             'view_all_sales', 'view_products', 'view_inventory',
             'view_financial_reports', 'export_financial_data',
-            'view_reports', 'view_advanced_reports', 'export_reports',
-            'view_audit_logs', 'view_activity_logs',
-            'view_communication_logs',
+            'view_reports', 'view_advanced_reports', 'export_reports', 'view_dashboards',
+            'view_audit_trail', 'view_audit_dashboard', 'view_audit_logs', 'export_audit_logs',
+            'view_activity_logs', 'view_communication_logs',
+            'edit_profile', 'delete_own_account', 'view_own_activity', 'manage_preferences',
         ]);
 
         // Teacher - Class and student management
@@ -346,9 +406,12 @@ class RolesAndPermissionsSeeder extends Seeder
             ['guard_name' => 'web']
         );
         $teacher->syncPermissions([
-            'view_users', 'view_schools', 'manage_school_classes',
-            'view_reports',
+            'view_users', 'view_schools',
+            'manage_school_classes', 'manage_academic_years',
+            'view_reports', 'view_dashboards',
             'send_notifications',
+            'view_audit_trail',
+            'edit_profile', 'delete_own_account', 'view_own_activity', 'manage_preferences',
         ]);
 
         // Staff - Basic operational access
@@ -359,6 +422,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $staff->syncPermissions([
             'view_own_sales', 'create_sales', 'edit_own_sales',
             'view_products', 'view_inventory',
+            'edit_profile', 'delete_own_account', 'view_own_activity', 'manage_preferences',
         ]);
 
         // Guest/Observer - Very limited access

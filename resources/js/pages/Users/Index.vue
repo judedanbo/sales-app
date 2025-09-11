@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PermissionGuard from '@/components/PermissionGuard.vue';
 import { Button } from '@/components/ui/button';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import UserFiltersComponent from '@/components/users/UserFilters.vue';
@@ -243,10 +244,12 @@ const clearFilters = () => {
             <!-- Header Section -->
             <PageHeader title="Users" description="Manage system users and their permissions">
                 <template #action>
-                    <Button @click="showCreateModal = true">
-                        <Plus class="mr-2 h-4 w-4" />
-                        Add User
-                    </Button>
+                    <PermissionGuard permission="create_users">
+                        <Button @click="showCreateModal = true">
+                            <Plus class="mr-2 h-4 w-4" />
+                            Add User
+                        </Button>
+                    </PermissionGuard>
                 </template>
             </PageHeader>
 
@@ -282,13 +285,15 @@ const clearFilters = () => {
         </div>
 
         <!-- Create User Modal -->
-        <UserFormModal
-            :open="showCreateModal"
-            :user-types="props.userTypes"
-            :schools="props.schools"
-            :roles="props.roles"
-            @update:open="showCreateModal = $event"
-            @user-created="handleUserCreated"
-        />
+        <PermissionGuard permission="create_users">
+            <UserFormModal
+                :open="showCreateModal"
+                :user-types="props.userTypes"
+                :schools="props.schools"
+                :roles="props.roles"
+                @update:open="showCreateModal = $event"
+                @user-created="handleUserCreated"
+            />
+        </PermissionGuard>
     </AppLayout>
 </template>

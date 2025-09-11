@@ -6,6 +6,7 @@ use App\Enums\BoardAffiliation;
 use App\Enums\MediumOfInstruction;
 use App\Enums\SchoolStatus;
 use App\Enums\SchoolType;
+use App\Http\Controllers\Concerns\AuthorizesResourceOperations;
 use App\Http\Controllers\Controller;
 use App\Models\School;
 use Illuminate\Http\Request;
@@ -14,11 +15,14 @@ use Inertia\Response;
 
 class SchoolController extends Controller
 {
+    use AuthorizesResourceOperations;
+
     /**
      * Display a listing of schools.
      */
     public function index(Request $request): Response
     {
+        $this->authorizeViewAny(School::class);
         $query = School::with(['contacts', 'addresses', 'management', 'officials']);
 
         // Get filter data from request (works for both GET and POST/reload)
@@ -78,6 +82,8 @@ class SchoolController extends Controller
      */
     public function getFormData(): \Illuminate\Http\JsonResponse
     {
+        $this->authorizeViewAny(School::class);
+
         return response()->json([
             'schoolTypes' => $this->formatOptionsForSelect(SchoolType::options()),
             'boardAffiliations' => $this->formatOptionsForSelect(BoardAffiliation::options()),
@@ -106,6 +112,7 @@ class SchoolController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorizeCreate(School::class);
         $validated = $request->validate([
             'school_name' => 'required|string|max:255',
             'school_code' => 'required|string|max:50|unique:schools,school_code',
@@ -137,6 +144,7 @@ class SchoolController extends Controller
      */
     public function show(School $school): Response
     {
+        $this->authorizeView($school);
         $school->load(['contacts', 'addresses', 'management', 'officials', 'documents', 'academicYears', 'schoolClasses']);
 
         return Inertia::render('Schools/Show', [
@@ -149,6 +157,7 @@ class SchoolController extends Controller
      */
     public function update(Request $request, School $school)
     {
+        $this->authorizeUpdate($school);
         $validated = $request->validate([
             'school_name' => 'required|string|max:255',
             'school_code' => 'required|string|max:50|unique:schools,school_code,'.$school->id,
@@ -180,6 +189,7 @@ class SchoolController extends Controller
      */
     public function destroy(School $school)
     {
+        $this->authorizeDelete($school);
         $school->delete();
 
         return redirect()->route('schools.index')->with('success', 'School deleted successfully.');
@@ -190,6 +200,7 @@ class SchoolController extends Controller
      */
     public function dashboard(): Response
     {
+        $this->authorizeStatistics(School::class);
         $stats = [
             'total_schools' => School::count(),
             'active_schools' => School::where('status', 'active')->count(),

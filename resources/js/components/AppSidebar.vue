@@ -3,6 +3,7 @@ import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import { useAuthUtils } from '@/composables/useAuthUtils';
 import { dashboard, documentation } from '@/routes';
 import { index as auditsIndex } from '@/routes/audits';
 import { index as permissionsIndex } from '@/routes/permissions';
@@ -12,9 +13,12 @@ import { index as usersIndex } from '@/routes/users';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import { Activity, BookOpen, Key, LayoutGrid, School, Shield, Users } from 'lucide-vue-next';
+import { computed } from 'vue';
 import AppLogo from './AppLogo.vue';
 
-const mainNavItems: NavItem[] = [
+const { filterNavigationByPermissions } = useAuthUtils();
+
+const allMainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: dashboard(),
@@ -47,13 +51,22 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-const footerNavItems: NavItem[] = [
+const allFooterNavItems: NavItem[] = [
     {
         title: 'Documentation',
         href: documentation(),
         icon: BookOpen,
     },
 ];
+
+// Filter navigation items based on user permissions
+const mainNavItems = computed(() => {
+    return filterNavigationByPermissions(allMainNavItems);
+});
+
+const footerNavItems = computed(() => {
+    return filterNavigationByPermissions(allFooterNavItems);
+});
 </script>
 
 <template>
