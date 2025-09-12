@@ -3,6 +3,7 @@ import PermissionGuard from '@/components/PermissionGuard.vue';
 import Badge from '@/components/ui/badge.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -20,13 +21,14 @@ import { index, show } from '@/routes/categories-simple';
 import { type BreadcrumbItem, type Category, type CategoryFilters, type PaginatedData } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { useDebounceFn } from '@vueuse/core';
-import { ChevronDown, ChevronRight, Edit, Eye, Folder, FolderOpen, MoreHorizontal, Package, Plus, Search, Trash2, TreePine } from 'lucide-vue-next';
+import { ChevronDown, ChevronRight, Edit, Eye, Folder, FolderOpen, MoreHorizontal, Package, Plus, Search, Trash2, TreePine, Calendar, User, Filter, X, Settings, RotateCcw } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 
 interface Props {
     categories: PaginatedData<Category>;
     filters: CategoryFilters;
     parentCategories: Array<{ id: number; name: string; full_name?: string }>;
+    creators: Array<{ id: number; name: string }>;
 }
 
 const props = defineProps<Props>();
@@ -43,6 +45,16 @@ const localFilters = ref<CategoryFilters>({
     search: props.filters.search || '',
     parent_id: props.filters.parent_id || '',
     is_active: props.filters.is_active || '',
+    created_from: props.filters.created_from || '',
+    created_to: props.filters.created_to || '',
+    updated_from: props.filters.updated_from || '',
+    updated_to: props.filters.updated_to || '',
+    created_by: props.filters.created_by || '',
+    has_children: props.filters.has_children || '',
+    has_products: props.filters.has_products || '',
+    sort_order_from: props.filters.sort_order_from || '',
+    sort_order_to: props.filters.sort_order_to || '',
+    include_deleted: props.filters.include_deleted || '',
     sort_by: props.filters.sort_by || 'sort_order',
     sort_direction: props.filters.sort_direction || 'asc',
 });
@@ -55,6 +67,16 @@ watch(
             search: newFilters.search || '',
             parent_id: newFilters.parent_id || '',
             is_active: newFilters.is_active || '',
+            created_from: newFilters.created_from || '',
+            created_to: newFilters.created_to || '',
+            updated_from: newFilters.updated_from || '',
+            updated_to: newFilters.updated_to || '',
+            created_by: newFilters.created_by || '',
+            has_children: newFilters.has_children || '',
+            has_products: newFilters.has_products || '',
+            sort_order_from: newFilters.sort_order_from || '',
+            sort_order_to: newFilters.sort_order_to || '',
+            include_deleted: newFilters.include_deleted || '',
             sort_by: newFilters.sort_by || 'sort_order',
             sort_direction: newFilters.sort_direction || 'asc',
         };
@@ -64,6 +86,7 @@ watch(
 
 const isLoading = ref(false);
 const selectedCategories = ref<number[]>([]);
+const showAdvancedFilters = ref(false);
 
 // Statistics computed from data
 const stats = computed(() => ({
@@ -73,6 +96,57 @@ const stats = computed(() => ({
     root: props.categories.data.filter((cat) => !cat.parent_id).length,
     withChildren: props.categories.data.filter((cat) => cat.children_count && cat.children_count > 0).length,
 }));
+
+// Active filters for chips display
+const activeFilters = computed(() => {
+    const filters = [];
+    
+    if (localFilters.value.search) {
+        filters.push({ key: 'search', label: `Search: "${localFilters.value.search}"`, value: localFilters.value.search });
+    }
+    
+    if (localFilters.value.parent_id) {
+        const parentName = localFilters.value.parent_id === 'null' 
+            ? 'Root Categories' 
+            : props.parentCategories.find(p => p.id.toString() === localFilters.value.parent_id?.toString())?.name || 'Unknown';
+        filters.push({ key: 'parent_id', label: `Parent: ${parentName}`, value: localFilters.value.parent_id });
+    }
+    
+    if (localFilters.value.is_active) {
+        const statusLabel = localFilters.value.is_active === '1' ? 'Active Only' : 'Inactive Only';
+        filters.push({ key: 'is_active', label: `Status: ${statusLabel}`, value: localFilters.value.is_active });
+    }
+    
+    if (localFilters.value.created_by) {
+        const creatorName = props.creators.find(c => c.id.toString() === localFilters.value.created_by?.toString())?.name || 'Unknown';
+        filters.push({ key: 'created_by', label: `Creator: ${creatorName}`, value: localFilters.value.created_by });
+    }
+    
+    if (localFilters.value.has_children) {
+        const label = localFilters.value.has_children === '1' ? 'With Children' : 'Without Children';
+        filters.push({ key: 'has_children', label, value: localFilters.value.has_children });
+    }
+    
+    if (localFilters.value.has_products) {
+        const label = localFilters.value.has_products === '1' ? 'With Products' : 'Without Products';
+        filters.push({ key: 'has_products', label, value: localFilters.value.has_products });
+    }
+    
+    if (localFilters.value.include_deleted === '1') {
+        filters.push({ key: 'include_deleted', label: 'Including Deleted', value: localFilters.value.include_deleted });
+    }
+    
+    return filters;
+});
+
+// Check if any advanced filters are active
+const hasAdvancedFilters = computed(() => {
+    return !!(localFilters.value.created_from || localFilters.value.created_to || 
+              localFilters.value.updated_from || localFilters.value.updated_to ||
+              localFilters.value.created_by || localFilters.value.has_children ||
+              localFilters.value.has_products || localFilters.value.sort_order_from ||
+              localFilters.value.sort_order_to || localFilters.value.include_deleted);
+});
 
 // Selection handlers
 const toggleSelection = (categoryId: number) => {
@@ -107,13 +181,34 @@ const debouncedSearch = useDebounceFn(() => {
     applyFilters();
 }, 500);
 
-// Watch for filter changes
+// Watch for search changes specifically with debouncing
+watch(
+    () => localFilters.value.search,
+    () => {
+        debouncedSearch();
+    },
+);
+
+// Watch for other filter changes
 watch(
     () => localFilters.value,
     (newFilters, oldFilters) => {
-        if (newFilters.search !== oldFilters?.search) {
-            debouncedSearch();
-        } else if (newFilters.parent_id !== oldFilters?.parent_id || newFilters.is_active !== oldFilters?.is_active) {
+        // Skip if this is initial load
+        if (!oldFilters) return;
+        
+        // Only apply filters immediately for non-search changes
+        if (newFilters.parent_id !== oldFilters.parent_id || 
+            newFilters.is_active !== oldFilters.is_active ||
+            newFilters.created_from !== oldFilters.created_from ||
+            newFilters.created_to !== oldFilters.created_to ||
+            newFilters.updated_from !== oldFilters.updated_from ||
+            newFilters.updated_to !== oldFilters.updated_to ||
+            newFilters.created_by !== oldFilters.created_by ||
+            newFilters.has_children !== oldFilters.has_children ||
+            newFilters.has_products !== oldFilters.has_products ||
+            newFilters.sort_order_from !== oldFilters.sort_order_from ||
+            newFilters.sort_order_to !== oldFilters.sort_order_to ||
+            newFilters.include_deleted !== oldFilters.include_deleted) {
             applyFilters();
         }
     },
@@ -126,21 +221,21 @@ function applyFilters() {
 
     const params: Record<string, any> = {};
 
-    if (localFilters.value.search) {
-        params.search = localFilters.value.search;
-    }
-    if (localFilters.value.parent_id && localFilters.value.parent_id !== '') {
-        params.parent_id = localFilters.value.parent_id;
-    }
-    if (localFilters.value.is_active && localFilters.value.is_active !== '') {
-        params.is_active = localFilters.value.is_active;
-    }
-    if (localFilters.value.sort_by && localFilters.value.sort_by !== 'sort_order') {
-        params.sort_by = localFilters.value.sort_by;
-    }
-    if (localFilters.value.sort_direction && localFilters.value.sort_direction !== 'asc') {
-        params.sort_direction = localFilters.value.sort_direction;
-    }
+    if (localFilters.value.search) params.search = localFilters.value.search;
+    if (localFilters.value.parent_id && localFilters.value.parent_id !== '') params.parent_id = localFilters.value.parent_id;
+    if (localFilters.value.is_active && localFilters.value.is_active !== '') params.is_active = localFilters.value.is_active;
+    if (localFilters.value.created_from) params.created_from = localFilters.value.created_from;
+    if (localFilters.value.created_to) params.created_to = localFilters.value.created_to;
+    if (localFilters.value.updated_from) params.updated_from = localFilters.value.updated_from;
+    if (localFilters.value.updated_to) params.updated_to = localFilters.value.updated_to;
+    if (localFilters.value.created_by && localFilters.value.created_by !== '') params.created_by = localFilters.value.created_by;
+    if (localFilters.value.has_children && localFilters.value.has_children !== '') params.has_children = localFilters.value.has_children;
+    if (localFilters.value.has_products && localFilters.value.has_products !== '') params.has_products = localFilters.value.has_products;
+    if (localFilters.value.sort_order_from) params.sort_order_from = localFilters.value.sort_order_from;
+    if (localFilters.value.sort_order_to) params.sort_order_to = localFilters.value.sort_order_to;
+    if (localFilters.value.include_deleted === '1') params.include_deleted = localFilters.value.include_deleted;
+    if (localFilters.value.sort_by && localFilters.value.sort_by !== 'sort_order') params.sort_by = localFilters.value.sort_by;
+    if (localFilters.value.sort_direction && localFilters.value.sort_direction !== 'asc') params.sort_direction = localFilters.value.sort_direction;
 
     router.get('/categories', params, {
         preserveScroll: true,
@@ -160,6 +255,16 @@ function goToPage(page: number) {
     if (localFilters.value.search) params.search = localFilters.value.search;
     if (localFilters.value.parent_id && localFilters.value.parent_id !== '') params.parent_id = localFilters.value.parent_id;
     if (localFilters.value.is_active && localFilters.value.is_active !== '') params.is_active = localFilters.value.is_active;
+    if (localFilters.value.created_from) params.created_from = localFilters.value.created_from;
+    if (localFilters.value.created_to) params.created_to = localFilters.value.created_to;
+    if (localFilters.value.updated_from) params.updated_from = localFilters.value.updated_from;
+    if (localFilters.value.updated_to) params.updated_to = localFilters.value.updated_to;
+    if (localFilters.value.created_by && localFilters.value.created_by !== '') params.created_by = localFilters.value.created_by;
+    if (localFilters.value.has_children && localFilters.value.has_children !== '') params.has_children = localFilters.value.has_children;
+    if (localFilters.value.has_products && localFilters.value.has_products !== '') params.has_products = localFilters.value.has_products;
+    if (localFilters.value.sort_order_from) params.sort_order_from = localFilters.value.sort_order_from;
+    if (localFilters.value.sort_order_to) params.sort_order_to = localFilters.value.sort_order_to;
+    if (localFilters.value.include_deleted === '1') params.include_deleted = localFilters.value.include_deleted;
     if (localFilters.value.sort_by && localFilters.value.sort_by !== 'sort_order') params.sort_by = localFilters.value.sort_by;
     if (localFilters.value.sort_direction && localFilters.value.sort_direction !== 'asc') params.sort_direction = localFilters.value.sort_direction;
 
@@ -191,9 +296,53 @@ const clearFilters = () => {
         search: '',
         parent_id: '',
         is_active: '',
+        created_from: '',
+        created_to: '',
+        updated_from: '',
+        updated_to: '',
+        created_by: '',
+        has_children: '',
+        has_products: '',
+        sort_order_from: '',
+        sort_order_to: '',
+        include_deleted: '',
         sort_by: 'sort_order',
         sort_direction: 'asc',
     };
+    applyFilters();
+};
+
+// Remove specific filter
+const removeFilter = (filterKey: string) => {
+    (localFilters.value as any)[filterKey] = '';
+    applyFilters();
+};
+
+// Quick filter presets
+const applyQuickFilter = (preset: string) => {
+    clearFilters();
+    
+    switch (preset) {
+        case 'root_categories':
+            localFilters.value.parent_id = 'null';
+            break;
+        case 'active_with_products':
+            localFilters.value.is_active = '1';
+            localFilters.value.has_products = '1';
+            break;
+        case 'categories_with_children':
+            localFilters.value.has_children = '1';
+            break;
+        case 'recently_created':
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+            localFilters.value.created_from = oneWeekAgo.toISOString().split('T')[0];
+            break;
+        case 'inactive_categories':
+            localFilters.value.is_active = '0';
+            break;
+    }
+    
     applyFilters();
 };
 
@@ -280,12 +429,72 @@ const formatDate = (dateString: string) => {
                 </Card>
             </div>
 
+            <!-- Active Filter Chips -->
+            <div v-if="activeFilters.length > 0" class="flex flex-wrap gap-2 items-center">
+                <span class="text-sm font-medium text-muted-foreground">Active Filters:</span>
+                <div
+                    v-for="filter in activeFilters"
+                    :key="filter.key"
+                    class="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 text-sm rounded-full"
+                >
+                    {{ filter.label }}
+                    <button @click="removeFilter(filter.key)" class="ml-1 hover:bg-blue-200 dark:hover:bg-blue-800 rounded-full p-0.5">
+                        <X class="h-3 w-3" />
+                    </button>
+                </div>
+                <Button variant="ghost" size="sm" @click="clearFilters" class="text-xs">
+                    <RotateCcw class="mr-1 h-3 w-3" />
+                    Clear All
+                </Button>
+            </div>
+
+            <!-- Quick Filter Presets -->
+            <div class="flex flex-wrap gap-2">
+                <span class="text-sm font-medium text-muted-foreground">Quick Filters:</span>
+                <Button variant="outline" size="sm" @click="applyQuickFilter('root_categories')">
+                    <TreePine class="mr-2 h-3 w-3" />
+                    Root Categories
+                </Button>
+                <Button variant="outline" size="sm" @click="applyQuickFilter('active_with_products')">
+                    <Package class="mr-2 h-3 w-3" />
+                    Active with Products
+                </Button>
+                <Button variant="outline" size="sm" @click="applyQuickFilter('categories_with_children')">
+                    <Folder class="mr-2 h-3 w-3" />
+                    With Children
+                </Button>
+                <Button variant="outline" size="sm" @click="applyQuickFilter('recently_created')">
+                    <Calendar class="mr-2 h-3 w-3" />
+                    Recently Created
+                </Button>
+                <Button variant="outline" size="sm" @click="applyQuickFilter('inactive_categories')">
+                    <Eye class="mr-2 h-3 w-3" />
+                    Inactive
+                </Button>
+            </div>
+
             <!-- Filters -->
             <Card>
                 <CardHeader>
-                    <CardTitle class="text-lg">Filters</CardTitle>
+                    <div class="flex items-center justify-between">
+                        <CardTitle class="text-lg flex items-center gap-2">
+                            <Filter class="h-5 w-5" />
+                            Filters
+                        </CardTitle>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            @click="showAdvancedFilters = !showAdvancedFilters"
+                            class="flex items-center gap-2"
+                        >
+                            <Settings class="h-4 w-4" />
+                            Advanced
+                            <ChevronDown :class="{ 'rotate-180': showAdvancedFilters }" class="h-4 w-4 transition-transform" />
+                        </Button>
+                    </div>
                 </CardHeader>
                 <CardContent class="space-y-4">
+                    <!-- Basic Filters -->
                     <div class="grid gap-4 md:grid-cols-4">
                         <!-- Search -->
                         <div class="space-y-2">
@@ -331,6 +540,117 @@ const formatDate = (dateString: string) => {
                         <!-- Actions -->
                         <div class="flex items-end space-x-2">
                             <Button variant="outline" @click="clearFilters"> Clear Filters </Button>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Filters -->
+                    <div v-show="showAdvancedFilters" class="space-y-4 pt-4 border-t">
+                        <div class="grid gap-4 md:grid-cols-3">
+                            <!-- Date Range Filters -->
+                            <div class="space-y-4 md:col-span-3">
+                                <h4 class="text-sm font-medium flex items-center gap-2">
+                                    <Calendar class="h-4 w-4" />
+                                    Date Ranges
+                                </h4>
+                                <div class="grid gap-4 md:grid-cols-4">
+                                    <div class="space-y-2">
+                                        <label class="text-sm font-medium">Created From</label>
+                                        <Input v-model="localFilters.created_from" type="date" />
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label class="text-sm font-medium">Created To</label>
+                                        <Input v-model="localFilters.created_to" type="date" />
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label class="text-sm font-medium">Updated From</label>
+                                        <Input v-model="localFilters.updated_from" type="date" />
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label class="text-sm font-medium">Updated To</label>
+                                        <Input v-model="localFilters.updated_to" type="date" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Creator Filter -->
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium flex items-center gap-2">
+                                    <User class="h-4 w-4" />
+                                    Created By
+                                </label>
+                                <Select v-model="localFilters.created_by">
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Any creator" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="">Any creator</SelectItem>
+                                        <SelectItem v-for="creator in creators" :key="creator.id" :value="creator.id.toString()">
+                                            {{ creator.name }}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <!-- Children Filter -->
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium">Has Children</label>
+                                <Select v-model="localFilters.has_children">
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Any" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="">Any</SelectItem>
+                                        <SelectItem value="1">With children</SelectItem>
+                                        <SelectItem value="0">Without children</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <!-- Products Filter -->
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium">Has Products</label>
+                                <Select v-model="localFilters.has_products">
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Any" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="">Any</SelectItem>
+                                        <SelectItem value="1">With products</SelectItem>
+                                        <SelectItem value="0">Without products</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        <!-- Sort Order Range -->
+                        <div class="space-y-4">
+                            <h4 class="text-sm font-medium">Sort Order Range</h4>
+                            <div class="grid gap-4 md:grid-cols-2">
+                                <div class="space-y-2">
+                                    <label class="text-sm font-medium">From</label>
+                                    <Input v-model="localFilters.sort_order_from" type="number" placeholder="0" />
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-sm font-medium">To</label>
+                                    <Input v-model="localFilters.sort_order_to" type="number" placeholder="999" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Include Deleted -->
+                        <div class="flex items-center space-x-2">
+                            <input
+                                id="include-deleted"
+                                type="checkbox"
+                                v-model="localFilters.include_deleted"
+                                class="rounded"
+                                :value="'1'"
+                                :true-value="'1'"
+                                :false-value="''"
+                            />
+                            <label for="include-deleted" class="text-sm font-medium cursor-pointer">
+                                Include deleted categories
+                            </label>
                         </div>
                     </div>
                 </CardContent>

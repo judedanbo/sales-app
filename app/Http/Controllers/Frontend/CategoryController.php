@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
 use App\Models\Category;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -51,6 +52,60 @@ class CategoryController extends Controller
             $query->where('is_active', (bool) $filters['is_active']);
         }
 
+        // Date range filters
+        if (! empty($filters['created_from'])) {
+            $query->whereDate('created_at', '>=', $filters['created_from']);
+        }
+
+        if (! empty($filters['created_to'])) {
+            $query->whereDate('created_at', '<=', $filters['created_to']);
+        }
+
+        if (! empty($filters['updated_from'])) {
+            $query->whereDate('updated_at', '>=', $filters['updated_from']);
+        }
+
+        if (! empty($filters['updated_to'])) {
+            $query->whereDate('updated_at', '<=', $filters['updated_to']);
+        }
+
+        // Creator filter
+        if (! empty($filters['created_by'])) {
+            $query->where('created_by', $filters['created_by']);
+        }
+
+        // Children count filter
+        if (isset($filters['has_children'])) {
+            if ($filters['has_children'] === '1') {
+                $query->has('children');
+            } elseif ($filters['has_children'] === '0') {
+                $query->doesntHave('children');
+            }
+        }
+
+        // Products count filter
+        if (isset($filters['has_products'])) {
+            if ($filters['has_products'] === '1') {
+                $query->has('products');
+            } elseif ($filters['has_products'] === '0') {
+                $query->doesntHave('products');
+            }
+        }
+
+        // Sort order range
+        if (! empty($filters['sort_order_from'])) {
+            $query->where('sort_order', '>=', $filters['sort_order_from']);
+        }
+
+        if (! empty($filters['sort_order_to'])) {
+            $query->where('sort_order', '<=', $filters['sort_order_to']);
+        }
+
+        // Include deleted categories if requested
+        if (! empty($filters['include_deleted']) && $filters['include_deleted'] === '1') {
+            $query->withTrashed();
+        }
+
         // Apply sorting
         $sortBy = $filters['sort_by'] ?? 'sort_order';
         $sortDirection = $filters['sort_direction'] ?? 'asc';
@@ -78,16 +133,35 @@ class CategoryController extends Controller
             ->orderBy('name')
             ->get(['id', 'name']);
 
+        // Get users who have created categories for creator filter
+        $creators = User::whereIn('id', function ($query) {
+            $query->select('created_by')
+                ->from('categories')
+                ->whereNotNull('created_by')
+                ->distinct();
+        })->orderBy('name')->get(['id', 'name']);
+
         return Inertia::render('Categories/Index', [
             'categories' => $categories,
             'filters' => [
                 'search' => $filters['search'] ?? '',
                 'parent_id' => $filters['parent_id'] ?? '',
                 'is_active' => $filters['is_active'] ?? '',
+                'created_from' => $filters['created_from'] ?? '',
+                'created_to' => $filters['created_to'] ?? '',
+                'updated_from' => $filters['updated_from'] ?? '',
+                'updated_to' => $filters['updated_to'] ?? '',
+                'created_by' => $filters['created_by'] ?? '',
+                'has_children' => $filters['has_children'] ?? '',
+                'has_products' => $filters['has_products'] ?? '',
+                'sort_order_from' => $filters['sort_order_from'] ?? '',
+                'sort_order_to' => $filters['sort_order_to'] ?? '',
+                'include_deleted' => $filters['include_deleted'] ?? '',
                 'sort_by' => $sortBy,
                 'sort_direction' => $sortDirection,
             ],
             'parentCategories' => $parentCategories,
+            'creators' => $creators,
         ]);
     }
 
@@ -122,12 +196,12 @@ class CategoryController extends Controller
                                 'creator',
                                 'updater',
                             ])
-                            ->withCount(['children', 'products']);
+                                ->withCount(['children', 'products']);
                         },
                         'creator',
                         'updater',
                     ])
-                    ->withCount(['children', 'products']);
+                        ->withCount(['children', 'products']);
                 },
                 'creator',
                 'updater',

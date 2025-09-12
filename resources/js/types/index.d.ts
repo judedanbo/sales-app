@@ -444,6 +444,16 @@ export interface CategoryFilters {
     search?: string;
     parent_id?: string | number;
     is_active?: string | boolean;
+    created_from?: string;
+    created_to?: string;
+    updated_from?: string;
+    updated_to?: string;
+    created_by?: string | number;
+    has_children?: string | boolean;
+    has_products?: string | boolean;
+    sort_order_from?: string | number;
+    sort_order_to?: string | number;
+    include_deleted?: string | boolean;
     sort_by?: string;
     sort_direction?: 'asc' | 'desc';
     page?: number;
