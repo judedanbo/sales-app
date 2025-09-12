@@ -273,11 +273,27 @@ The main categories page provides:
 - **Root Categories**: Count of top-level categories (blue badge)
 - **Categories with Children**: Count of categories containing subcategories (purple badge)
 
-**Filtering Options:**
-- **Search**: Real-time search across category names and descriptions
+**Basic Filtering Options:**
+- **Search**: Real-time search across category names, descriptions, and slugs (500ms debounced)
 - **Parent Category**: Filter to show categories under specific parent or root categories only
 - **Status**: Filter by active/inactive status
 - **Clear Filters**: Reset all filters to default state
+
+**Advanced Filtering System:**
+- **Active Filter Chips**: Visual indicators showing currently applied filters with individual removal options
+- **Quick Filter Presets**: One-click filters for common scenarios:
+  - **Root Categories**: Show only top-level categories
+  - **Active with Products**: Categories that are active and have products assigned
+  - **With Children**: Categories containing subcategories
+  - **Recently Created**: Categories created within the last week
+  - **Inactive**: Categories marked as disabled
+- **Advanced Filter Panel** (expandable):
+  - **Date Ranges**: Filter by creation date, update date ranges
+  - **Creator Filter**: Filter by specific user who created categories
+  - **Children Status**: Filter by categories with/without child categories
+  - **Products Status**: Filter by categories with/without assigned products
+  - **Sort Order Range**: Filter by numeric sort order values
+  - **Include Deleted**: Option to include soft-deleted categories in results
 
 **Categories Table:**
 - **Hierarchy Display**: Visual tree structure with connecting lines and folder icons
@@ -349,9 +365,11 @@ Navigate to individual category pages by clicking category names:
 
 Use the "Tree View" button for alternative category visualization:
 - Expanded hierarchical view showing all category relationships
-- Visual tree structure with connecting lines
-- Collapsible/expandable category branches  
-- Overview of entire category organization
+- Visual tree structure with connecting lines and chevron icons
+- **Expand All/Collapse All** toggle functionality for quick navigation
+- Collapsible/expandable category branches with proper state management
+- Overview of entire category organization with visual hierarchy indicators
+- Fixed expansion functionality ensures child categories display correctly when expanded
 
 ### Permission-Based Access
 
@@ -390,10 +408,14 @@ Categories system respects user permissions:
 - Review breadcrumb navigation for hierarchy path
 
 #### Filter/Search Problems
+- **Search Not Working**: Fixed in recent update - search now properly triggers on input changes
 - Clear all filters and try again
 - Check spelling in search terms
 - Try partial matches instead of exact terms
 - Verify data exists matching filter criteria
+- **Search Delay**: Search is debounced by 500ms for performance - wait briefly for results
+- **Filter Chips**: Use active filter chips to see what filters are currently applied
+- **Advanced Filters**: Check if advanced filter panel contains additional active filters
 
 ---
 
@@ -736,6 +758,17 @@ The dashboard provides real-time insights into:
 ## Updates and Changes
 
 ### Recent Enhancements
+
+**Categories Index Search & Tree Expansion Fix (September 2025):**
+- Fixed search functionality not affecting category table by correcting Vue.js watcher logic
+- Resolved CategoryTree expansion issue where "Expand All/Collapse All" button wasn't working
+- Separated search watcher from other filters for proper 500ms debouncing behavior
+- Enhanced CategoryController with comprehensive advanced filtering capabilities
+- Implemented visual filter chips showing active filters with individual removal options
+- Added quick filter presets for common scenarios (root categories, active with products, etc.)
+- Created advanced collapsible filter panel with date ranges, creator filters, and status options
+- Enhanced filter persistence across pagination and navigation for better user experience
+- Fixed chevron icons and proper state management in CategoryTree component
 
 **System Administrator Audit Access Fix (January 2025):**
 - Fixed role name mismatches preventing super administrators from accessing audit routes

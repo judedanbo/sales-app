@@ -40,9 +40,14 @@ A comprehensive sales management system built with Laravel 12, Vue 3, and Inerti
 ### 📁 Categories Management System
 - Hierarchical category structure with unlimited parent-child depth
 - Complete CRUD operations with soft delete support
-- Advanced filtering, search, and hierarchical navigation
+- **Advanced filtering system** with search across names, descriptions, and slugs
+- **Visual filter management** with active filter chips and quick preset buttons
+- **Comprehensive filtering options**: date ranges, creator filters, children/products status
+- **CategoryTree expansion** with working "Expand All/Collapse All" functionality
+- **Debounced search** (500ms) for optimal performance and user experience  
 - Statistics dashboard with real-time metrics
-- Breadcrumb navigation and visual tree structure
+- Breadcrumb navigation and visual tree structure with proper chevron icons
+- Filter state persistence across pagination and navigation
 - Permission-based access control
 
 ### 🔐 Authentication & Authorization
@@ -204,6 +209,22 @@ GET /categories/tree         # Tree view visualization
 - **Browser Tests**: End-to-end user workflows with Pest 4
 - **Unit Tests**: Individual model and service logic
 - **Factories & Seeders**: Comprehensive test data generation
+
+## Recent Enhancements
+
+### Categories System Fixes (September 2025)
+- **Fixed search functionality** - Search now properly affects the category table with corrected Vue.js watcher logic
+- **Fixed CategoryTree expansion** - "Expand All/Collapse All" functionality now works correctly with proper state management
+- **Enhanced filtering system** - Added comprehensive advanced filtering with visual filter chips and quick presets
+- **Improved performance** - Separated search watcher with 500ms debouncing for optimal user experience
+- **Better UX** - Added active filter chips with individual removal options and filter state persistence
+
+### Technical Improvements
+- **Backend**: Enhanced CategoryController with advanced filtering capabilities (date ranges, creator filters, etc.)
+- **Frontend**: Fixed Vue.js watcher patterns for proper reactivity and state management  
+- **UI/UX**: Implemented visual filter chips, collapsible advanced filters, and quick filter presets
+- **TypeScript**: Updated CategoryFilters interface with comprehensive filter option types
+- **Performance**: Optimized search with debouncing and improved state management patterns
 
 ## Contributing
 

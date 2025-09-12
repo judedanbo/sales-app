@@ -101,6 +101,16 @@
         - [x] Fix table component import issues by replacing shadcn/ui table components with HTML tables
         - [x] Configure permission system with view_categories permission for appropriate user roles
         - [x] Create comprehensive category permissions (create, edit, delete, restore, bulk_edit)
+        - [x] **Fix CategoryTree Expansion & Search Functionality** (Completed - September 2025)
+            - [x] Fixed CategoryTree expansion functionality by updating tree() method to use nested 'children' relationships
+            - [x] Resolved search functionality not affecting category table by fixing Vue.js watcher logic
+            - [x] Separated search watcher from other filters for proper debouncing behavior (500ms delay)
+            - [x] Enhanced CategoryController with advanced filtering: date ranges, creator filter, children/products count
+            - [x] Implemented comprehensive filter UI with active filter chips, quick filter presets, advanced collapsible filters
+            - [x] Added sort order ranges, soft delete inclusion, and proper state management
+            - [x] Updated CategoryFilters TypeScript interface with new filter options
+            - [x] Created filter chips with removable tags and quick filter buttons for common use cases
+            - [x] Enhanced filter persistence across pagination and navigation
     - [ ] Create remaining Laravel migrations for other tables
     - [ ] Implement remaining Eloquent models with relationships
     - [ ] Add model factories for remaining entities
