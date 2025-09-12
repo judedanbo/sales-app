@@ -89,6 +89,18 @@
         - [x] Enhance UserFactory with intelligent school association and custom states
         - [x] Add role assignment methods and permission checking functionality
         - [x] Comprehensive testing of user creation, role assignment, and relationships
+    - [x] ✅ **Categories Management System** (Completed - September 2025)
+        - [x] Create comprehensive Category model with hierarchical relationships and parent-child support
+        - [x] Implement CategoryController API with full CRUD operations, statistics, and hierarchy management
+        - [x] Build Frontend/CategoryController for Inertia.js integration with Vue components
+        - [x] Create Categories/Index.vue with hierarchical listing, filtering, search, and pagination
+        - [x] Build Categories/Show.vue with detailed category view, breadcrumb navigation, and child listings
+        - [x] Add TypeScript interfaces for Category, CategoryBreadcrumb, and CategoryFilters
+        - [x] Implement route helpers (categories-simple.ts) as temporary Wayfinder replacement
+        - [x] Add Categories link to AppSidebar navigation with Folder icon and permission filtering
+        - [x] Fix table component import issues by replacing shadcn/ui table components with HTML tables
+        - [x] Configure permission system with view_categories permission for appropriate user roles
+        - [x] Create comprehensive category permissions (create, edit, delete, restore, bulk_edit)
     - [ ] Create remaining Laravel migrations for other tables
     - [ ] Implement remaining Eloquent models with relationships
     - [ ] Add model factories for remaining entities

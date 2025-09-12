@@ -37,6 +37,14 @@ A comprehensive sales management system built with Laravel 12, Vue 3, and Inerti
 - Bulk operations and soft delete support
 - RESTful API with comprehensive frontend integration
 
+### 📁 Categories Management System
+- Hierarchical category structure with unlimited parent-child depth
+- Complete CRUD operations with soft delete support
+- Advanced filtering, search, and hierarchical navigation
+- Statistics dashboard with real-time metrics
+- Breadcrumb navigation and visual tree structure
+- Permission-based access control
+
 ### 🔐 Authentication & Authorization
 - Complete auth scaffolding (login, register, password reset, email verification)
 - Role-based permissions with Spatie Laravel Permission
@@ -167,12 +175,27 @@ DELETE /api/schools/{id}      # Soft delete school
 POST   /api/schools/{id}/restore # Restore soft deleted school
 ```
 
+### Categories API
+```
+GET    /api/categories        # List categories with hierarchy
+POST   /api/categories        # Create category
+GET    /api/categories/{id}   # Show category with children
+PUT    /api/categories/{id}   # Update category
+DELETE /api/categories/{id}   # Soft delete category
+POST   /api/categories/{id}/restore # Restore soft deleted category
+GET    /api/categories/statistics   # Category statistics
+```
+
 ### Frontend Routes
 ```
 GET /schools                  # Schools index page
 GET /schools/create          # School creation form
 GET /schools/{id}            # School detail view
 GET /schools/{id}/edit       # School edit form
+
+GET /categories              # Categories index page
+GET /categories/{id}         # Category detail view with children
+GET /categories/tree         # Tree view visualization
 ```
 
 ## Testing Strategy

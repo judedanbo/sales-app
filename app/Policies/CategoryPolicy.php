@@ -36,11 +36,6 @@ class CategoryPolicy
      */
     public function update(User $user, Category $category): bool
     {
-        // Don't allow editing inactive categories unless user has special permission
-        if (! $category->is_active && ! $user->hasPermissionTo('edit_inactive_categories')) {
-            return false;
-        }
-
         return $user->hasPermissionTo('edit_categories');
     }
 
@@ -49,16 +44,6 @@ class CategoryPolicy
      */
     public function delete(User $user, Category $category): bool
     {
-        // Prevent deletion if category has children
-        if ($category->children()->exists()) {
-            return false;
-        }
-
-        // Prevent deletion if category has active products (when Product model exists)
-        if (class_exists('App\\Models\\Product') && $category->products()->exists()) {
-            return false;
-        }
-
         return $user->hasPermissionTo('delete_categories');
     }
 
@@ -93,11 +78,6 @@ class CategoryPolicy
      */
     public function toggleStatus(User $user, Category $category): bool
     {
-        // Don't allow deactivating categories with active children
-        if ($category->is_active && $category->activeChildren()->exists()) {
-            return false;
-        }
-
         return $user->hasPermissionTo('manage_category_status');
     }
 

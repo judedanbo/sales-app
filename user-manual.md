@@ -6,9 +6,10 @@
 2. [User Management](#user-management)
 3. [Role Management](#role-management)
 4. [Schools Management](#schools-management)
-5. [Audit Management](#audit-management)
-6. [Dashboard Overview](#dashboard-overview)
-7. [System Administration](#system-administration)
+5. [Categories Management](#categories-management)
+6. [Audit Management](#audit-management)
+7. [Dashboard Overview](#dashboard-overview)
+8. [System Administration](#system-administration)
 
 ---
 
@@ -33,6 +34,7 @@ The application uses a sidebar navigation system:
 
 - **Dashboard**: Overview of system statistics and recent activity
 - **Schools**: Manage school information, academic years, and classes
+- **Categories**: Product category management with hierarchical organization
 - **Users**: User account management and role assignments
 - **Roles**: Role and permission management
 - **Permissions**: System permission overview
@@ -215,6 +217,183 @@ The Schools system provides comprehensive management of educational institutions
    - Set current active academic year
    - Track academic progress
    - Plan future academic periods
+
+---
+
+## Categories Management
+
+### Category Overview
+
+The Categories system provides comprehensive management of product categorization for the sales application:
+
+- **Hierarchical Structure**: Support for parent-child category relationships with unlimited depth
+- **Category Details**: Name, slug, description, and status management
+- **Sort Order**: Custom ordering for category organization
+- **Filtering and Search**: Advanced filtering by parent category, status, and search functionality
+- **Statistics**: Real-time metrics showing category usage and hierarchy information
+
+### Accessing Categories
+
+1. Click "Categories" in the main navigation sidebar (folder icon)
+2. The Categories interface is accessible to all authenticated users
+3. The main categories page displays:
+   - **Statistics Cards**: Total categories, active/inactive counts, root categories, and categories with children
+   - **Filter Panel**: Search, parent category filter, and status filter options
+   - **Categories Table**: Hierarchical listing of all categories with actions
+
+### Understanding Category Hierarchy
+
+#### Root Categories
+- Top-level categories with no parent
+- Displayed without indentation in the hierarchy
+- Can contain child categories (subcategories)
+- Example: "Uniforms", "Books", "Stationery"
+
+#### Child Categories (Subcategories)  
+- Categories that belong to a parent category
+- Displayed with visual hierarchy indicators (├─ prefix)
+- Can have their own child categories for deeper organization
+- Example: Under "Uniforms" → "Shirts", "Pants", "Shoes"
+
+#### Category Depth
+- Visual indicators show the level of nesting
+- Folder icons indicate categories with children (open folder) vs. leaf categories (closed folder)
+- Breadcrumb navigation helps understand category relationships
+
+### Viewing Categories
+
+#### Categories Index Page
+
+The main categories page provides:
+
+**Statistics Overview:**
+- **Total Categories**: Complete count of all categories in system
+- **Active Categories**: Count of currently active categories (green badge)
+- **Inactive Categories**: Count of disabled categories (orange badge)  
+- **Root Categories**: Count of top-level categories (blue badge)
+- **Categories with Children**: Count of categories containing subcategories (purple badge)
+
+**Filtering Options:**
+- **Search**: Real-time search across category names and descriptions
+- **Parent Category**: Filter to show categories under specific parent or root categories only
+- **Status**: Filter by active/inactive status
+- **Clear Filters**: Reset all filters to default state
+
+**Categories Table:**
+- **Hierarchy Display**: Visual tree structure with connecting lines and folder icons
+- **Category Information**: Name, slug (URL-friendly identifier), description
+- **Parent Relationships**: Shows parent category name with navigation links
+- **Children Count**: Badges showing number of direct child categories
+- **Products Count**: Shows how many products are assigned to each category
+- **Status**: Active/inactive status badges with color coding
+- **Sort Order**: Numeric ordering for category sequence
+- **Creation Date**: When category was initially created
+- **Actions Menu**: View, edit, and delete options per category
+
+#### Category Details Page
+
+Navigate to individual category pages by clicking category names:
+
+**Category Information:**
+- Full category details with name, description, and metadata
+- Breadcrumb navigation showing category hierarchy path
+- Parent category relationship (if applicable)
+- Status and creation information
+
+**Child Categories Table:**
+- List of all direct child categories (subcategories)
+- Same table format as main categories page
+- Actions to view individual child categories
+- Direct navigation to child category detail pages
+
+**Statistics:**
+- Child categories count
+- Products associated with this category
+- Status and activity information
+
+### Category Actions
+
+#### Viewing Categories
+- Click category name to view detailed information
+- Navigate hierarchy using breadcrumb links
+- Use parent category links to explore relationships
+- Filter and search to find specific categories
+
+#### Managing Category Status
+- Categories can be marked as active (available) or inactive (disabled)
+- Status changes affect category visibility in product assignment
+- Color-coded badges clearly indicate current status
+- Status filter helps manage active vs. inactive categories
+
+### Navigation Features
+
+#### Hierarchical Navigation
+- **Breadcrumbs**: Show complete path from root to current category
+- **Parent Links**: Click parent category names to navigate up hierarchy
+- **Child Navigation**: Click child category names to navigate down hierarchy
+- **Home Links**: Return to main categories listing from any level
+
+#### Search and Filtering
+- **Real-time Search**: Search updates results as you type (500ms delay)
+- **Combined Filters**: Use multiple filters simultaneously for precise results
+- **URL State**: Filters maintain state in browser URL for bookmarking and sharing
+- **Filter Persistence**: Filter settings preserved when navigating between pages
+
+#### Pagination and Sorting
+- **Pagination**: Navigate through large category lists efficiently
+- **Sortable Columns**: Click column headers to sort by name, creation date, or sort order
+- **Sort Direction**: Toggle between ascending and descending order
+- **Custom Ordering**: Categories can be manually ordered using sort order field
+
+### Category Tree View
+
+Use the "Tree View" button for alternative category visualization:
+- Expanded hierarchical view showing all category relationships
+- Visual tree structure with connecting lines
+- Collapsible/expandable category branches  
+- Overview of entire category organization
+
+### Permission-Based Access
+
+Categories system respects user permissions:
+- **View Access**: All authenticated users can view categories
+- **Modification Rights**: Editing requires appropriate permissions
+- **Administrative Functions**: Category creation/deletion requires admin rights
+- **Bulk Operations**: Advanced operations restricted to authorized users
+
+### Best Practices
+
+#### Category Organization
+- **Logical Hierarchy**: Organize categories in intuitive parent-child relationships
+- **Consistent Naming**: Use clear, descriptive category names
+- **Appropriate Depth**: Avoid overly deep hierarchies (generally 3-4 levels maximum)
+- **Regular Review**: Periodically review and reorganize category structure
+
+#### Category Management  
+- **Status Management**: Mark unused categories as inactive rather than deleting
+- **Documentation**: Use description fields to clarify category purpose
+- **Sort Order**: Maintain logical ordering within category groups
+- **Parent Assignment**: Ensure categories are properly nested under appropriate parents
+
+### Troubleshooting Categories
+
+#### Categories Not Showing
+- Check if category is marked as active
+- Verify user has view permissions  
+- Clear any active filters that might hide category
+- Refresh page and check again
+
+#### Hierarchy Display Issues
+- Verify parent-child relationships are correctly set
+- Check for circular references (category set as its own parent)
+- Ensure sort order is properly configured
+- Review breadcrumb navigation for hierarchy path
+
+#### Filter/Search Problems
+- Clear all filters and try again
+- Check spelling in search terms
+- Try partial matches instead of exact terms
+- Verify data exists matching filter criteria
 
 ---
 

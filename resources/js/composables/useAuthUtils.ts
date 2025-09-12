@@ -88,6 +88,11 @@ export function useAuthUtils() {
                 return permissions.canViewSchools;
             }
 
+            // Categories navigation - accessible to all authenticated users since it's a basic feature
+            if (href.includes('/categories') || item.title === 'Categories') {
+                return true;
+            }
+
             // Users navigation
             if (href.includes('/users') || item.title === 'Users') {
                 return permissions.canViewUsers;

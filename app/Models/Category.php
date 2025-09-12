@@ -132,13 +132,7 @@ class Category extends Model implements Auditable
      */
     public function products(): HasMany
     {
-        // Check if Product model exists, otherwise return empty relationship
-        if (class_exists('App\\Models\\Product')) {
-            return $this->hasMany(\App\Models\Product::class);
-        }
-
-        // Return a dummy relationship that will always be empty
-        return $this->hasMany(Category::class, 'non_existent_column');
+        return $this->hasMany(Product::class);
     }
 
     /**

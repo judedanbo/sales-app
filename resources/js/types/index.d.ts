@@ -383,3 +383,68 @@ export interface AuditTimelineEntry {
     new_values?: Record<string, any>;
     changes_summary: string[];
 }
+
+// Category Management Types
+export interface Category {
+    id: number;
+    name: string;
+    slug: string;
+    description?: string;
+    parent_id?: number | null;
+    sort_order: number;
+    is_active: boolean;
+    color?: string | null;
+    icon?: string | null;
+    created_by?: number | null;
+    updated_by?: number | null;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string | null;
+
+    // Computed attributes
+    full_name?: string;
+    depth?: number;
+    is_root?: boolean;
+    is_leaf?: boolean;
+    has_children?: boolean;
+    breadcrumb?: CategoryBreadcrumb[];
+
+    // Relationships
+    parent?: Category;
+    children?: Category[];
+    children_count?: number;
+    active_children_count?: number;
+    products_count?: number;
+
+    // Creator/updater info
+    created_by_user?: {
+        id: number;
+        name: string;
+    };
+    updated_by_user?: {
+        id: number;
+        name: string;
+    };
+
+    // Status info
+    status?: {
+        is_active: boolean;
+        label: string;
+        class: string;
+    };
+}
+
+export interface CategoryBreadcrumb {
+    id: number;
+    name: string;
+    slug: string;
+}
+
+export interface CategoryFilters {
+    search?: string;
+    parent_id?: string | number;
+    is_active?: string | boolean;
+    sort_by?: string;
+    sort_direction?: 'asc' | 'desc';
+    page?: number;
+}
