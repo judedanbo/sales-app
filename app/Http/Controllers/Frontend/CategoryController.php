@@ -102,15 +102,37 @@ class CategoryController extends Controller
 
         $query = Category::whereNull('parent_id')
             ->with([
-                'descendants' => function ($q) use ($includeInactive) {
+                'children' => function ($q) use ($includeInactive) {
                     if (! $includeInactive) {
                         $q->where('is_active', true);
                     }
+                    $q->with([
+                        'children' => function ($q2) use ($includeInactive) {
+                            if (! $includeInactive) {
+                                $q2->where('is_active', true);
+                            }
+                            $q2->with([
+                                'children' => function ($q3) use ($includeInactive) {
+                                    if (! $includeInactive) {
+                                        $q3->where('is_active', true);
+                                    }
+                                    $q3->with(['creator', 'updater'])
+                                        ->withCount(['children', 'products']);
+                                },
+                                'creator',
+                                'updater',
+                            ])
+                            ->withCount(['children', 'products']);
+                        },
+                        'creator',
+                        'updater',
+                    ])
+                    ->withCount(['children', 'products']);
                 },
-                'descendants.creator',
-                'descendants.updater',
+                'creator',
+                'updater',
             ])
-            ->withCount(['descendants', 'products']);
+            ->withCount(['children', 'products']);
 
         if (! $includeInactive) {
             $query->where('is_active', true);

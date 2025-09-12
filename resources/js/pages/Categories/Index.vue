@@ -3,6 +3,14 @@ import PermissionGuard from '@/components/PermissionGuard.vue';
 import Badge from '@/components/ui/badge.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -12,19 +20,7 @@ import { index, show } from '@/routes/categories-simple';
 import { type BreadcrumbItem, type Category, type CategoryFilters, type PaginatedData } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { useDebounceFn } from '@vueuse/core';
-import { 
-    ChevronDown, 
-    ChevronRight, 
-    Edit, 
-    Eye, 
-    Folder, 
-    FolderOpen, 
-    Package, 
-    Plus, 
-    Search, 
-    Trash2,
-    TreePine
-} from 'lucide-vue-next';
+import { ChevronDown, ChevronRight, Edit, Eye, Folder, FolderOpen, MoreHorizontal, Package, Plus, Search, Trash2, TreePine } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 
 interface Props {
@@ -63,7 +59,7 @@ watch(
             sort_direction: newFilters.sort_direction || 'asc',
         };
     },
-    { immediate: true }
+    { immediate: true },
 );
 
 const isLoading = ref(false);
@@ -72,10 +68,10 @@ const selectedCategories = ref<number[]>([]);
 // Statistics computed from data
 const stats = computed(() => ({
     total: props.categories.total,
-    active: props.categories.data.filter(cat => cat.is_active).length,
-    inactive: props.categories.data.filter(cat => !cat.is_active).length,
-    root: props.categories.data.filter(cat => !cat.parent_id).length,
-    withChildren: props.categories.data.filter(cat => cat.children_count && cat.children_count > 0).length,
+    active: props.categories.data.filter((cat) => cat.is_active).length,
+    inactive: props.categories.data.filter((cat) => !cat.is_active).length,
+    root: props.categories.data.filter((cat) => !cat.parent_id).length,
+    withChildren: props.categories.data.filter((cat) => cat.children_count && cat.children_count > 0).length,
 }));
 
 // Selection handlers
@@ -103,7 +99,7 @@ const clearSelection = () => {
 // Clear selection when page changes
 watch(
     () => props.categories.current_page,
-    () => clearSelection()
+    () => clearSelection(),
 );
 
 // Debounced search
@@ -117,22 +113,19 @@ watch(
     (newFilters, oldFilters) => {
         if (newFilters.search !== oldFilters?.search) {
             debouncedSearch();
-        } else if (
-            newFilters.parent_id !== oldFilters?.parent_id ||
-            newFilters.is_active !== oldFilters?.is_active
-        ) {
+        } else if (newFilters.parent_id !== oldFilters?.parent_id || newFilters.is_active !== oldFilters?.is_active) {
             applyFilters();
         }
     },
-    { deep: true }
+    { deep: true },
 );
 
 // Apply filters
 function applyFilters() {
     isLoading.value = true;
-    
+
     const params: Record<string, any> = {};
-    
+
     if (localFilters.value.search) {
         params.search = localFilters.value.search;
     }
@@ -148,7 +141,7 @@ function applyFilters() {
     if (localFilters.value.sort_direction && localFilters.value.sort_direction !== 'asc') {
         params.sort_direction = localFilters.value.sort_direction;
     }
-    
+
     router.get('/categories', params, {
         preserveScroll: true,
         preserveState: true,
@@ -161,17 +154,17 @@ function applyFilters() {
 // Pagination
 function goToPage(page: number) {
     isLoading.value = true;
-    
+
     const params: Record<string, any> = {};
-    
+
     if (localFilters.value.search) params.search = localFilters.value.search;
     if (localFilters.value.parent_id && localFilters.value.parent_id !== '') params.parent_id = localFilters.value.parent_id;
     if (localFilters.value.is_active && localFilters.value.is_active !== '') params.is_active = localFilters.value.is_active;
     if (localFilters.value.sort_by && localFilters.value.sort_by !== 'sort_order') params.sort_by = localFilters.value.sort_by;
     if (localFilters.value.sort_direction && localFilters.value.sort_direction !== 'asc') params.sort_direction = localFilters.value.sort_direction;
-    
+
     if (page > 1) params.page = page;
-    
+
     router.get('/categories', params, {
         preserveScroll: true,
         preserveState: true,
@@ -213,7 +206,6 @@ function handleDelete(category: Category) {
     }
 }
 
-
 // Get hierarchy indicator
 function getHierarchyPrefix(category: Category): string {
     if (!category.depth || category.depth === 0) return '';
@@ -254,6 +246,7 @@ const formatDate = (dateString: string) => {
             </PageHeader>
 
             <!-- Statistics Cards -->
+
             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
                 <Card>
                     <CardHeader class="pb-2">
@@ -298,12 +291,8 @@ const formatDate = (dateString: string) => {
                         <div class="space-y-2">
                             <label class="text-sm font-medium">Search</label>
                             <div class="relative">
-                                <Search class="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                <Input 
-                                    v-model="localFilters.search"
-                                    placeholder="Search categories..."
-                                    class="pl-9"
-                                />
+                                <Search class="absolute top-3 left-3 h-4 w-4 text-muted-foreground" />
+                                <Input v-model="localFilters.search" placeholder="Search categories..." class="pl-9" />
                             </div>
                         </div>
 
@@ -317,11 +306,7 @@ const formatDate = (dateString: string) => {
                                 <SelectContent>
                                     <SelectItem value="">All categories</SelectItem>
                                     <SelectItem value="null">Root categories only</SelectItem>
-                                    <SelectItem 
-                                        v-for="parent in parentCategories" 
-                                        :key="parent.id" 
-                                        :value="parent.id.toString()"
-                                    >
+                                    <SelectItem v-for="parent in parentCategories" :key="parent.id" :value="parent.id.toString()">
                                         {{ parent.full_name || parent.name }}
                                     </SelectItem>
                                 </SelectContent>
@@ -345,9 +330,7 @@ const formatDate = (dateString: string) => {
 
                         <!-- Actions -->
                         <div class="flex items-end space-x-2">
-                            <Button variant="outline" @click="clearFilters">
-                                Clear Filters
-                            </Button>
+                            <Button variant="outline" @click="clearFilters"> Clear Filters </Button>
                         </div>
                     </div>
                 </CardContent>
@@ -358,9 +341,7 @@ const formatDate = (dateString: string) => {
                 <CardHeader class="pb-0">
                     <div class="flex items-center justify-between">
                         <CardTitle>Categories</CardTitle>
-                        <div class="text-sm text-muted-foreground">
-                            {{ categories.from }}-{{ categories.to }} of {{ categories.total }}
-                        </div>
+                        <div class="text-sm text-muted-foreground">{{ categories.from }}-{{ categories.to }} of {{ categories.total }}</div>
                     </div>
                 </CardHeader>
                 <CardContent class="p-0">
@@ -388,12 +369,12 @@ const formatDate = (dateString: string) => {
                                         />
                                     </th>
                                     <th class="px-4 py-3 text-left">
-                                        <button 
-                                            @click="handleSort('name')"
-                                            class="flex items-center gap-1 hover:text-foreground"
-                                        >
+                                        <button @click="handleSort('name')" class="flex items-center gap-1 hover:text-foreground">
                                             Category Name
-                                            <ChevronDown v-if="localFilters.sort_by === 'name' && localFilters.sort_direction === 'asc'" class="h-4 w-4" />
+                                            <ChevronDown
+                                                v-if="localFilters.sort_by === 'name' && localFilters.sort_direction === 'asc'"
+                                                class="h-4 w-4"
+                                            />
                                             <ChevronRight v-else-if="localFilters.sort_by === 'name'" class="h-4 w-4 rotate-180" />
                                         </button>
                                     </th>
@@ -403,22 +384,22 @@ const formatDate = (dateString: string) => {
                                     <th class="px-4 py-3 text-left">Products</th>
                                     <th class="px-4 py-3 text-left">Status</th>
                                     <th class="px-4 py-3 text-left">
-                                        <button 
-                                            @click="handleSort('sort_order')"
-                                            class="flex items-center gap-1 hover:text-foreground"
-                                        >
+                                        <button @click="handleSort('sort_order')" class="flex items-center gap-1 hover:text-foreground">
                                             Order
-                                            <ChevronDown v-if="localFilters.sort_by === 'sort_order' && localFilters.sort_direction === 'asc'" class="h-4 w-4" />
+                                            <ChevronDown
+                                                v-if="localFilters.sort_by === 'sort_order' && localFilters.sort_direction === 'asc'"
+                                                class="h-4 w-4"
+                                            />
                                             <ChevronRight v-else-if="localFilters.sort_by === 'sort_order'" class="h-4 w-4 rotate-180" />
                                         </button>
                                     </th>
                                     <th class="px-4 py-3 text-left">
-                                        <button 
-                                            @click="handleSort('created_at')"
-                                            class="flex items-center gap-1 hover:text-foreground"
-                                        >
+                                        <button @click="handleSort('created_at')" class="flex items-center gap-1 hover:text-foreground">
                                             Created
-                                            <ChevronDown v-if="localFilters.sort_by === 'created_at' && localFilters.sort_direction === 'asc'" class="h-4 w-4" />
+                                            <ChevronDown
+                                                v-if="localFilters.sort_by === 'created_at' && localFilters.sort_direction === 'asc'"
+                                                class="h-4 w-4"
+                                            />
                                             <ChevronRight v-else-if="localFilters.sort_by === 'created_at'" class="h-4 w-4 rotate-180" />
                                         </button>
                                     </th>
@@ -448,24 +429,16 @@ const formatDate = (dateString: string) => {
                                     <!-- Name with hierarchy -->
                                     <td class="px-4 py-3">
                                         <div class="flex items-center gap-2">
-                                            <div class="text-muted-foreground font-mono text-xs">
+                                            <div class="font-mono text-xs text-muted-foreground">
                                                 {{ getHierarchyPrefix(category) }}
                                             </div>
                                             <div class="flex items-center gap-2">
-                                                <component 
-                                                    :is="category.has_children ? FolderOpen : Folder"
-                                                    class="h-4 w-4 text-muted-foreground"
-                                                />
+                                                <component :is="category.has_children ? FolderOpen : Folder" class="h-4 w-4 text-muted-foreground" />
                                                 <div>
-                                                    <Link 
-                                                        :href="show(category.id).url"
-                                                        class="font-medium hover:underline"
-                                                    >
+                                                    <Link :href="show(category.id).url" class="font-medium hover:underline">
                                                         {{ category.name }}
                                                     </Link>
-                                                    <div v-if="category.slug" class="text-xs text-muted-foreground">
-                                                        /{{ category.slug }}
-                                                    </div>
+                                                    <div v-if="category.slug" class="text-xs text-muted-foreground">/{{ category.slug }}</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -481,14 +454,10 @@ const formatDate = (dateString: string) => {
 
                                     <!-- Parent -->
                                     <td class="px-4 py-3">
-                                        <Link 
-                                            v-if="category.parent"
-                                            :href="show(category.parent.id).url"
-                                            class="text-sm hover:underline"
-                                        >
+                                        <Link v-if="category.parent" :href="show(category.parent.id).url" class="text-sm hover:underline">
                                             {{ category.parent.name }}
                                         </Link>
-                                        <span v-else class="text-muted-foreground text-sm">Root</span>
+                                        <span v-else class="text-sm text-muted-foreground">Root</span>
                                     </td>
 
                                     <!-- Children Count -->
@@ -525,34 +494,40 @@ const formatDate = (dateString: string) => {
                                     </td>
 
                                     <!-- Actions -->
-                                    <td class="px-4 py-3">
-                                        <div class="flex items-center gap-1">
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                as="a"
-                                                :href="show(category.id).url"
-                                            >
-                                                <Eye class="h-4 w-4" />
-                                            </Button>
-
-                                            <PermissionGuard permission="edit_categories">
+                                    <td class="px-4 py-3 text-right">
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
                                                 <Button variant="ghost" size="sm">
-                                                    <Edit class="h-4 w-4" />
+                                                    <MoreHorizontal class="h-4 w-4" />
                                                 </Button>
-                                            </PermissionGuard>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                <DropdownMenuSeparator />
 
-                                            <PermissionGuard permission="delete_categories">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    @click="handleDelete(category)"
-                                                    class="text-destructive hover:text-destructive"
-                                                >
-                                                    <Trash2 class="h-4 w-4" />
-                                                </Button>
-                                            </PermissionGuard>
-                                        </div>
+                                                <Link :href="show(category.id).url">
+                                                    <DropdownMenuItem>
+                                                        <Eye class="mr-2 h-4 w-4" />
+                                                        View
+                                                    </DropdownMenuItem>
+                                                </Link>
+
+                                                <PermissionGuard permission="edit_categories">
+                                                    <DropdownMenuItem>
+                                                        <Edit class="mr-2 h-4 w-4" />
+                                                        Edit
+                                                    </DropdownMenuItem>
+                                                </PermissionGuard>
+
+                                                <PermissionGuard permission="delete_categories">
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem class="text-red-600 dark:text-red-400" @click="handleDelete(category)">
+                                                        <Trash2 class="mr-2 h-4 w-4" />
+                                                        Delete
+                                                    </DropdownMenuItem>
+                                                </PermissionGuard>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </td>
                                 </tr>
                             </tbody>
@@ -563,17 +538,12 @@ const formatDate = (dateString: string) => {
 
             <!-- Pagination -->
             <div v-if="categories.last_page > 1" class="flex items-center justify-center space-x-2">
-                <Button 
-                    variant="outline" 
-                    size="sm"
-                    :disabled="categories.current_page === 1"
-                    @click="goToPage(categories.current_page - 1)"
-                >
+                <Button variant="outline" size="sm" :disabled="categories.current_page === 1" @click="goToPage(categories.current_page - 1)">
                     Previous
                 </Button>
-                
-                <Button 
-                    v-for="page in categories.links.slice(1, -1)" 
+
+                <Button
+                    v-for="page in categories.links.slice(1, -1)"
                     :key="page.page"
                     :variant="page.active ? 'default' : 'outline'"
                     size="sm"
@@ -582,9 +552,9 @@ const formatDate = (dateString: string) => {
                 >
                     {{ page.label }}
                 </Button>
-                
-                <Button 
-                    variant="outline" 
+
+                <Button
+                    variant="outline"
                     size="sm"
                     :disabled="categories.current_page === categories.last_page"
                     @click="goToPage(categories.current_page + 1)"
