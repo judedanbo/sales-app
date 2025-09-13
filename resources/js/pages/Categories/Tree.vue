@@ -1,23 +1,14 @@
 <script setup lang="ts">
-import PermissionGuard from '@/components/PermissionGuard.vue';
 import CategoryTree from '@/components/categories/CategoryTree.vue';
+import PermissionGuard from '@/components/PermissionGuard.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { index } from '@/routes/categories-simple';
+import { index } from '@/routes/categories';
 import { type BreadcrumbItem, type Category } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
-import { 
-    ArrowLeft, 
-    List, 
-    Plus, 
-    TreePine,
-    FolderOpen,
-    Package,
-    Activity,
-    Layers
-} from 'lucide-vue-next';
+import { Activity, ArrowLeft, FolderOpen, Layers, List, Package, Plus, TreePine } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 interface Props {
@@ -50,13 +41,13 @@ const stats = computed(() => {
     };
 
     const allCategories = flattenCategories(props.categories);
-    
+
     return {
         total: allCategories.length,
-        active: allCategories.filter(cat => cat.is_active).length,
-        inactive: allCategories.filter(cat => !cat.is_active).length,
+        active: allCategories.filter((cat) => cat.is_active).length,
+        inactive: allCategories.filter((cat) => !cat.is_active).length,
         root: props.categories.length,
-        withChildren: allCategories.filter(cat => cat.children && cat.children.length > 0).length,
+        withChildren: allCategories.filter((cat) => cat.children && cat.children.length > 0).length,
         products: allCategories.reduce((sum, cat) => sum + (cat.products_count || 0), 0),
     };
 });
@@ -76,11 +67,15 @@ function handleEdit(category: Category) {
 
 function handleMove(category: Category, newParentId: number | null) {
     if (confirm(`Move "${category.name}" to a different parent?`)) {
-        router.post(`/categories/${category.id}/move`, {
-            parent_id: newParentId,
-        }, {
-            preserveScroll: true,
-        });
+        router.post(
+            `/categories/${category.id}/move`,
+            {
+                parent_id: newParentId,
+            },
+            {
+                preserveScroll: true,
+            },
+        );
     }
 }
 </script>
@@ -91,10 +86,7 @@ function handleMove(category: Category, newParentId: number | null) {
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="space-y-6 p-8">
             <!-- Header -->
-            <PageHeader 
-                title="Category Tree" 
-                description="Visualize and manage the hierarchical structure of your categories"
-            >
+            <PageHeader title="Category Tree" description="Visualize and manage the hierarchical structure of your categories">
                 <template #action>
                     <div class="flex gap-2">
                         <Button variant="outline" as="a" :href="index().url">
@@ -126,7 +118,7 @@ function handleMove(category: Category, newParentId: number | null) {
                         <CardTitle class="text-3xl">{{ stats.total }}</CardTitle>
                     </CardHeader>
                 </Card>
-                
+
                 <Card>
                     <CardHeader class="pb-2">
                         <CardDescription class="flex items-center gap-2">
@@ -136,7 +128,7 @@ function handleMove(category: Category, newParentId: number | null) {
                         <CardTitle class="text-3xl text-green-600">{{ stats.active }}</CardTitle>
                     </CardHeader>
                 </Card>
-                
+
                 <Card>
                     <CardHeader class="pb-2">
                         <CardDescription class="flex items-center gap-2">
@@ -146,7 +138,7 @@ function handleMove(category: Category, newParentId: number | null) {
                         <CardTitle class="text-3xl text-orange-600">{{ stats.inactive }}</CardTitle>
                     </CardHeader>
                 </Card>
-                
+
                 <Card>
                     <CardHeader class="pb-2">
                         <CardDescription class="flex items-center gap-2">
@@ -156,7 +148,7 @@ function handleMove(category: Category, newParentId: number | null) {
                         <CardTitle class="text-3xl text-blue-600">{{ stats.root }}</CardTitle>
                     </CardHeader>
                 </Card>
-                
+
                 <Card>
                     <CardHeader class="pb-2">
                         <CardDescription class="flex items-center gap-2">
@@ -166,7 +158,7 @@ function handleMove(category: Category, newParentId: number | null) {
                         <CardTitle class="text-3xl text-purple-600">{{ stats.withChildren }}</CardTitle>
                     </CardHeader>
                 </Card>
-                
+
                 <Card>
                     <CardHeader class="pb-2">
                         <CardDescription class="flex items-center gap-2">
@@ -187,11 +179,9 @@ function handleMove(category: Category, newParentId: number | null) {
                                 <TreePine class="h-5 w-5" />
                                 Category Hierarchy
                             </CardTitle>
-                            <CardDescription>
-                                Explore and manage the hierarchical structure of your categories
-                            </CardDescription>
+                            <CardDescription> Explore and manage the hierarchical structure of your categories </CardDescription>
                         </div>
-                        
+
                         <div class="text-sm text-muted-foreground">
                             {{ stats.total }} categories in {{ stats.root }} root {{ stats.root === 1 ? 'category' : 'categories' }}
                         </div>
@@ -201,9 +191,7 @@ function handleMove(category: Category, newParentId: number | null) {
                     <div v-if="categories.length === 0" class="py-12 text-center">
                         <TreePine class="mx-auto h-12 w-12 text-muted-foreground" />
                         <h3 class="mt-4 text-lg font-semibold">No categories found</h3>
-                        <p class="mt-2 text-sm text-muted-foreground">
-                            Get started by creating your first category
-                        </p>
+                        <p class="mt-2 text-sm text-muted-foreground">Get started by creating your first category</p>
                         <PermissionGuard permission="create_categories">
                             <Button class="mt-4">
                                 <Plus class="mr-2 h-4 w-4" />
@@ -211,14 +199,8 @@ function handleMove(category: Category, newParentId: number | null) {
                             </Button>
                         </PermissionGuard>
                     </div>
-                    
-                    <CategoryTree
-                        v-else
-                        :categories="categories"
-                        @delete="handleDelete"
-                        @edit="handleEdit"
-                        @move="handleMove"
-                    />
+
+                    <CategoryTree v-else :categories="categories" @delete="handleDelete" @edit="handleEdit" @move="handleMove" />
                 </CardContent>
             </Card>
         </div>

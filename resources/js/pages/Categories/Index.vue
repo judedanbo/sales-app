@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import CategoryCreateModal from '@/components/categories/CategoryCreateModal.vue';
+import CategoryEditModal from '@/components/categories/CategoryEditModal.vue';
 import PermissionGuard from '@/components/PermissionGuard.vue';
 import Badge from '@/components/ui/badge.vue';
 import { Button } from '@/components/ui/button';
@@ -16,7 +18,7 @@ import PageHeader from '@/components/ui/PageHeader.vue';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { index, show } from '@/routes/categories-simple';
+import { index, show } from '@/routes/categories';
 import { type BreadcrumbItem, type Category, type CategoryFilters, type PaginatedData } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { useDebounceFn } from '@vueuse/core';
@@ -105,6 +107,11 @@ watch(
 const isLoading = ref(false);
 const selectedCategories = ref<number[]>([]);
 const showAdvancedFilters = ref(false);
+
+// Modal state
+const showCreateModal = ref(false);
+const showEditModal = ref(false);
+const selectedCategory = ref<Category | null>(null);
 
 // Statistics computed from data
 const stats = computed(() => ({
@@ -397,6 +404,29 @@ const formatDate = (dateString: string) => {
         day: 'numeric',
     });
 };
+
+// Modal handlers
+function openCreateModal() {
+    showCreateModal.value = true;
+}
+
+function openEditModal(category: Category) {
+    selectedCategory.value = category;
+    showEditModal.value = true;
+}
+
+function handleCategoryCreated() {
+    showCreateModal.value = false;
+    // Refresh the page data
+    router.reload();
+}
+
+function handleCategoryUpdated() {
+    showEditModal.value = false;
+    selectedCategory.value = null;
+    // Refresh the page data
+    router.reload();
+}
 </script>
 
 <template>
@@ -413,7 +443,7 @@ const formatDate = (dateString: string) => {
                             Tree View
                         </Button>
                         <PermissionGuard permission="create_categories">
-                            <Button>
+                            <Button @click="openCreateModal">
                                 <Plus class="mr-2 h-4 w-4" />
                                 Add Category
                             </Button>
@@ -854,7 +884,7 @@ const formatDate = (dateString: string) => {
                                                 </Link>
 
                                                 <PermissionGuard permission="edit_categories">
-                                                    <DropdownMenuItem>
+                                                    <DropdownMenuItem @click="openEditModal(category)">
                                                         <Edit class="mr-2 h-4 w-4" />
                                                         Edit
                                                     </DropdownMenuItem>
@@ -904,5 +934,19 @@ const formatDate = (dateString: string) => {
                 </Button>
             </div>
         </div>
+
+        <!-- Category Modals -->
+        <CategoryCreateModal 
+            :open="showCreateModal" 
+            @update:open="showCreateModal = $event" 
+            @category-created="handleCategoryCreated" 
+        />
+        
+        <CategoryEditModal 
+            :open="showEditModal" 
+            :category="selectedCategory" 
+            @update:open="showEditModal = $event" 
+            @category-updated="handleCategoryUpdated" 
+        />
     </AppLayout>
 </template>

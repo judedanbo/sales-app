@@ -4,11 +4,11 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { useAlerts } from '@/composables/useAlerts';
 import type { School } from '@/types';
 import { useForm } from '@inertiajs/vue3';
 import { Calendar } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
-import { useAlerts } from '@/composables/useAlerts';
 
 interface Props {
     open: boolean;
@@ -98,7 +98,7 @@ const handleSubmit = () => {
         onSuccess: () => {
             success(`Academic year "${form.year_name}" has been added successfully to ${props.school?.school_name}!`, {
                 position: 'top-center',
-                duration: 4000
+                duration: 4000,
             });
             emit('academic-year-created');
             isOpen.value = false;
@@ -109,7 +109,7 @@ const handleSubmit = () => {
             error(errorMessages.join(', ') || 'Failed to create academic year. Please check your input and try again.', {
                 position: 'top-center',
                 priority: 'high',
-                persistent: true
+                persistent: true,
             });
         },
     });

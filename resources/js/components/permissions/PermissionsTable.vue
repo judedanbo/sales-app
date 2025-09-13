@@ -13,12 +13,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import Pagination from '@/components/ui/Pagination.vue';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAlerts } from '@/composables/useAlerts';
 import { show } from '@/routes/permissions';
 import type { PaginatedData, Permission, PermissionFilters } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import { ChevronDown, ChevronUp, Download, Eye, Key, Layers, MoreHorizontal, Shield } from 'lucide-vue-next';
 import { computed } from 'vue';
-import { useAlerts } from '@/composables/useAlerts';
 
 interface Props {
     permissions: PaginatedData<Permission>;
@@ -60,9 +60,9 @@ function formatDate(date: string | undefined) {
 function handleViewRoles(permission: Permission) {
     info(`Viewing roles for permission: ${permission.display_name || permission.name}`, {
         position: 'top-right',
-        duration: 5000
+        duration: 5000,
     });
-    
+
     // Navigate to permission show page which has role management
     window.location.href = show(permission.id).url;
 }

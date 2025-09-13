@@ -6,23 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import PageHeader from '@/components/ui/PageHeader.vue';
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { destroy, index as categoriesIndex, show } from '@/routes/categories-simple';
+import { index as categoriesIndex, destroy, show } from '@/routes/categories';
 import { type BreadcrumbItem, type Category, type CategoryBreadcrumb } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { 
-    Calendar,
-    ChevronRight,
-    Edit, 
-    Eye,
-    Folder, 
-    FolderOpen,
-    Home,
-    Package,
-    Trash2,
-    TreePine,
-    User,
-    Users
-} from 'lucide-vue-next';
+import { Calendar, ChevronRight, Edit, Eye, Folder, FolderOpen, Home, Package, Trash2, TreePine, User, Users } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 interface Props {
@@ -42,15 +29,15 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => {
             href: categoriesIndex().url,
         },
     ];
-    
+
     // Add each breadcrumb item except the last one (current category)
-    props.breadcrumb.slice(0, -1).forEach(item => {
+    props.breadcrumb.slice(0, -1).forEach((item) => {
         items.push({
             title: item.name,
             href: show(item.id).url,
         });
     });
-    
+
     // Add current category
     if (props.breadcrumb.length > 0) {
         const current = props.breadcrumb[props.breadcrumb.length - 1];
@@ -59,7 +46,7 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => {
             href: show(current.id).url,
         });
     }
-    
+
     return items;
 });
 
@@ -85,9 +72,13 @@ const handleDelete = () => {
 };
 
 const toggleStatus = () => {
-    router.post(`/categories/${props.category.id}/toggle-status`, {}, {
-        preserveScroll: true,
-    });
+    router.post(
+        `/categories/${props.category.id}/toggle-status`,
+        {},
+        {
+            preserveScroll: true,
+        },
+    );
 };
 
 // Format date helper
@@ -137,8 +128,8 @@ const getDepthIndicator = (depth: number) => {
                     </PermissionGuard>
 
                     <PermissionGuard permission="edit_categories">
-                        <Button 
-                            variant="outline" 
+                        <Button
+                            variant="outline"
                             @click="toggleStatus"
                             :class="isActive ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'"
                         >
@@ -172,11 +163,7 @@ const getDepthIndicator = (depth: number) => {
                             <template v-if="index > 0">
                                 <ChevronRight class="h-4 w-4 text-muted-foreground" />
                             </template>
-                            <Link 
-                                v-if="index < breadcrumb.length - 1"
-                                :href="show(item.id).url"
-                                class="hover:underline"
-                            >
+                            <Link v-if="index < breadcrumb.length - 1" :href="show(item.id).url" class="hover:underline">
                                 {{ item.name }}
                             </Link>
                             <span v-else class="font-medium">{{ item.name }}</span>
@@ -191,15 +178,10 @@ const getDepthIndicator = (depth: number) => {
                     <div class="flex items-center justify-between">
                         <div>
                             <CardTitle class="flex items-center gap-2">
-                                <component 
-                                    :is="hasChildren ? FolderOpen : Folder"
-                                    class="h-5 w-5"
-                                />
+                                <component :is="hasChildren ? FolderOpen : Folder" class="h-5 w-5" />
                                 {{ category.name }}
                             </CardTitle>
-                            <CardDescription v-if="category.slug">
-                                Slug: /{{ category.slug }}
-                            </CardDescription>
+                            <CardDescription v-if="category.slug"> Slug: /{{ category.slug }} </CardDescription>
                         </div>
                         <Badge :variant="isActive ? 'default' : 'secondary'">
                             {{ isActive ? 'Active' : 'Inactive' }}
@@ -226,10 +208,7 @@ const getDepthIndicator = (depth: number) => {
                         <div v-if="category.color" class="space-y-2">
                             <div class="text-sm font-medium text-muted-foreground">Color</div>
                             <div class="flex items-center gap-2">
-                                <div 
-                                    class="h-4 w-4 rounded border" 
-                                    :style="{ backgroundColor: category.color }"
-                                ></div>
+                                <div class="h-4 w-4 rounded border" :style="{ backgroundColor: category.color }"></div>
                                 {{ category.color }}
                             </div>
                         </div>
@@ -283,10 +262,7 @@ const getDepthIndicator = (depth: number) => {
                         <div class="flex items-center gap-3">
                             <FolderOpen class="h-8 w-8 text-muted-foreground" />
                             <div>
-                                <Link 
-                                    :href="show(category.parent.id).url"
-                                    class="font-medium hover:underline"
-                                >
+                                <Link :href="show(category.parent.id).url" class="font-medium hover:underline">
                                     {{ category.parent.name }}
                                 </Link>
                                 <div v-if="category.parent.description" class="text-sm text-muted-foreground">
@@ -330,20 +306,12 @@ const getDepthIndicator = (depth: number) => {
                             <tr v-for="child in category.children" :key="child.id" class="border-b hover:bg-muted/50">
                                 <td class="px-4 py-3">
                                     <div class="flex items-center gap-2">
-                                        <component 
-                                            :is="child.has_children ? FolderOpen : Folder"
-                                            class="h-4 w-4 text-muted-foreground"
-                                        />
+                                        <component :is="child.has_children ? FolderOpen : Folder" class="h-4 w-4 text-muted-foreground" />
                                         <div>
-                                            <Link 
-                                                :href="show(child.id).url"
-                                                class="font-medium hover:underline"
-                                            >
+                                            <Link :href="show(child.id).url" class="font-medium hover:underline">
                                                 {{ child.name }}
                                             </Link>
-                                            <div v-if="child.slug" class="text-xs text-muted-foreground">
-                                                /{{ child.slug }}
-                                            </div>
+                                            <div v-if="child.slug" class="text-xs text-muted-foreground">/{{ child.slug }}</div>
                                         </div>
                                     </div>
                                 </td>
@@ -374,12 +342,7 @@ const getDepthIndicator = (depth: number) => {
                                     <span class="text-sm tabular-nums">{{ child.sort_order }}</span>
                                 </td>
                                 <td class="px-4 py-3">
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        as="a"
-                                        :href="show(child.id).url"
-                                    >
+                                    <Button variant="ghost" size="sm" as="a" :href="show(child.id).url">
                                         <Eye class="h-4 w-4" />
                                     </Button>
                                 </td>
@@ -397,9 +360,7 @@ const getDepthIndicator = (depth: number) => {
                         <CardTitle class="text-2xl">{{ category.children_count || 0 }}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p class="text-xs text-muted-foreground">
-                            Categories directly under this category
-                        </p>
+                        <p class="text-xs text-muted-foreground">Categories directly under this category</p>
                     </CardContent>
                 </Card>
 
@@ -409,9 +370,7 @@ const getDepthIndicator = (depth: number) => {
                         <CardTitle class="text-2xl text-green-600">{{ category.active_children_count || 0 }}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p class="text-xs text-muted-foreground">
-                            Active child categories
-                        </p>
+                        <p class="text-xs text-muted-foreground">Active child categories</p>
                     </CardContent>
                 </Card>
 
@@ -421,9 +380,7 @@ const getDepthIndicator = (depth: number) => {
                         <CardTitle class="text-2xl text-blue-600">{{ category.products_count || 0 }}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p class="text-xs text-muted-foreground">
-                            Products in this category
-                        </p>
+                        <p class="text-xs text-muted-foreground">Products in this category</p>
                     </CardContent>
                 </Card>
 
@@ -433,9 +390,7 @@ const getDepthIndicator = (depth: number) => {
                         <CardTitle class="text-2xl text-purple-600">{{ category.depth || 0 }}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p class="text-xs text-muted-foreground">
-                            Levels from root category
-                        </p>
+                        <p class="text-xs text-muted-foreground">Levels from root category</p>
                     </CardContent>
                 </Card>
             </div>
@@ -452,11 +407,11 @@ const getDepthIndicator = (depth: number) => {
                     <div class="grid gap-4 md:grid-cols-2">
                         <div class="space-y-3">
                             <div>
-                                <div class="text-sm font-medium text-muted-foreground mb-1">Created</div>
+                                <div class="mb-1 text-sm font-medium text-muted-foreground">Created</div>
                                 <div class="text-sm">{{ formatDate(category.created_at) }}</div>
                             </div>
                             <div v-if="category.created_by_user">
-                                <div class="text-sm font-medium text-muted-foreground mb-1">Created By</div>
+                                <div class="mb-1 text-sm font-medium text-muted-foreground">Created By</div>
                                 <div class="flex items-center gap-2 text-sm">
                                     <User class="h-4 w-4" />
                                     {{ category.created_by_user.name }}
@@ -465,11 +420,11 @@ const getDepthIndicator = (depth: number) => {
                         </div>
                         <div class="space-y-3">
                             <div>
-                                <div class="text-sm font-medium text-muted-foreground mb-1">Last Updated</div>
+                                <div class="mb-1 text-sm font-medium text-muted-foreground">Last Updated</div>
                                 <div class="text-sm">{{ formatDate(category.updated_at) }}</div>
                             </div>
                             <div v-if="category.updated_by_user">
-                                <div class="text-sm font-medium text-muted-foreground mb-1">Updated By</div>
+                                <div class="mb-1 text-sm font-medium text-muted-foreground">Updated By</div>
                                 <div class="flex items-center gap-2 text-sm">
                                     <User class="h-4 w-4" />
                                     {{ category.updated_by_user.name }}

@@ -7,11 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import Separator from '@/components/ui/separator/Separator.vue';
+import { useAlerts } from '@/composables/useAlerts';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { destroy, index as rolesIndex, show } from '@/routes/roles';
+import { index as rolesIndex, show } from '@/routes/roles';
 import { type BreadcrumbItem, type Permission, type Role, type User } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
-import { useAlerts } from '@/composables/useAlerts';
 import { Edit, Settings, Shield, ShieldCheck, Trash2, Users2 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
@@ -105,24 +105,18 @@ const handleUsersUpdated = (updatedRole: Role, updatedAvailableUsers: User[]) =>
 
 const handleDelete = () => {
     if (props.role.users_count > 0) {
-        error(
-            `Cannot delete role "${props.role.display_name || props.role.name}" because it has ${props.role.users_count} user(s) assigned to it.`,
-            {
-                title: 'Cannot Delete Role',
-                persistent: true
-            }
-        );
+        error(`Cannot delete role "${props.role.display_name || props.role.name}" because it has ${props.role.users_count} user(s) assigned to it.`, {
+            title: 'Cannot Delete Role',
+            persistent: true,
+        });
         return;
     }
 
     // Show warning confirmation
-    warning(
-        `Are you sure you want to delete the role "${props.role.display_name || props.role.name}"? This action cannot be undone.`,
-        {
-            title: 'Confirm Delete',
-            persistent: true
-        }
-    );
+    warning(`Are you sure you want to delete the role "${props.role.display_name || props.role.name}"? This action cannot be undone.`, {
+        title: 'Confirm Delete',
+        persistent: true,
+    });
 };
 
 // Format guard name

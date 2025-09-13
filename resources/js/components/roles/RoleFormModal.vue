@@ -4,11 +4,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
+import { useAlerts } from '@/composables/useAlerts';
 import type { Permission, PermissionGroup, Role } from '@/types';
 import { router } from '@inertiajs/vue3';
 import { ChevronDown, ChevronRight } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
-import { useAlerts } from '@/composables/useAlerts';
 
 interface Props {
     open: boolean;
@@ -162,9 +162,9 @@ const handleSubmit = () => {
             const actionText = isEditing.value ? 'updated' : 'created';
             success(`Role "${role?.display_name || role?.name}" has been ${actionText} successfully!`, {
                 position: 'top-center',
-                duration: 4000
+                duration: 4000,
             });
-            
+
             if (isEditing.value) {
                 emit('role-updated', role);
             } else {
@@ -181,7 +181,7 @@ const handleSubmit = () => {
             error(errorMessages.join(', ') || `Failed to ${isEditing.value ? 'update' : 'create'} role. Please check your input and try again.`, {
                 position: 'top-center',
                 priority: 'high',
-                persistent: true
+                persistent: true,
             });
         },
         onFinish: () => {

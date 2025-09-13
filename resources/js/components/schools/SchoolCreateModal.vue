@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { useAlerts } from '@/composables/useAlerts';
 import { router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
-import { useAlerts } from '@/composables/useAlerts';
 import SchoolFormFields from './SchoolFormFields.vue';
 
 interface Props {
@@ -59,7 +59,7 @@ watch(
                 error('Failed to load form data. Please refresh the page and try again.', {
                     position: 'top-center',
                     priority: 'critical',
-                    persistent: true
+                    persistent: true,
                 });
             }
         }
@@ -85,7 +85,7 @@ const handleSubmit = () => {
             const school = page.props.school;
             success(`School "${school?.school_name || 'New School'}" has been created successfully!`, {
                 position: 'top-center',
-                duration: 4000
+                duration: 4000,
             });
             emit('school-created', school);
             emit('update:open', false);
@@ -97,7 +97,7 @@ const handleSubmit = () => {
             error(errorMessages.join(', ') || 'Failed to create school. Please check your input and try again.', {
                 position: 'top-center',
                 priority: 'high',
-                persistent: true
+                persistent: true,
             });
         },
         onFinish: () => {

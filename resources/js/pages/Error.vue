@@ -1,18 +1,10 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import AppLayout from '@/layouts/AppLayout.vue';
 import { router } from '@inertiajs/vue3';
-import { 
-    AlertTriangle, 
-    ArrowLeft, 
-    Home, 
-    Lock, 
-    Search, 
-    ServerCrash, 
-    Shield 
-} from 'lucide-vue-next';
+import { AlertTriangle, ArrowLeft, Home, Lock, Search, ServerCrash, Shield } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 interface Props {
@@ -27,20 +19,20 @@ const errorConfig = computed(() => {
         case 403:
             return {
                 title: 'Access Forbidden',
-                description: 'You don\'t have permission to access this resource.',
+                description: "You don't have permission to access this resource.",
                 icon: Lock,
                 color: 'text-red-500',
                 suggestion: 'Contact your administrator if you believe this is an error.',
-                showContactAdmin: true
+                showContactAdmin: true,
             };
         case 404:
             return {
                 title: 'Page Not Found',
-                description: 'The page you\'re looking for doesn\'t exist.',
+                description: "The page you're looking for doesn't exist.",
                 icon: Search,
                 color: 'text-blue-500',
                 suggestion: 'Check the URL or navigate back to a known page.',
-                showContactAdmin: false
+                showContactAdmin: false,
             };
         case 500:
             return {
@@ -49,7 +41,7 @@ const errorConfig = computed(() => {
                 icon: ServerCrash,
                 color: 'text-orange-500',
                 suggestion: 'Please try again later or contact support if the problem persists.',
-                showContactAdmin: true
+                showContactAdmin: true,
             };
         case 503:
             return {
@@ -58,7 +50,7 @@ const errorConfig = computed(() => {
                 icon: AlertTriangle,
                 color: 'text-yellow-500',
                 suggestion: 'Please try again in a few moments.',
-                showContactAdmin: false
+                showContactAdmin: false,
             };
         default:
             return {
@@ -67,7 +59,7 @@ const errorConfig = computed(() => {
                 icon: Shield,
                 color: 'text-gray-500',
                 suggestion: 'Please try again or contact support if the problem persists.',
-                showContactAdmin: true
+                showContactAdmin: true,
             };
     }
 });
@@ -92,10 +84,7 @@ const goHome = () => {
                 <Card>
                     <CardHeader class="text-center">
                         <div class="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-                            <component 
-                                :is="errorConfig.icon" 
-                                :class="['h-10 w-10', errorConfig.color]" 
-                            />
+                            <component :is="errorConfig.icon" :class="['h-10 w-10', errorConfig.color]" />
                         </div>
                         <CardTitle class="text-2xl font-bold">
                             {{ errorConfig.title }}
@@ -104,7 +93,7 @@ const goHome = () => {
                             {{ errorConfig.description }}
                         </CardDescription>
                     </CardHeader>
-                    
+
                     <CardContent class="space-y-6">
                         <!-- Error Details -->
                         <Alert variant="destructive">
@@ -129,19 +118,12 @@ const goHome = () => {
 
                         <!-- Action Buttons -->
                         <div class="flex flex-col gap-3 sm:flex-row">
-                            <Button 
-                                variant="outline" 
-                                @click="goBack"
-                                class="flex-1"
-                            >
+                            <Button variant="outline" @click="goBack" class="flex-1">
                                 <ArrowLeft class="mr-2 h-4 w-4" />
                                 Go Back
                             </Button>
-                            
-                            <Button 
-                                @click="goHome"
-                                class="flex-1"
-                            >
+
+                            <Button @click="goHome" class="flex-1">
                                 <Home class="mr-2 h-4 w-4" />
                                 Dashboard
                             </Button>
@@ -150,14 +132,8 @@ const goHome = () => {
                         <!-- Additional Help -->
                         <div class="pt-4 text-center">
                             <p class="text-xs text-muted-foreground">
-                                Need help? Visit our 
-                                <Button 
-                                    variant="link" 
-                                    class="h-auto p-0 text-xs"
-                                    @click="router.visit('/docs')"
-                                >
-                                    documentation
-                                </Button>
+                                Need help? Visit our
+                                <Button variant="link" class="h-auto p-0 text-xs" @click="router.visit('/docs')"> documentation </Button>
                                 or contact support.
                             </p>
                         </div>

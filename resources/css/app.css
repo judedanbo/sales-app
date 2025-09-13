@@ -87,23 +87,23 @@
     .z-alerts {
         z-index: 9999;
     }
-    
+
     .z-modal {
         z-index: 1000;
     }
-    
+
     .z-dropdown {
         z-index: 100;
     }
-    
+
     .z-sidebar {
         z-index: 50;
     }
-    
+
     .z-navigation {
         z-index: 20;
     }
-    
+
     .z-base {
         z-index: 10;
     }

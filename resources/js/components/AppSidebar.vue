@@ -6,14 +6,15 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { useAuthUtils } from '@/composables/useAuthUtils';
 import { dashboard, documentation } from '@/routes';
 import { index as auditsIndex } from '@/routes/audits';
-import { index as categoriesIndex } from '@/routes/categories-simple';
+import { index as categoriesIndex } from '@/routes/categories';
 import { index as permissionsIndex } from '@/routes/permissions';
+import { index as productsIndex } from '@/routes/products';
 import { index as rolesIndex } from '@/routes/roles';
 import { index as schoolsIndex } from '@/routes/schools';
 import { index as usersIndex } from '@/routes/users';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { Activity, BookOpen, Folder, Key, LayoutGrid, School, Shield, Users } from 'lucide-vue-next';
+import { Activity, BookOpen, Folder, Key, LayoutGrid, Package, School, Shield, Users } from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogo from './AppLogo.vue';
 
@@ -34,6 +35,11 @@ const allMainNavItems: NavItem[] = [
         title: 'Categories',
         href: categoriesIndex(),
         icon: Folder,
+    },
+    {
+        title: 'Products',
+        href: productsIndex(),
+        icon: Package,
     },
     {
         title: 'Users',

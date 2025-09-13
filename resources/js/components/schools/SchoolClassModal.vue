@@ -4,11 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { useAlerts } from '@/composables/useAlerts';
 import type { School } from '@/types';
 import { useForm } from '@inertiajs/vue3';
 import { CheckCircle2 } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
-import { useAlerts } from '@/composables/useAlerts';
 
 interface Props {
     open: boolean;
@@ -61,7 +61,7 @@ const handleSubmit = () => {
         onSuccess: () => {
             success(`Class "${form.class_name}" has been successfully added to ${props.school?.school_name}.`, {
                 position: 'top-center',
-                duration: 4000
+                duration: 4000,
             });
             emit('class-created');
             isOpen.value = false;
@@ -73,7 +73,7 @@ const handleSubmit = () => {
             error(errorMessages.join(', ') || 'Failed to create class. Please try again.', {
                 position: 'top-center',
                 priority: 'high',
-                persistent: true
+                persistent: true,
             });
         },
     });

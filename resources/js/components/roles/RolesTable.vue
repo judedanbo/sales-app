@@ -14,12 +14,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import Pagination from '@/components/ui/Pagination.vue';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAlerts } from '@/composables/useAlerts';
 import { index, show } from '@/routes/roles';
 import type { PaginatedData, Permission, Role, RoleFilters, User } from '@/types';
 import { Link, router } from '@inertiajs/vue3';
 import { ChevronDown, ChevronUp, Download, Edit as EditIcon, Eye, Key, MoreHorizontal, Plus, Shield, Trash2, Users } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
-import { useAlerts } from '@/composables/useAlerts';
 import RoleFormModal from './RoleFormModal.vue';
 import RolePermissionsModal from './RolePermissionsModal.vue';
 import RoleUsersModal from './RoleUsersModal.vue';
@@ -82,7 +82,7 @@ watch(
                 // Role was successfully deleted, show success toast
                 success(`Role "${roleToDelete.value?.display_name || roleToDelete.value?.name}" has been successfully deleted.`, {
                     position: 'bottom-right',
-                    duration: 4000
+                    duration: 4000,
                 });
                 // Close the modal
                 showDeleteModal.value = false;

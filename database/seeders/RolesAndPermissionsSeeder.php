@@ -121,7 +121,32 @@ class RolesAndPermissionsSeeder extends Seeder
                 'create_products' => 'Create new products',
                 'edit_products' => 'Edit product information',
                 'delete_products' => 'Delete products',
+                'restore_products' => 'Restore soft-deleted products',
+                'force_delete_products' => 'Permanently delete products',
+                'bulk_edit_products' => 'Perform bulk operations on products',
+                'export_products' => 'Export product data',
+                'manage_product_status' => 'Activate/deactivate products',
+                'view_product_analytics' => 'View product performance analytics',
+                'manage_product_categories' => 'Assign/change product categories',
+                'duplicate_products' => 'Duplicate existing products',
+            ],
+
+            // Product Pricing Management
+            'pricing' => [
                 'manage_pricing' => 'Manage product pricing',
+                'view_price_history' => 'View product price change history',
+                'approve_price_changes' => 'Approve pending price changes',
+                'schedule_price_changes' => 'Schedule future price changes',
+                'bulk_update_pricing' => 'Perform bulk price updates',
+            ],
+
+            // School Product Integration
+            'school_products' => [
+                'manage_class_requirements' => 'Manage product requirements for school classes',
+                'view_school_product_usage' => 'View product usage by schools',
+                'assign_products_to_classes' => 'Assign products to specific school classes',
+                'approve_class_requirements' => 'Approve class product requirements',
+                'copy_class_requirements' => 'Copy requirements between academic years',
             ],
 
             'inventory' => [
@@ -129,6 +154,9 @@ class RolesAndPermissionsSeeder extends Seeder
                 'edit_inventory' => 'Edit inventory levels',
                 'manage_stock' => 'Manage stock movements',
                 'approve_stock_adjustments' => 'Approve stock adjustments',
+                'view_product_inventory' => 'View inventory levels for products',
+                'adjust_product_stock' => 'Make stock adjustments',
+                'view_stock_movements' => 'View product stock movement history',
             ],
 
             // Financial Management

@@ -459,3 +459,206 @@ export interface CategoryFilters {
     sort_direction?: 'asc' | 'desc';
     page?: number;
 }
+
+// Product Management Types
+export interface Product {
+    id: number;
+    sku: string;
+    name: string;
+    description?: string;
+    category_id: number;
+    category?: Category;
+    status: 'active' | 'inactive' | 'discontinued';
+    unit_price: number;
+    unit_type: string;
+    reorder_level?: number;
+    tax_rate: number;
+    weight?: number;
+    dimensions?: {
+        length?: number;
+        width?: number;
+        height?: number;
+    };
+    color?: string;
+    brand?: string;
+    attributes?: Record<string, any>;
+    barcode?: string;
+    image_url?: string;
+    gallery?: string[];
+    meta_title?: string;
+    meta_description?: string;
+    tags?: string[];
+    created_by?: number;
+    updated_by?: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string | null;
+
+    // Computed attributes
+    formatted_price?: string;
+    formatted_tax_rate?: string;
+    formatted_weight?: string;
+    low_stock?: boolean;
+    status_label?: string;
+    status_color?: string;
+
+    // Relationships
+    creator?: User;
+    updater?: User;
+    current_price?: ProductPrice;
+    prices?: ProductPrice[];
+    classProductRequirements?: ClassProductRequirement[];
+    inventory?: ProductInventory;
+}
+
+export interface ProductPrice {
+    id: number;
+    product_id: number;
+    version_number: number;
+    price: number;
+    final_price: number;
+    status: 'draft' | 'pending' | 'active' | 'expired' | 'rejected';
+    valid_from: string;
+    valid_to?: string;
+    created_by: number;
+    approved_by?: number;
+    approved_at?: string;
+    approval_notes?: string;
+    cost_price?: number;
+    markup_percentage?: number;
+    currency: string;
+    bulk_discounts?: Array<{
+        min_quantity: number;
+        discount_percentage: number;
+    }>;
+    notes?: string;
+    created_at: string;
+    updated_at: string;
+
+    // Computed attributes
+    formatted_price?: string;
+    formatted_final_price?: string;
+    profit_margin?: number;
+    is_valid?: boolean;
+    is_approved?: boolean;
+
+    // Relationships
+    product?: Product;
+    creator?: User;
+    approver?: User;
+}
+
+export interface ClassProductRequirement {
+    id: number;
+    school_id: number;
+    academic_year_id: number;
+    class_id: number;
+    product_id: number;
+    is_required: boolean;
+    min_quantity?: number;
+    max_quantity?: number;
+    recommended_quantity?: number;
+    required_by?: string;
+    is_active: boolean;
+    description?: string;
+    notes?: string;
+    estimated_cost?: number;
+    budget_allocation?: number;
+    priority: 'low' | 'medium' | 'high' | 'critical';
+    requirement_category: 'textbooks' | 'stationery' | 'uniforms' | 'supplies' | 'technology' | 'sports' | 'art' | 'science' | 'other';
+    created_by: number;
+    approved_by?: number;
+    approved_at?: string;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string | null;
+
+    // Computed attributes
+    formatted_estimated_cost?: string;
+    formatted_budget_allocation?: string;
+    total_estimated_cost?: number;
+    is_overdue?: boolean;
+    is_upcoming?: boolean;
+    is_approved?: boolean;
+    priority_color?: string;
+
+    // Relationships
+    school?: School;
+    academicYear?: AcademicYear;
+    schoolClass?: SchoolClass;
+    product?: Product;
+    creator?: User;
+    approver?: User;
+}
+
+export interface ProductInventory {
+    id: number;
+    product_id: number;
+    quantity_on_hand: number;
+    quantity_available: number;
+    quantity_reserved: number;
+    minimum_stock_level?: number;
+    maximum_stock_level?: number;
+    reorder_point?: number;
+    reorder_quantity?: number;
+    last_stock_count?: string;
+    last_movement_at?: string;
+    created_at: string;
+    updated_at: string;
+
+    // Computed attributes
+    is_low_stock?: boolean;
+    is_out_of_stock?: boolean;
+    stock_status?: 'in_stock' | 'low_stock' | 'out_of_stock' | 'reorder_needed';
+
+    // Relationships
+    product?: Product;
+}
+
+export interface ProductFilters {
+    search?: string;
+    category_id?: string | number;
+    status?: string;
+    price_from?: string | number;
+    price_to?: string | number;
+    low_stock?: string | boolean;
+    created_from?: string;
+    created_to?: string;
+    updated_from?: string;
+    updated_to?: string;
+    created_by?: string | number;
+    has_image?: string | boolean;
+    has_barcode?: string | boolean;
+    unit_type?: string;
+    brand?: string;
+    include_deleted?: string | boolean;
+    sort_by?: string;
+    sort_direction?: 'asc' | 'desc';
+    page?: number;
+}
+
+export interface ProductStatistics {
+    total: number;
+    active: number;
+    inactive: number;
+    discontinued: number;
+    low_stock: number;
+    out_of_stock: number;
+    recent: number;
+    by_category: Array<{
+        category_id: number;
+        category_name: string;
+        count: number;
+    }>;
+    by_status: Record<string, number>;
+    by_price_range: Array<{
+        range: string;
+        count: number;
+    }>;
+    value_breakdown: {
+        total_value: number;
+        average_price: number;
+        highest_price: number;
+        lowest_price: number;
+    };
+}

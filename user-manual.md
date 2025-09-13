@@ -7,9 +7,10 @@
 3. [Role Management](#role-management)
 4. [Schools Management](#schools-management)
 5. [Categories Management](#categories-management)
-6. [Audit Management](#audit-management)
-7. [Dashboard Overview](#dashboard-overview)
-8. [System Administration](#system-administration)
+6. [Products Management](#products-management)
+7. [Audit Management](#audit-management)
+8. [Dashboard Overview](#dashboard-overview)
+9. [System Administration](#system-administration)
 
 ---
 
@@ -35,6 +36,7 @@ The application uses a sidebar navigation system:
 - **Dashboard**: Overview of system statistics and recent activity
 - **Schools**: Manage school information, academic years, and classes
 - **Categories**: Product category management with hierarchical organization
+- **Products**: Product inventory and catalog management with pricing and categories
 - **Users**: User account management and role assignments
 - **Roles**: Role and permission management
 - **Permissions**: System permission overview
@@ -472,6 +474,395 @@ Categories system respects user permissions:
 
 ---
 
+## Products Management
+
+### Product Overview
+
+The Products system provides comprehensive management of inventory items and catalog products for the sales application:
+
+- **Product Information**: SKU, name, description, and category assignment
+- **Pricing Management**: Unit prices with tax rate calculations and Ghana Cedis (GHS) currency support
+- **Inventory Tracking**: Quantity on hand, reorder levels, and low stock alerts
+- **Categorization**: Hierarchical category assignment with parent-child relationships
+- **Status Management**: Active/inactive status control for product availability
+
+### Accessing Products
+
+1. Click "Products" in the main navigation sidebar (package icon)
+2. The Products interface is accessible to users with product management permissions
+3. The main products page displays:
+   - **Statistics Cards**: Total products, active/inactive counts, low stock alerts, and category distribution
+   - **Filter Panel**: Search, category filter, status filter, and price range options
+   - **Products Table**: Comprehensive listing of all products with actions and details
+
+### Understanding Product Structure
+
+#### Product Information Fields
+
+**Basic Details:**
+- **SKU (Stock Keeping Unit)**: Unique identifier with smart generation patterns
+- **Name**: Product display name for customer-facing interfaces
+- **Description**: Detailed product information and specifications
+- **Category**: Hierarchical category assignment for organization
+- **Status**: Active (available for sale) or inactive (hidden from sales)
+
+**Pricing Information:**
+- **Unit Price**: Base price in Ghana Cedis (GHS) before tax
+- **Tax Rate**: Percentage-based tax rate (displayed as 0-100%, stored as 0-1 decimal)
+- **Final Price**: Calculated total including tax (Unit Price × (1 + Tax Rate))
+- **Currency**: All prices displayed in Ghana Cedis with GH₵ symbol
+
+**Inventory Details:**
+- **Quantity on Hand**: Current stock level available for sale
+- **Reorder Level**: Minimum stock threshold for reorder alerts
+- **Unit Type**: Product measurement unit (pieces, kilograms, liters, etc.)
+- **Location**: Physical storage location for inventory management
+
+### Creating Products
+
+1. Navigate to Products → Index
+2. Click "Add Product" button
+3. Fill out the comprehensive product form:
+
+**Basic Information Section:**
+- **Product Name**: Clear, descriptive name for the product
+- **Description**: Detailed product information and specifications
+- **Category**: Select from hierarchical category dropdown
+- **Status**: Set as active (available) or inactive (hidden)
+
+**Pricing Section:**
+- **Unit Price**: Enter base price in Ghana Cedis (without tax)
+- **Tax Rate**: Enter as percentage (e.g., 18 for 18% VAT)
+  - System displays percentage input for user-friendly entry
+  - Automatically converts to decimal (0-1) for backend validation
+  - Helper text guides percentage entry format
+
+**Inventory Section:**
+- **Current Quantity**: Initial stock level
+- **Reorder Level**: Minimum stock threshold for alerts
+- **Unit Type**: Select from dropdown options:
+  - Pieces (individual items)
+  - Kilograms (weight-based)
+  - Liters (volume-based)
+  - Boxes (packaged items)
+  - Sets (grouped items)
+- **Storage Location**: Physical location for inventory tracking
+
+**SKU Generation:**
+- **Auto-generate**: System creates SKU from product name
+- **Pattern Selection**: Choose from predefined patterns:
+  - **Product Pattern**: PRD-XXXX format
+  - **Item Pattern**: ITM-XXXX format
+  - **Goods Pattern**: GDS-XXXX format
+  - **Stock Pattern**: STK-XXXX format
+- **Custom Entry**: Enter completely custom SKU code
+- **Uniqueness**: System validates SKU uniqueness across all products
+
+4. Click "Create Product" to save
+
+### Viewing Products
+
+#### Products Index Page
+
+The main products page provides:
+
+**Product Statistics Overview:**
+- **Total Products**: Complete count of all products in catalog
+- **Active Products**: Count of currently available products (green badge)
+- **Inactive Products**: Count of disabled/hidden products (orange badge)
+- **Low Stock Alerts**: Count of products below reorder level (red badge)
+- **Categories Used**: Count of categories with assigned products (blue badge)
+
+**Search and Filtering Options:**
+- **Search**: Real-time search across product names, descriptions, and SKUs (500ms debounced)
+- **Category Filter**: Filter by specific category or view uncategorized products
+- **Status Filter**: Filter by active/inactive status
+- **Price Range**: Filter by minimum and maximum price ranges
+- **Stock Level**: Filter by in-stock, low stock, or out of stock status
+- **Clear Filters**: Reset all filters to default state
+
+**Products Table:**
+- **Product Information**: Name, SKU, description with truncation
+- **Category Assignment**: Shows assigned category with navigation links
+- **Pricing Display**: Unit price, tax rate, and calculated final price in GHS format
+- **Inventory Status**: Current quantity, reorder level, and stock status indicators
+- **Status Badges**: Active/inactive status with color coding (green/orange)
+- **Creation Date**: When product was initially added to system
+- **Actions Menu**: View, edit, duplicate, and delete options per product
+
+#### Product Details Page
+
+Navigate to individual product pages by clicking product names:
+
+**Comprehensive Product Information:**
+- Full product details with name, description, SKU, and metadata
+- Category assignment with breadcrumb navigation to parent categories
+- Complete pricing breakdown: unit price, tax rate, final price calculation
+- Inventory status with current quantity, reorder level, and location
+- Status information and creation/modification timestamps
+
+**Related Information:**
+- **Category Details**: Link to assigned category with hierarchy path
+- **Inventory History**: Track stock movements and quantity changes
+- **Price History**: Previous pricing changes and tax rate modifications
+- **Sales Data**: Products sold, revenue generated, popular combinations
+
+### Product Pricing System
+
+#### Ghana Cedis (GHS) Currency Support
+
+**Price Display Format:**
+- All prices displayed with GH₵ symbol prefix
+- Two decimal places for precise pricing (GH₵ 125.50)
+- Consistent currency formatting throughout the application
+- Final price calculation includes tax automatically
+
+**Tax Rate Management:**
+- **User Input**: Enter tax rates as percentages (0-100%)
+- **Backend Storage**: Automatically converted to decimals (0-1) for calculations
+- **Display**: Shows percentage format for user clarity (18.0% VAT)
+- **Calculation**: Final Price = Unit Price × (1 + Tax Rate decimal)
+- **Validation**: Supports fractional percentages (e.g., 12.5% tax rate)
+
+#### Price Calculations
+
+**Automatic Calculations:**
+- System automatically calculates final price including tax
+- Real-time price updates when tax rate or unit price changes
+- Consistent rounding to 2 decimal places for currency display
+- Price history tracking for audit and analysis purposes
+
+**Example Pricing:**
+- Unit Price: GH₵ 100.00
+- Tax Rate: 18% (stored as 0.18)
+- Final Price: GH₵ 100.00 × (1 + 0.18) = GH₵ 118.00
+
+### SKU Management System
+
+#### Smart SKU Generation
+
+**Auto-Generation from Name:**
+- System creates SKU by processing product name
+- Removes special characters and spaces
+- Converts to uppercase format
+- Adds numeric suffix for uniqueness
+- Example: "School Uniform Shirt" → "SCHOOL-UNIFORM-SHIRT-001"
+
+**Pattern-Based Generation:**
+- **PRD-XXXX**: Product prefix with 4-digit number (PRD-0001)
+- **ITM-XXXX**: Item prefix with sequential numbering (ITM-0045)
+- **GDS-XXXX**: Goods prefix for general merchandise (GDS-0123)
+- **STK-XXXX**: Stock prefix for inventory tracking (STK-0089)
+
+**Custom SKU Entry:**
+- Manual entry for specific business requirements
+- System validates uniqueness across entire product catalog
+- Supports alphanumeric characters, hyphens, and underscores
+- Maximum 50 characters with validation feedback
+
+#### SKU Validation
+
+**Uniqueness Checking:**
+- Real-time validation during product creation and editing
+- Clear error messages if SKU already exists
+- Suggestions for alternative SKUs if conflicts occur
+- Database-level constraint enforcement for data integrity
+
+### Unit Type Management
+
+#### Available Unit Types
+
+The system supports various unit types for different product categories:
+
+- **Pieces**: Individual countable items (uniforms, books, calculators)
+- **Kilograms**: Weight-based products (bulk stationery, sports equipment)
+- **Liters**: Volume-based products (liquids, chemicals, cleaning supplies)
+- **Boxes**: Packaged items sold in box quantities (bulk paper, supplies)
+- **Sets**: Grouped items sold as complete sets (geometry sets, art supplies)
+
+#### Unit Type Selection
+
+**Dropdown Interface:**
+- Clear labeling for each unit type with descriptions
+- Consistent terminology across product catalog
+- Integration with inventory calculations and stock alerts
+- Proper display in sales interfaces and receipts
+
+### Product Actions
+
+#### Managing Product Status
+
+**Active Products:**
+- Available for sale in POS systems
+- Visible in product catalogs and searches
+- Included in inventory calculations and reports
+- Green status badge indicates availability
+
+**Inactive Products:**
+- Hidden from sales interfaces and catalogs
+- Preserved in system for historical records
+- Can be reactivated when needed
+- Orange status badge indicates disabled status
+- Inventory still tracked for auditing purposes
+
+#### Bulk Operations
+
+**Bulk Status Updates:**
+- Select multiple products for simultaneous status changes
+- Activate/deactivate multiple products efficiently
+- Bulk category reassignment capabilities
+- Mass price updates with percentage increases/decreases
+
+#### Product Duplication
+
+**Clone Existing Products:**
+- Duplicate product structure for similar items
+- Copy pricing, category, and basic information
+- Generate new unique SKU automatically
+- Modify details as needed for new product variant
+
+### Inventory Integration
+
+#### Stock Level Monitoring
+
+**Current Quantity Tracking:**
+- Real-time inventory levels with sales integration
+- Automatic updates when sales transactions occur
+- Manual adjustments for inventory corrections
+- Stock movement history for audit trails
+
+**Low Stock Alerts:**
+- Configurable reorder level thresholds
+- Visual indicators for products needing restocking
+- Dashboard alerts for low inventory attention
+- Automated reporting for procurement planning
+
+#### Inventory Locations
+
+**Physical Storage Tracking:**
+- Assign storage locations for efficient warehouse management
+- Support for multiple location tracking
+- Location-based inventory reports and searches
+- Integration with picking and fulfillment processes
+
+### Permission-Based Access
+
+Products system respects user permissions:
+
+- **View Access**: Users with product view permissions can browse catalog
+- **Creation Rights**: Product creation requires appropriate management permissions
+- **Modification Access**: Editing products restricted to authorized users
+- **Bulk Operations**: Advanced operations require higher-level permissions
+- **Price Management**: Pricing changes may require additional approval workflows
+
+### Best Practices
+
+#### Product Information Management
+
+**Naming Conventions:**
+- Use clear, descriptive product names
+- Include important attributes in names (size, color, model)
+- Maintain consistency across similar product lines
+- Avoid abbreviations that may confuse users
+
+**Description Guidelines:**
+- Provide comprehensive product specifications
+- Include dimensions, materials, and key features
+- Use consistent formatting for similar product types
+- Update descriptions when product specifications change
+
+#### Category Assignment
+
+**Logical Organization:**
+- Assign products to most specific appropriate category
+- Use parent categories for broader organization
+- Review category structure periodically for optimization
+- Ensure consistent categorization across product lines
+
+#### Pricing Management
+
+**Regular Price Reviews:**
+- Monitor competitor pricing for market competitiveness
+- Review tax rates for compliance with current regulations
+- Document price changes with justification
+- Maintain price history for trend analysis
+
+#### Inventory Accuracy
+
+**Stock Level Maintenance:**
+- Conduct regular physical inventory counts
+- Update reorder levels based on sales velocity
+- Monitor stock movements for unusual patterns
+- Maintain accurate location information
+
+### Troubleshooting Products
+
+#### Products Not Displaying
+
+**Visibility Issues:**
+- Check if product is marked as active
+- Verify user has view permissions for products
+- Clear any active filters that might hide product
+- Refresh page and check search criteria
+
+#### SKU Generation Problems
+
+**SKU Conflicts:**
+- System will display error for duplicate SKUs
+- Try different pattern or manual entry
+- Check if similar product already exists
+- Contact administrator for SKU policy clarification
+
+#### Pricing Calculation Issues
+
+**Tax Rate Problems:**
+- Ensure tax rate is entered as percentage (not decimal)
+- Verify current tax regulations for accuracy
+- Check calculation: Final = Unit × (1 + Tax Rate decimal)
+- Review price display formatting for currency symbol
+
+#### Search and Filter Problems
+
+**Search Not Working:**
+- Clear search field and try partial terms
+- Check spelling and try alternative keywords
+- Verify data exists matching search criteria
+- Try clearing all filters and search again
+
+**Filter Issues:**
+- Review active filter chips for current selections
+- Try individual filters to isolate problems
+- Clear all filters and apply selectively
+- Check if combination of filters yields no results
+
+### Integration with Other Systems
+
+#### Category Integration
+
+**Hierarchical Categories:**
+- Products automatically inherit category hierarchy
+- Category changes affect product organization
+- Category deletion requires product reassignment
+- Category filters work across product searches
+
+#### Sales Integration
+
+**POS System Integration:**
+- Active products available in point-of-sale interface
+- Pricing automatically calculated with tax
+- Inventory levels update with each sale
+- Product information displays on receipts
+
+#### Reporting Integration
+
+**Analytics and Reports:**
+- Product performance tracking across sales
+- Inventory turnover analysis and trends
+- Category-based sales reporting
+- Price history and change impact analysis
+
+---
+
 ## Audit Management
 
 ### Understanding the Audit System
@@ -819,6 +1210,22 @@ The dashboard provides real-time insights into:
 
 ### Recent Enhancements
 
+**Products Management System Implementation (September 2025):**
+- Implemented comprehensive Product Management System with full CRUD operations and advanced features
+- Created Product model with comprehensive attributes: SKU, name, description, category assignment, pricing, and inventory tracking
+- Built API and Frontend controllers for seamless Laravel + Inertia.js integration with Vue 3 components
+- Added Products navigation to main sidebar with Package icon and proper permission-based access control
+- **Smart SKU Generation System**: Auto-generation from product names, pattern-based options (PRD-, ITM-, GDS-, STK-), and custom entry with uniqueness validation
+- **Ghana Cedis (GHS) Currency Support**: Complete currency localization with GH₵ symbol, proper formatting, and price calculations
+- **Tax Rate Conversion System**: User-friendly percentage input (0-100%) with automatic decimal conversion (0-1) for backend validation
+- **Unit Type Dropdown**: Converted from text input to select dropdown with options (Pieces, Kilograms, Liters, Boxes, Sets)
+- **Table UI Components**: Created comprehensive table component library (Table, TableHeader, TableBody, TableRow, TableCell) for consistent data presentation
+- Fixed table component import errors and built successful Vite production assets
+- Added TypeScript interfaces for Product entities and form data structures
+- **Comprehensive Form Validation**: ProductFormFields.vue with real-time validation, computed properties, and watchers for smart form behavior
+- Enhanced CategoryFormFields.vue and modal components with auto-slug generation and parent selection
+- Successfully tested all features with proper form submission, validation, and user feedback systems
+
 **Enhanced Alert Notification System (September 2025):**
 - Implemented unified alert system replacing all toast notifications throughout the application
 - Enhanced AlertsContainer with z-[9999] layering ensuring alerts float above all page components
@@ -893,5 +1300,5 @@ The dashboard provides real-time insights into:
 
 ---
 
-*Last Updated: January 2025*
-*Version: 2.1.0*
+*Last Updated: September 2025*
+*Version: 2.2.0*

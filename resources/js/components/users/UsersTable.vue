@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import Pagination from '@/components/ui/Pagination.vue';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAlerts } from '@/composables/useAlerts';
 import { index, show } from '@/routes/users';
 import type { PaginatedData, User, UserFilters } from '@/types';
 import { Link, router } from '@inertiajs/vue3';
@@ -34,7 +35,6 @@ import {
     Users as UsersIcon,
 } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
-import { useAlerts } from '@/composables/useAlerts';
 import UserFormModal from './UserFormModal.vue';
 import UserRoleModal from './UserRoleModal.vue';
 
@@ -80,12 +80,12 @@ watch(
     (newUsers) => {
         if (isDeleting.value && userToDelete.value) {
             // Check if the user being deleted is no longer in the list
-            const stillExists = newUsers.some(user => user.id === userToDelete.value?.id);
+            const stillExists = newUsers.some((user) => user.id === userToDelete.value?.id);
             if (!stillExists) {
                 // User was successfully deleted, show success toast
                 success(`User "${userToDelete.value?.name}" has been successfully deleted.`, {
                     position: 'bottom-right',
-                    duration: 4000
+                    duration: 4000,
                 });
                 // Close the modal
                 showDeleteModal.value = false;
@@ -94,7 +94,7 @@ watch(
             }
         }
     },
-    { deep: true }
+    { deep: true },
 );
 
 // Selection helpers
@@ -171,7 +171,7 @@ function confirmDelete() {
 
     isDeleting.value = true;
     emit('delete', userToDelete.value);
-    
+
     // Note: The parent component will handle the actual deletion
     // We'll close the modal when the deletion is complete
 }
