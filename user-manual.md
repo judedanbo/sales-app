@@ -67,6 +67,23 @@ The application uses a sidebar navigation system:
 4. Click "Create User"
 5. The system will automatically assign appropriate roles based on user type
 
+### Deleting Users
+
+1. Navigate to Users → Index
+2. Find the user you want to delete in the users table
+3. Click the "⋯" menu button for the user
+4. Select "Delete" from the dropdown menu
+5. A professional confirmation modal will appear showing:
+   - **Title**: "Delete User"
+   - **User Name**: The name of the user being deleted
+   - **Warning Message**: Confirmation text asking if you're sure
+   - **Action Buttons**: "Cancel" and "Delete User" (red button)
+6. Click "Delete User" to confirm, or "Cancel" to abort
+7. During deletion, the modal shows a loading state with a spinner
+8. The modal automatically closes when deletion is complete
+9. The user list refreshes to reflect the changes
+10. A success notification confirms the deletion
+
 ### User Types
 
 The system supports seven user types:
@@ -184,6 +201,23 @@ Each user card shows:
    - Guard name (web/api)
    - Initial permissions (optional)
 
+### Deleting Roles
+
+1. Navigate to Roles → Index
+2. Find the role you want to delete in the roles table
+3. Click the "⋯" menu button for the role
+4. Select "Delete" from the dropdown menu
+5. A professional confirmation modal will appear showing:
+   - **Title**: "Delete Role"
+   - **Role Name**: The display name of the role being deleted
+   - **Warning Message**: Confirmation text asking if you're sure
+   - **Action Buttons**: "Cancel" and "Delete Role" (red button)
+6. Click "Delete Role" to confirm, or "Cancel" to abort
+7. During deletion, the modal shows a loading state with a spinner
+8. The modal automatically closes when deletion is complete
+9. The roles list refreshes to reflect the changes
+10. A success notification confirms the deletion
+
 ---
 
 ## Schools Management
@@ -217,6 +251,25 @@ The Schools system provides comprehensive management of educational institutions
    - Set current active academic year
    - Track academic progress
    - Plan future academic periods
+
+### Deleting Schools
+
+1. Navigate to Schools → Index
+2. Find the school you want to delete in the schools table
+3. Click the "⋯" menu button for the school
+4. Select "Delete" from the dropdown menu
+5. A professional confirmation modal will appear showing:
+   - **Title**: "Delete School" 
+   - **School Name**: The name of the school being deleted
+   - **Warning Message**: Confirmation text asking if you're sure
+   - **Action Buttons**: "Cancel" and "Delete School" (red button)
+6. Click "Delete School" to confirm, or "Cancel" to abort
+7. During deletion, the modal shows a loading state with a spinner
+8. The modal automatically closes when deletion is complete
+9. The schools list refreshes to reflect the changes
+10. A success notification confirms the deletion
+
+**Note**: School deletion may be restricted if the school has active users or related data. Administrators and super administrators have the necessary permissions to delete schools.
 
 ---
 
@@ -722,6 +775,13 @@ The dashboard provides real-time insights into:
 - Check browser console for JavaScript errors
 - Refresh page and try again
 
+**Delete Confirmation Modal Issues:**
+- If delete confirmation modal doesn't appear, check user permissions
+- Modal should show automatically after clicking delete action
+- Ensure JavaScript is enabled in your browser
+- Try refreshing the page if modal appears to freeze
+- Check that the record still exists if modal won't open
+
 **Search Not Working:**
 - Clear search field and try again
 - Check spelling and try partial matches
@@ -789,6 +849,13 @@ The dashboard provides real-time insights into:
 - Implemented bulk user operations with real-time updates
 - Enhanced search and filtering capabilities
 - Improved user experience with immediate visual feedback
+
+**Delete Confirmation Modal System (September 2025):**
+- Implemented professional delete confirmation modals across Schools, Users, and Roles management
+- Replaced browser confirm dialogs with accessible, branded confirmation interfaces
+- Added loading states and automatic modal cleanup after successful deletions
+- Enhanced user experience with clear action buttons and descriptive messaging
+- Consistent architecture pattern across all management interfaces
 
 **Audit Management System:**
 - Comprehensive audit trail tracking for all system changes
