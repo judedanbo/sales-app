@@ -177,11 +177,13 @@ function handleSort(column: string) {
 
 // Event handlers for components
 function handleDelete(user: User) {
-    if (confirm(`Are you sure you want to delete ${user.name}?`)) {
-        router.delete(`/users/${user.id}`, {
-            preserveScroll: true,
-        });
-    }
+    router.delete(`/users/${user.id}`, {
+        preserveScroll: true,
+        onFinish: () => {
+            // The deletion is complete - the UsersTable will handle modal cleanup
+            // through its own state management or parent-child communication
+        },
+    });
 }
 
 function handleRestore(user: User) {

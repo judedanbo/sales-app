@@ -12,12 +12,15 @@ import { type BreadcrumbItem, type School } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
 import { Building2, Calendar, Edit, ExternalLink, FileText, Globe, GraduationCap, Mail, MapPin, Phone, Trash2, User, Users } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
+import { useAlerts } from '@/composables/useAlerts';
 
 interface Props {
     school: School;
 }
 
 const props = defineProps<Props>();
+
+const { warning, success, error } = useAlerts();
 
 const isEditModalOpen = ref(false);
 const isDeleting = ref(false);
@@ -46,19 +49,25 @@ const handleEdit = () => {
 };
 
 const handleSchoolUpdated = (updatedSchool: School) => {
+    success(`School "${updatedSchool.school_name}" has been updated successfully!`, {
+        position: 'top-center',
+        duration: 4000
+    });
     // Refresh the page to get updated data
     router.get(show(props.school.id).url);
 };
 
 const handleDelete = () => {
-    if (confirm(`Are you sure you want to delete "${props.school.school_name}"?`)) {
-        isDeleting.value = true;
-        router.delete(destroy(props.school.id).url, {
-            onFinish: () => {
-                isDeleting.value = false;
-            },
-        });
-    }
+    warning(
+        `Are you sure you want to delete "${props.school.school_name}"? This action cannot be undone and will permanently remove all associated data including contacts, addresses, classes, and academic years.`,
+        {
+            title: 'Delete School Confirmation',
+            persistent: true
+        }
+    );
+    
+    // TODO: Implement proper delete confirmation modal with confirm/cancel buttons
+    // For now, we show a warning but don't actually delete until modal is implemented
 };
 
 // Format date helper

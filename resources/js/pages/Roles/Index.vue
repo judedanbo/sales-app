@@ -158,11 +158,13 @@ function handleSort(column: string) {
 
 // Event handlers for components
 function handleDelete(role: Role) {
-    if (confirm(`Are you sure you want to delete the role "${role.display_name || role.name}"?`)) {
-        router.delete(`/roles/${role.id}`, {
-            preserveScroll: true,
-        });
-    }
+    router.delete(`/roles/${role.id}`, {
+        preserveScroll: true,
+        onFinish: () => {
+            // The deletion is complete - the RolesTable will handle modal cleanup
+            // through its own state management or parent-child communication
+        },
+    });
 }
 
 function handleFiltersUpdate(newFilters: RoleFilters) {

@@ -5,7 +5,9 @@ import SchoolFiltersComponent from '@/components/schools/SchoolFilters.vue';
 import SchoolsTable from '@/components/schools/SchoolsTable.vue';
 import SchoolStats from '@/components/schools/SchoolStats.vue';
 import { Button } from '@/components/ui/button';
+import DeleteConfirmationModal from '@/components/ui/DeleteConfirmationModal.vue';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import { useAlerts } from '@/composables/useAlerts';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { index } from '@/routes/schools';
 import { type BreadcrumbItem, type PaginatedData, type School, type SchoolFilters } from '@/types';
@@ -13,6 +15,8 @@ import { Head, router } from '@inertiajs/vue3';
 import { useDebounceFn } from '@vueuse/core';
 import { Plus } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
+
+const { addAlert } = useAlerts();
 
 interface Props {
     schools: PaginatedData<School>;
@@ -60,6 +64,9 @@ watch(
 const isLoading = ref(false);
 const selectedSchools = ref<number[]>([]);
 const showCreateModal = ref(false);
+const showDeleteModal = ref(false);
+const schoolToDelete = ref<School | null>(null);
+const isDeleting = ref(false);
 
 // Selection handlers
 const toggleSelection = (schoolId: number) => {
@@ -225,11 +232,38 @@ function handleSort(column: string) {
 
 // Event handlers for components
 function handleDelete(school: School) {
-    if (confirm(`Are you sure you want to delete ${school.school_name}?`)) {
-        router.delete(`/schools/${school.id}`, {
-            preserveScroll: true,
-        });
-    }
+    schoolToDelete.value = school;
+    showDeleteModal.value = true;
+}
+
+const showAlert = (variant: 'success', message: string, title: string) => {
+    addAlert(message, variant, {
+        title: title,
+    });
+};
+
+function confirmDelete() {
+    if (!schoolToDelete.value) return;
+
+    isDeleting.value = true;
+
+    router.delete(`/schools/${schoolToDelete.value.id}`, {
+        preserveScroll: true,
+        onSuccess: () => {
+            // Successfully deleted, handled in onFinish
+            showAlert('success', 'The School ' + schoolToDelete.value?.school_name + ' has been successfully deleted', 'School Deleted');
+        },
+        onFinish: () => {
+            isDeleting.value = false;
+            showDeleteModal.value = false;
+            schoolToDelete.value = null;
+        },
+    });
+}
+
+function cancelDelete() {
+    showDeleteModal.value = false;
+    schoolToDelete.value = null;
 }
 
 function handleFiltersUpdate(newFilters: SchoolFilters) {
@@ -331,5 +365,18 @@ const clearFilters = () => {
         <PermissionGuard permission="create_schools">
             <SchoolCreateModal :open="showCreateModal" @update:open="showCreateModal = $event" @school-created="handleSchoolCreated" />
         </PermissionGuard>
+
+        <!-- Delete Confirmation Modal -->
+        <DeleteConfirmationModal
+            :open="showDeleteModal"
+            :loading="isDeleting"
+            title="Delete School"
+            message="Are you sure you want to delete"
+            :item-name="schoolToDelete?.school_name"
+            danger-text="Delete School"
+            @update:open="showDeleteModal = $event"
+            @confirm="confirmDelete"
+            @cancel="cancelDelete"
+        />
     </AppLayout>
 </template>

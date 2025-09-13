@@ -11,6 +11,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { destroy, index as rolesIndex, show } from '@/routes/roles';
 import { type BreadcrumbItem, type Permission, type Role, type User } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
+import { useAlerts } from '@/composables/useAlerts';
 import { Edit, Settings, Shield, ShieldCheck, Trash2, Users2 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
@@ -38,6 +39,8 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const { error, warning } = useAlerts();
 
 const isDeleting = ref(false);
 const isEditModalOpen = ref(false);
@@ -101,23 +104,25 @@ const handleUsersUpdated = (updatedRole: Role, updatedAvailableUsers: User[]) =>
 };
 
 const handleDelete = () => {
-    const confirmMessage = `Are you sure you want to delete the role "${props.role.display_name || props.role.name}"?`;
-
     if (props.role.users_count > 0) {
-        alert(
-            `Cannot delete role "${props.role.display_name || props.role.name}" because it has ${props.role.users_count} user(s) assigned to it. Please remove all users from this role before deleting.`,
+        error(
+            `Cannot delete role "${props.role.display_name || props.role.name}" because it has ${props.role.users_count} user(s) assigned to it.`,
+            {
+                title: 'Cannot Delete Role',
+                persistent: true
+            }
         );
         return;
     }
 
-    if (confirm(confirmMessage)) {
-        isDeleting.value = true;
-        router.delete(destroy(props.role.id).url, {
-            onFinish: () => {
-                isDeleting.value = false;
-            },
-        });
-    }
+    // Show warning confirmation
+    warning(
+        `Are you sure you want to delete the role "${props.role.display_name || props.role.name}"? This action cannot be undone.`,
+        {
+            title: 'Confirm Delete',
+            persistent: true
+        }
+    );
 };
 
 // Format guard name

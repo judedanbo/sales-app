@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { useAlerts } from '@/composables/useAlerts';
 import type { School } from '@/types';
 import { router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import SchoolFormFields from './SchoolFormFields.vue';
+
+const { addAlert } = useAlerts();
 
 interface Props {
     open: boolean;
@@ -17,6 +20,7 @@ interface Emits {
 
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
+const { success, error } = useAlerts();
 
 const processing = ref(false);
 const errors = ref<Record<string, string>>({});
@@ -90,6 +94,11 @@ watch(
 const updateForm = (newForm: typeof form.value) => {
     form.value = newForm;
 };
+const showAlert = (variant: 'success' | 'error', message: string, title: string) => {
+    addAlert(message, variant, {
+        title,
+    });
+};
 
 const handleSubmit = () => {
     if (!props.school) return;
@@ -99,11 +108,15 @@ const handleSubmit = () => {
 
     router.put(`/schools/${props.school.id}`, form.value, {
         onSuccess: (page) => {
-            emit('school-updated', page.props.school);
+            const school = page.props.school;
+            showAlert('success', `School "${props.school?.school_name || 'School'}" has been updated successfully!`, 'School Updated');
+            emit('school-updated', school);
             emit('update:open', false);
         },
         onError: (pageErrors) => {
             errors.value = pageErrors;
+            const errorMessages = Object.values(pageErrors).flat();
+            showAlert('error', errorMessages.join(', ') || 'Failed to update school. Please check your input and try again.', 'Update Failed');
         },
         onFinish: () => {
             processing.value = false;

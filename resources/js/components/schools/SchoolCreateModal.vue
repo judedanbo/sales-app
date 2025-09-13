@@ -2,6 +2,7 @@
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
+import { useAlerts } from '@/composables/useAlerts';
 import SchoolFormFields from './SchoolFormFields.vue';
 
 interface Props {
@@ -15,6 +16,7 @@ interface Emits {
 
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
+const { success, error } = useAlerts();
 
 const processing = ref(false);
 const errors = ref<Record<string, string>>({});
@@ -53,8 +55,12 @@ watch(
                 const response = await fetch('/schools/form-data');
                 const data = await response.json();
                 formData.value = data;
-            } catch (error) {
-                console.error('Failed to load form data:', error);
+            } catch (err) {
+                error('Failed to load form data. Please refresh the page and try again.', {
+                    position: 'top-center',
+                    priority: 'critical',
+                    persistent: true
+                });
             }
         }
 
@@ -76,12 +82,23 @@ const handleSubmit = () => {
 
     router.post('/schools', form.value, {
         onSuccess: (page) => {
-            emit('school-created', page.props.school);
+            const school = page.props.school;
+            success(`School "${school?.school_name || 'New School'}" has been created successfully!`, {
+                position: 'top-center',
+                duration: 4000
+            });
+            emit('school-created', school);
             emit('update:open', false);
             form.value = { ...initialForm };
         },
         onError: (pageErrors) => {
             errors.value = pageErrors;
+            const errorMessages = Object.values(pageErrors).flat();
+            error(errorMessages.join(', ') || 'Failed to create school. Please check your input and try again.', {
+                position: 'top-center',
+                priority: 'high',
+                persistent: true
+            });
         },
         onFinish: () => {
             processing.value = false;

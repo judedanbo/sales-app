@@ -8,6 +8,7 @@ import type { School } from '@/types';
 import { useForm } from '@inertiajs/vue3';
 import { CheckCircle2 } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
+import { useAlerts } from '@/composables/useAlerts';
 
 interface Props {
     open: boolean;
@@ -21,6 +22,7 @@ interface Emits {
 
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
+const { success, error } = useAlerts();
 
 const form = useForm({
     class_name: '',
@@ -57,19 +59,22 @@ const handleSubmit = () => {
     form.post(`/schools/${props.school.id}/classes`, {
         preserveScroll: true,
         onSuccess: () => {
-            successMessage.value = `Class "${form.class_name}" has been successfully added to ${props.school.school_name}.`;
-            showSuccess.value = true;
-
-            // Close the modal after a delay to show the success message
-            setTimeout(() => {
-                emit('class-created');
-                isOpen.value = false;
-                form.reset();
-                showSuccess.value = false;
-            }, 2000);
+            success(`Class "${form.class_name}" has been successfully added to ${props.school?.school_name}.`, {
+                position: 'top-center',
+                duration: 4000
+            });
+            emit('class-created');
+            isOpen.value = false;
+            form.reset();
         },
         onError: (errors) => {
             console.error('Form errors:', errors);
+            const errorMessages = Object.values(errors).flat();
+            error(errorMessages.join(', ') || 'Failed to create class. Please try again.', {
+                position: 'top-center',
+                priority: 'high',
+                persistent: true
+            });
         },
     });
 };

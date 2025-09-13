@@ -4,6 +4,7 @@ import Badge from '@/components/ui/badge.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import DeleteConfirmationModal from '@/components/ui/DeleteConfirmationModal.vue';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -32,7 +33,8 @@ import {
     UserMinus,
     Users as UsersIcon,
 } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
+import { useAlerts } from '@/composables/useAlerts';
 import UserFormModal from './UserFormModal.vue';
 import UserRoleModal from './UserRoleModal.vue';
 
@@ -57,6 +59,7 @@ interface Emits {
 
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
+const { success } = useAlerts();
 
 // Edit modal state
 const showEditModal = ref(false);
@@ -65,6 +68,34 @@ const userToEdit = ref<User | null>(null);
 // Role management modal state
 const showRoleModal = ref(false);
 const userToManageRoles = ref<User | null>(null);
+
+// Delete modal state
+const showDeleteModal = ref(false);
+const userToDelete = ref<User | null>(null);
+const isDeleting = ref(false);
+
+// Watch for user deletion completion - close modal when user is no longer in the list
+watch(
+    () => props.users.data,
+    (newUsers) => {
+        if (isDeleting.value && userToDelete.value) {
+            // Check if the user being deleted is no longer in the list
+            const stillExists = newUsers.some(user => user.id === userToDelete.value?.id);
+            if (!stillExists) {
+                // User was successfully deleted, show success toast
+                success(`User "${userToDelete.value?.name}" has been successfully deleted.`, {
+                    position: 'bottom-right',
+                    duration: 4000
+                });
+                // Close the modal
+                showDeleteModal.value = false;
+                userToDelete.value = null;
+                isDeleting.value = false;
+            }
+        }
+    },
+    { deep: true }
+);
 
 // Selection helpers
 const isSelected = (userId: number) => props.selectedUsers.includes(userId);
@@ -131,7 +162,24 @@ function handleSort(column: string) {
 }
 
 function handleDelete(user: User) {
-    emit('delete', user);
+    userToDelete.value = user;
+    showDeleteModal.value = true;
+}
+
+function confirmDelete() {
+    if (!userToDelete.value) return;
+
+    isDeleting.value = true;
+    emit('delete', userToDelete.value);
+    
+    // Note: The parent component will handle the actual deletion
+    // We'll close the modal when the deletion is complete
+}
+
+function cancelDelete() {
+    showDeleteModal.value = false;
+    userToDelete.value = null;
+    isDeleting.value = false;
 }
 
 function handleRestore(user: User) {
@@ -422,5 +470,18 @@ function handleRoleUpdated(user: User) {
         :available-roles="availableRoles"
         @update:open="showRoleModal = $event"
         @role-updated="handleRoleUpdated"
+    />
+
+    <!-- Delete Confirmation Modal -->
+    <DeleteConfirmationModal
+        :open="showDeleteModal"
+        :loading="isDeleting"
+        title="Delete User"
+        message="Are you sure you want to delete"
+        :item-name="userToDelete?.name"
+        danger-text="Delete User"
+        @update:open="showDeleteModal = $event"
+        @confirm="confirmDelete"
+        @cancel="cancelDelete"
     />
 </template>

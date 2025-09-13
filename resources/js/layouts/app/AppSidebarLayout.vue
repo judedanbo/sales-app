@@ -3,6 +3,10 @@ import AppContent from '@/components/AppContent.vue';
 import AppShell from '@/components/AppShell.vue';
 import AppSidebar from '@/components/AppSidebar.vue';
 import AppSidebarHeader from '@/components/AppSidebarHeader.vue';
+import AlertsContainer from '@/components/ui/AlertsContainer.vue';
+import { useAlerts } from '@/composables/useAlerts';
+import { usePage } from '@inertiajs/vue3';
+import { watch, computed } from 'vue';
 import type { BreadcrumbItemType } from '@/types';
 
 interface Props {
@@ -12,6 +16,23 @@ interface Props {
 withDefaults(defineProps<Props>(), {
     breadcrumbs: () => [],
 });
+
+// Handle flash messages from Laravel/Inertia
+const { handleFlashMessages, alerts } = useAlerts()
+const page = usePage()
+
+// Check if we have critical alerts that need backdrop
+const hasCriticalAlerts = computed(() => 
+    alerts.value.some(alert => alert.priority === 'critical')
+)
+
+watch(
+    () => page,
+    (newPage) => {
+        handleFlashMessages(newPage)
+    },
+    { deep: true, immediate: true }
+)
 </script>
 
 <template>
@@ -21,5 +42,9 @@ withDefaults(defineProps<Props>(), {
             <AppSidebarHeader :breadcrumbs="breadcrumbs" />
             <slot />
         </AppContent>
+        
+        <!-- Global Alerts Container -->
+        <AlertsContainer :backdrop="hasCriticalAlerts" />
+        
     </AppShell>
 </template>

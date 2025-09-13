@@ -3,6 +3,7 @@ import Badge from '@/components/ui/badge.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import DeleteConfirmationModal from '@/components/ui/DeleteConfirmationModal.vue';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -17,7 +18,8 @@ import { index, show } from '@/routes/roles';
 import type { PaginatedData, Permission, Role, RoleFilters, User } from '@/types';
 import { Link, router } from '@inertiajs/vue3';
 import { ChevronDown, ChevronUp, Download, Edit as EditIcon, Eye, Key, MoreHorizontal, Plus, Shield, Trash2, Users } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
+import { useAlerts } from '@/composables/useAlerts';
 import RoleFormModal from './RoleFormModal.vue';
 import RolePermissionsModal from './RolePermissionsModal.vue';
 import RoleUsersModal from './RoleUsersModal.vue';
@@ -42,6 +44,7 @@ interface Emits {
 
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
+const { success } = useAlerts();
 
 // Edit modal state
 const showEditModal = ref(false);
@@ -56,12 +59,40 @@ const roleForUsers = ref<Role | null>(null);
 const showPermissionsModal = ref(false);
 const roleForPermissions = ref<Role | null>(null);
 
+// Delete modal state
+const showDeleteModal = ref(false);
+const roleToDelete = ref<Role | null>(null);
+const isDeleting = ref(false);
+
 // Selection helpers
 const isSelected = (roleId: number) => props.selectedRoles.includes(roleId);
 
 const isAllSelected = computed(() => props.roles.data.length > 0 && props.selectedRoles.length === props.roles.data.length);
 
 const isIndeterminate = computed(() => props.selectedRoles.length > 0 && props.selectedRoles.length < props.roles.data.length);
+
+// Watch for role deletion completion - close modal when role is no longer in the list
+watch(
+    () => props.roles.data,
+    (newRoles) => {
+        if (isDeleting.value && roleToDelete.value) {
+            // Check if the role being deleted is no longer in the list
+            const stillExists = newRoles.some((role) => role.id === roleToDelete.value?.id);
+            if (!stillExists) {
+                // Role was successfully deleted, show success toast
+                success(`Role "${roleToDelete.value?.display_name || roleToDelete.value?.name}" has been successfully deleted.`, {
+                    position: 'bottom-right',
+                    duration: 4000
+                });
+                // Close the modal
+                showDeleteModal.value = false;
+                roleToDelete.value = null;
+                isDeleting.value = false;
+            }
+        }
+    },
+    { deep: true },
+);
 
 // Helper function to get filtered parameters (same as in Index.vue)
 function getFilteredParameters(filters: RoleFilters) {
@@ -109,7 +140,38 @@ function handleSort(column: string) {
 }
 
 function handleDelete(role: Role) {
-    emit('delete', role);
+    roleToDelete.value = role;
+    showDeleteModal.value = true;
+}
+
+function confirmDelete() {
+    if (!roleToDelete.value) return;
+
+    isDeleting.value = true;
+    // emit('delete', roleToDelete.value);
+    router.delete(`/roles/${roleToDelete.value?.id}`, {
+        preserveScroll: true,
+        onSuccess: () => {
+            showDeleteModal.value = false;
+            roleToDelete.value = null;
+            isDeleting.value = false;
+            // The deletion is initiated - the RolesTable will handle modal cleanup
+            // through its own state management or parent-child communication
+        },
+        onFinish: () => {
+            // The deletion is complete - the RolesTable will handle modal cleanup
+            // through its own state management or parent-child communication
+        },
+    });
+
+    // Note: The parent component will handle the actual deletion
+    // We'll close the modal when the deletion is complete
+}
+
+function cancelDelete() {
+    showDeleteModal.value = false;
+    roleToDelete.value = null;
+    isDeleting.value = false;
 }
 
 function toggleSelection(roleId: number) {
@@ -412,5 +474,18 @@ function handlePermissionsUpdated() {
         :all-permissions="allPermissions"
         @update:open="showPermissionsModal = $event"
         @permissions-updated="handlePermissionsUpdated"
+    />
+
+    <!-- Delete Confirmation Modal -->
+    <DeleteConfirmationModal
+        :open="showDeleteModal"
+        :loading="isDeleting"
+        title="Delete Role"
+        message="Are you sure you want to delete the role"
+        :item-name="roleToDelete?.display_name || roleToDelete?.name"
+        danger-text="Delete Role"
+        @update:open="showDeleteModal = $event"
+        @confirm="confirmDelete"
+        @cancel="cancelDelete"
     />
 </template>

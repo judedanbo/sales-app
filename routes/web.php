@@ -17,6 +17,10 @@ Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('home');
 
+Route::get('/test-alerts', function () {
+    return Inertia::render('TestAlerts');
+})->name('test-alerts');
+
 // Level 1: Basic authenticated access
 Route::middleware(['auth'])->group(function () {
     Route::get('docs', [DocumentationController::class, 'index'])->name('documentation');

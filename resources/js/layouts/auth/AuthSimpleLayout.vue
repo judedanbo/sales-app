@@ -28,5 +28,6 @@ defineProps<{
                 <slot />
             </div>
         </div>
+        
     </div>
 </template>

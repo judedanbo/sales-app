@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '
 import type { Permission, Role } from '@/types';
 import { AlertCircle, ChevronDown, ChevronRight, Loader2, Search, Shield, ShieldCheck, ShieldOff } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
+import { useAlerts } from '@/composables/useAlerts';
 
 interface Props {
     open: boolean;
@@ -25,6 +26,7 @@ interface Emits {
 
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
+const { error, success } = useAlerts();
 
 const processing = ref(false);
 const errors = ref<Record<string, string>>({});
@@ -208,12 +210,20 @@ const handleSubmit = async () => {
         }
 
         // Success - close modal and emit update
+        success(`Role assignments updated successfully for permission "${props.permission?.display_name || props.permission?.name}"`, {
+            position: 'top-center',
+            duration: 4000
+        });
         emit('update:open', false);
         if (props.permission) {
             emit('roles-updated', props.permission);
         }
-    } catch (error) {
-        console.error('Error updating role assignments:', error);
+    } catch (err) {
+        error('Failed to update role assignments. Please try again.', {
+            position: 'top-center',
+            priority: 'critical',
+            persistent: true
+        });
         errors.value = { general: 'Network error. Please try again.' };
     } finally {
         processing.value = false;

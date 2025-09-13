@@ -71,6 +71,7 @@ export interface School {
     total_teachers?: number;
     website?: string;
     description?: string;
+    is_active: boolean;
     status: 'active' | 'inactive';
     created_at: string;
     updated_at: string;

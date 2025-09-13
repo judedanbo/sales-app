@@ -8,6 +8,7 @@ import type { School } from '@/types';
 import { useForm } from '@inertiajs/vue3';
 import { Calendar } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
+import { useAlerts } from '@/composables/useAlerts';
 
 interface Props {
     open: boolean;
@@ -21,6 +22,7 @@ interface Emits {
 
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
+const { success, error } = useAlerts();
 
 const form = useForm({
     year_name: '',
@@ -94,12 +96,21 @@ const handleSubmit = () => {
     form.post(`/schools/${props.school.id}/academic-years`, {
         preserveScroll: true,
         onSuccess: () => {
+            success(`Academic year "${form.year_name}" has been added successfully to ${props.school?.school_name}!`, {
+                position: 'top-center',
+                duration: 4000
+            });
             emit('academic-year-created');
             isOpen.value = false;
             form.reset();
         },
         onError: (errors) => {
-            console.error('Form errors:', errors);
+            const errorMessages = Object.values(errors).flat();
+            error(errorMessages.join(', ') || 'Failed to create academic year. Please check your input and try again.', {
+                position: 'top-center',
+                priority: 'high',
+                persistent: true
+            });
         },
     });
 };

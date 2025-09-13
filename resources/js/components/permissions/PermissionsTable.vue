@@ -18,6 +18,7 @@ import type { PaginatedData, Permission, PermissionFilters } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import { ChevronDown, ChevronUp, Download, Eye, Key, Layers, MoreHorizontal, Shield } from 'lucide-vue-next';
 import { computed } from 'vue';
+import { useAlerts } from '@/composables/useAlerts';
 
 interface Props {
     permissions: PaginatedData<Permission>;
@@ -36,6 +37,7 @@ interface Emits {
 
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
+const { info } = useAlerts();
 
 // Selection helpers
 const isSelected = (permissionId: number) => props.selectedPermissions.includes(permissionId);
@@ -52,6 +54,17 @@ function formatDate(date: string | undefined) {
         month: 'short',
         day: 'numeric',
     });
+}
+
+// Handle view roles action
+function handleViewRoles(permission: Permission) {
+    info(`Viewing roles for permission: ${permission.display_name || permission.name}`, {
+        position: 'top-right',
+        duration: 5000
+    });
+    
+    // Navigate to permission show page which has role management
+    window.location.href = show(permission.id).url;
 }
 
 // Get sort icon
@@ -262,7 +275,7 @@ function getCategoryColor(category: string | undefined) {
 
                                         <DropdownMenuSeparator />
 
-                                        <DropdownMenuItem @click="() => console.log('View Roles:', permission.id)">
+                                        <DropdownMenuItem @click="() => handleViewRoles(permission)">
                                             <Shield class="mr-2 h-4 w-4" />
                                             View Roles
                                         </DropdownMenuItem>

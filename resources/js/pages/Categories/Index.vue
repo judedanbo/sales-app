@@ -3,7 +3,6 @@ import PermissionGuard from '@/components/PermissionGuard.vue';
 import Badge from '@/components/ui/badge.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -21,7 +20,26 @@ import { index, show } from '@/routes/categories-simple';
 import { type BreadcrumbItem, type Category, type CategoryFilters, type PaginatedData } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { useDebounceFn } from '@vueuse/core';
-import { ChevronDown, ChevronRight, Edit, Eye, Folder, FolderOpen, MoreHorizontal, Package, Plus, Search, Trash2, TreePine, Calendar, User, Filter, X, Settings, RotateCcw } from 'lucide-vue-next';
+import {
+    Calendar,
+    ChevronDown,
+    ChevronRight,
+    Edit,
+    Eye,
+    Filter,
+    Folder,
+    FolderOpen,
+    MoreHorizontal,
+    Package,
+    Plus,
+    RotateCcw,
+    Search,
+    Settings,
+    Trash2,
+    TreePine,
+    User,
+    X,
+} from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 
 interface Props {
@@ -100,52 +118,60 @@ const stats = computed(() => ({
 // Active filters for chips display
 const activeFilters = computed(() => {
     const filters = [];
-    
+
     if (localFilters.value.search) {
         filters.push({ key: 'search', label: `Search: "${localFilters.value.search}"`, value: localFilters.value.search });
     }
-    
+
     if (localFilters.value.parent_id) {
-        const parentName = localFilters.value.parent_id === 'null' 
-            ? 'Root Categories' 
-            : props.parentCategories.find(p => p.id.toString() === localFilters.value.parent_id?.toString())?.name || 'Unknown';
+        const parentName =
+            localFilters.value.parent_id === 'null'
+                ? 'Root Categories'
+                : props.parentCategories.find((p) => p.id.toString() === localFilters.value.parent_id?.toString())?.name || 'Unknown';
         filters.push({ key: 'parent_id', label: `Parent: ${parentName}`, value: localFilters.value.parent_id });
     }
-    
+
     if (localFilters.value.is_active) {
         const statusLabel = localFilters.value.is_active === '1' ? 'Active Only' : 'Inactive Only';
         filters.push({ key: 'is_active', label: `Status: ${statusLabel}`, value: localFilters.value.is_active });
     }
-    
+
     if (localFilters.value.created_by) {
-        const creatorName = props.creators.find(c => c.id.toString() === localFilters.value.created_by?.toString())?.name || 'Unknown';
+        const creatorName = props.creators.find((c) => c.id.toString() === localFilters.value.created_by?.toString())?.name || 'Unknown';
         filters.push({ key: 'created_by', label: `Creator: ${creatorName}`, value: localFilters.value.created_by });
     }
-    
+
     if (localFilters.value.has_children) {
         const label = localFilters.value.has_children === '1' ? 'With Children' : 'Without Children';
         filters.push({ key: 'has_children', label, value: localFilters.value.has_children });
     }
-    
+
     if (localFilters.value.has_products) {
         const label = localFilters.value.has_products === '1' ? 'With Products' : 'Without Products';
         filters.push({ key: 'has_products', label, value: localFilters.value.has_products });
     }
-    
+
     if (localFilters.value.include_deleted === '1') {
         filters.push({ key: 'include_deleted', label: 'Including Deleted', value: localFilters.value.include_deleted });
     }
-    
+
     return filters;
 });
 
 // Check if any advanced filters are active
 const hasAdvancedFilters = computed(() => {
-    return !!(localFilters.value.created_from || localFilters.value.created_to || 
-              localFilters.value.updated_from || localFilters.value.updated_to ||
-              localFilters.value.created_by || localFilters.value.has_children ||
-              localFilters.value.has_products || localFilters.value.sort_order_from ||
-              localFilters.value.sort_order_to || localFilters.value.include_deleted);
+    return !!(
+        localFilters.value.created_from ||
+        localFilters.value.created_to ||
+        localFilters.value.updated_from ||
+        localFilters.value.updated_to ||
+        localFilters.value.created_by ||
+        localFilters.value.has_children ||
+        localFilters.value.has_products ||
+        localFilters.value.sort_order_from ||
+        localFilters.value.sort_order_to ||
+        localFilters.value.include_deleted
+    );
 });
 
 // Selection handlers
@@ -195,9 +221,10 @@ watch(
     (newFilters, oldFilters) => {
         // Skip if this is initial load
         if (!oldFilters) return;
-        
+
         // Only apply filters immediately for non-search changes
-        if (newFilters.parent_id !== oldFilters.parent_id || 
+        if (
+            newFilters.parent_id !== oldFilters.parent_id ||
             newFilters.is_active !== oldFilters.is_active ||
             newFilters.created_from !== oldFilters.created_from ||
             newFilters.created_to !== oldFilters.created_to ||
@@ -208,7 +235,8 @@ watch(
             newFilters.has_products !== oldFilters.has_products ||
             newFilters.sort_order_from !== oldFilters.sort_order_from ||
             newFilters.sort_order_to !== oldFilters.sort_order_to ||
-            newFilters.include_deleted !== oldFilters.include_deleted) {
+            newFilters.include_deleted !== oldFilters.include_deleted
+        ) {
             applyFilters();
         }
     },
@@ -321,7 +349,7 @@ const removeFilter = (filterKey: string) => {
 // Quick filter presets
 const applyQuickFilter = (preset: string) => {
     clearFilters();
-    
+
     switch (preset) {
         case 'root_categories':
             localFilters.value.parent_id = 'null';
@@ -342,7 +370,7 @@ const applyQuickFilter = (preset: string) => {
             localFilters.value.is_active = '0';
             break;
     }
-    
+
     applyFilters();
 };
 
@@ -430,15 +458,15 @@ const formatDate = (dateString: string) => {
             </div>
 
             <!-- Active Filter Chips -->
-            <div v-if="activeFilters.length > 0" class="flex flex-wrap gap-2 items-center">
+            <div v-if="activeFilters.length > 0" class="flex flex-wrap items-center gap-2">
                 <span class="text-sm font-medium text-muted-foreground">Active Filters:</span>
                 <div
                     v-for="filter in activeFilters"
                     :key="filter.key"
-                    class="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 text-sm rounded-full"
+                    class="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800 dark:bg-blue-900/20 dark:text-blue-200"
                 >
                     {{ filter.label }}
-                    <button @click="removeFilter(filter.key)" class="ml-1 hover:bg-blue-200 dark:hover:bg-blue-800 rounded-full p-0.5">
+                    <button @click="removeFilter(filter.key)" class="ml-1 rounded-full p-0.5 hover:bg-blue-200 dark:hover:bg-blue-800">
                         <X class="h-3 w-3" />
                     </button>
                 </div>
@@ -477,16 +505,11 @@ const formatDate = (dateString: string) => {
             <Card>
                 <CardHeader>
                     <div class="flex items-center justify-between">
-                        <CardTitle class="text-lg flex items-center gap-2">
+                        <CardTitle class="flex items-center gap-2 text-lg">
                             <Filter class="h-5 w-5" />
                             Filters
                         </CardTitle>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            @click="showAdvancedFilters = !showAdvancedFilters"
-                            class="flex items-center gap-2"
-                        >
+                        <Button variant="ghost" size="sm" @click="showAdvancedFilters = !showAdvancedFilters" class="flex items-center gap-2">
                             <Settings class="h-4 w-4" />
                             Advanced
                             <ChevronDown :class="{ 'rotate-180': showAdvancedFilters }" class="h-4 w-4 transition-transform" />
@@ -544,11 +567,11 @@ const formatDate = (dateString: string) => {
                     </div>
 
                     <!-- Advanced Filters -->
-                    <div v-show="showAdvancedFilters" class="space-y-4 pt-4 border-t">
+                    <div v-show="showAdvancedFilters" class="space-y-4 border-t pt-4">
                         <div class="grid gap-4 md:grid-cols-3">
                             <!-- Date Range Filters -->
                             <div class="space-y-4 md:col-span-3">
-                                <h4 class="text-sm font-medium flex items-center gap-2">
+                                <h4 class="flex items-center gap-2 text-sm font-medium">
                                     <Calendar class="h-4 w-4" />
                                     Date Ranges
                                 </h4>
@@ -574,7 +597,7 @@ const formatDate = (dateString: string) => {
 
                             <!-- Creator Filter -->
                             <div class="space-y-2">
-                                <label class="text-sm font-medium flex items-center gap-2">
+                                <label class="flex items-center gap-2 text-sm font-medium">
                                     <User class="h-4 w-4" />
                                     Created By
                                 </label>
@@ -648,9 +671,7 @@ const formatDate = (dateString: string) => {
                                 :true-value="'1'"
                                 :false-value="''"
                             />
-                            <label for="include-deleted" class="text-sm font-medium cursor-pointer">
-                                Include deleted categories
-                            </label>
+                            <label for="include-deleted" class="cursor-pointer text-sm font-medium"> Include deleted categories </label>
                         </div>
                     </div>
                 </CardContent>

@@ -8,6 +8,7 @@ import type { Permission, PermissionGroup, Role } from '@/types';
 import { router } from '@inertiajs/vue3';
 import { ChevronDown, ChevronRight } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
+import { useAlerts } from '@/composables/useAlerts';
 
 interface Props {
     open: boolean;
@@ -24,6 +25,7 @@ interface Emits {
 
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
+const { success, error } = useAlerts();
 
 const processing = ref(false);
 const errors = ref<Record<string, string>>({});
@@ -157,6 +159,12 @@ const handleSubmit = () => {
     router[method](url, submitData, {
         onSuccess: (page) => {
             const role = page.props.role || page.props.roles?.data?.[0];
+            const actionText = isEditing.value ? 'updated' : 'created';
+            success(`Role "${role?.display_name || role?.name}" has been ${actionText} successfully!`, {
+                position: 'top-center',
+                duration: 4000
+            });
+            
             if (isEditing.value) {
                 emit('role-updated', role);
             } else {
@@ -169,6 +177,12 @@ const handleSubmit = () => {
         },
         onError: (pageErrors) => {
             errors.value = pageErrors;
+            const errorMessages = Object.values(pageErrors).flat();
+            error(errorMessages.join(', ') || `Failed to ${isEditing.value ? 'update' : 'create'} role. Please check your input and try again.`, {
+                position: 'top-center',
+                priority: 'high',
+                persistent: true
+            });
         },
         onFinish: () => {
             processing.value = false;
