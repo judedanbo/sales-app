@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import PermissionGuard from '@/components/PermissionGuard.vue';
+import ProductEditModal from '@/components/products/ProductEditModal.vue';
 import Badge from '@/components/ui/badge.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import DeleteConfirmationModal from '@/components/ui/DeleteConfirmationModal.vue';
+import ImageUpload from '@/components/ui/ImageUpload.vue';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import { useAlerts } from '@/composables/useAlerts';
+import { usePermissions } from '@/composables/usePermissions';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem, type Product } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
@@ -14,7 +17,6 @@ import {
     Archive,
     BarChart3,
     Calendar,
-    DollarSign,
     Edit,
     Globe,
     Hash,
@@ -37,9 +39,17 @@ interface Props {
 const props = defineProps<Props>();
 
 const { success, error } = useAlerts();
+const { hasPermission } = usePermissions();
 
 const isDeleting = ref(false);
 const showDeleteModal = ref(false);
+const showEditModal = ref(false);
+
+// Reactive product data to handle image updates
+const reactiveProduct = ref<Product>({ ...props.product });
+
+// Check if user can edit products
+const canEditProducts = computed(() => hasPermission('edit_products'));
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -53,21 +63,29 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 // Computed properties
-const isActive = computed(() => props.product.status === 'active');
-const isDiscontinued = computed(() => props.product.status === 'discontinued');
-const hasInventory = computed(() => !!props.product.inventory);
-const hasLowStock = computed(() => props.product.low_stock);
-const hasImage = computed(() => !!props.product.image_url);
-const hasDimensions = computed(() => props.product.dimensions?.length || props.product.dimensions?.width || props.product.dimensions?.height);
-const hasTags = computed(() => props.product.tags && props.product.tags.length > 0);
+const hasInventory = computed(() => !!reactiveProduct.value.inventory);
+const hasLowStock = computed(() => reactiveProduct.value.low_stock);
+const hasDimensions = computed(
+    () => reactiveProduct.value.dimensions?.length || reactiveProduct.value.dimensions?.width || reactiveProduct.value.dimensions?.height,
+);
+const hasTags = computed(() => reactiveProduct.value.tags && reactiveProduct.value.tags.length > 0);
 
 // Event handlers
 const handleEdit = () => {
-    router.get(`/products/${props.product.id}/edit`);
+    showEditModal.value = true;
 };
 
 const handleDelete = () => {
     showDeleteModal.value = true;
+};
+
+const handleProductUpdated = (updatedProduct: Product) => {
+    // Update the reactive product data with the updated product
+    reactiveProduct.value = { ...updatedProduct };
+    success(`Product "${updatedProduct.name}" has been updated successfully!`, {
+        position: 'top-center',
+        duration: 4000,
+    });
 };
 
 const confirmDelete = () => {
@@ -100,6 +118,14 @@ const cancelDelete = () => {
     showDeleteModal.value = false;
 };
 
+const handleImageUploaded = (imageUrl: string) => {
+    reactiveProduct.value = { ...reactiveProduct.value, image_url: imageUrl };
+};
+
+const handleImageDeleted = () => {
+    reactiveProduct.value = { ...reactiveProduct.value, image_url: undefined };
+};
+
 // Format helpers
 const formatPrice = (price: number): string => {
     return new Intl.NumberFormat('en-GH', {
@@ -122,8 +148,8 @@ const formatWeight = (weight?: number): string => {
 };
 
 const formatDimensions = () => {
-    if (!props.product.dimensions) return 'Not specified';
-    const { length, width, height } = props.product.dimensions;
+    if (!reactiveProduct.value.dimensions) return 'Not specified';
+    const { length, width, height } = reactiveProduct.value.dimensions;
     if (!length && !width && !height) return 'Not specified';
 
     const parts = [];
@@ -149,26 +175,26 @@ const getStatusBadgeVariant = (status: string): 'default' | 'secondary' | 'destr
 
 const getStockStatusColor = () => {
     if (!hasInventory.value) return 'text-muted-foreground';
-    if (props.product.inventory?.is_out_of_stock) return 'text-red-600';
+    if (reactiveProduct.value.inventory?.is_out_of_stock) return 'text-red-600';
     if (hasLowStock.value) return 'text-orange-600';
     return 'text-green-600';
 };
 
 const getStockStatusText = () => {
     if (!hasInventory.value) return 'No inventory data';
-    if (props.product.inventory?.is_out_of_stock) return 'Out of Stock';
+    if (reactiveProduct.value.inventory?.is_out_of_stock) return 'Out of Stock';
     if (hasLowStock.value) return 'Low Stock';
     return 'In Stock';
 };
 </script>
 
 <template>
-    <Head :title="product.name" />
+    <Head :title="reactiveProduct.name" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="space-y-6 p-8">
             <!-- Header -->
-            <PageHeader :title="product.name" :description="`SKU: ${product.sku}`">
+            <PageHeader :title="reactiveProduct.name" :description="`SKU: ${reactiveProduct.sku}`">
                 <template #action>
                     <div class="flex items-center gap-2">
                         <PermissionGuard permission="edit_products">
@@ -199,13 +225,15 @@ const getStockStatusText = () => {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div class="flex aspect-square items-center justify-center overflow-hidden rounded-lg bg-muted">
-                                <img v-if="hasImage" :src="product.image_url" :alt="product.name" class="h-full w-full object-cover" />
-                                <div v-else class="text-center text-muted-foreground">
-                                    <Package class="mx-auto mb-2 h-16 w-16" />
-                                    <p class="text-sm">No image available</p>
-                                </div>
-                            </div>
+                            <ImageUpload
+                                :current-image="reactiveProduct.image_url || undefined"
+                                :upload-url="`/products/${product.id}/image`"
+                                :delete-url="reactiveProduct.image_url ? `/products/${product.id}/image` : undefined"
+                                :alt="reactiveProduct.name"
+                                :disabled="!canEditProducts"
+                                @uploaded="handleImageUploaded"
+                                @deleted="handleImageDeleted"
+                            />
                         </CardContent>
                     </Card>
                 </div>
@@ -219,13 +247,13 @@ const getStockStatusText = () => {
                                 <div>
                                     <CardTitle class="flex items-center gap-2">
                                         <Package class="h-5 w-5" />
-                                        {{ product.name }}
+                                        {{ reactiveProduct.name }}
                                     </CardTitle>
-                                    <CardDescription>{{ product.description || 'No description provided' }}</CardDescription>
+                                    <CardDescription>{{ reactiveProduct.description || 'No description provided' }}</CardDescription>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <Badge :variant="getStatusBadgeVariant(product.status)">
-                                        {{ product.status }}
+                                    <Badge :variant="getStatusBadgeVariant(reactiveProduct.status)">
+                                        {{ reactiveProduct.status }}
                                     </Badge>
                                     <Badge v-if="hasLowStock" variant="destructive"> Low Stock </Badge>
                                 </div>
@@ -237,7 +265,7 @@ const getStockStatusText = () => {
                                     <div class="text-sm font-medium text-muted-foreground">SKU</div>
                                     <div class="flex items-center gap-2">
                                         <Hash class="h-4 w-4" />
-                                        {{ product.sku }}
+                                        {{ reactiveProduct.sku }}
                                     </div>
                                 </div>
 
@@ -245,16 +273,16 @@ const getStockStatusText = () => {
                                     <div class="text-sm font-medium text-muted-foreground">Category</div>
                                     <div class="flex items-center gap-2">
                                         <Tag class="h-4 w-4" />
-                                        {{ product.category?.name || 'No category' }}
+                                        {{ reactiveProduct.category?.name || 'No category' }}
                                     </div>
                                 </div>
 
                                 <div class="space-y-2">
                                     <div class="text-sm font-medium text-muted-foreground">Unit Price</div>
                                     <div class="flex items-center gap-2">
-                                        <DollarSign class="h-4 w-4" />
-                                        <span class="text-lg font-semibold">{{ formatPrice(product.unit_price) }}</span>
-                                        <span class="text-sm text-muted-foreground">per {{ product.unit_type }}</span>
+                                        <!-- <DollarSign class="h-4 w-4" /> -->
+                                        <span class="text-lg font-semibold">{{ formatPrice(reactiveProduct.unit_price) }}</span>
+                                        <span class="text-sm text-muted-foreground">per {{ reactiveProduct.unit_type }}</span>
                                     </div>
                                 </div>
 
@@ -262,23 +290,23 @@ const getStockStatusText = () => {
                                     <div class="text-sm font-medium text-muted-foreground">Tax Rate</div>
                                     <div class="flex items-center gap-2">
                                         <TrendingUp class="h-4 w-4" />
-                                        {{ product.tax_rate }}%
+                                        {{ reactiveProduct.tax_rate }}%
                                     </div>
                                 </div>
 
-                                <div v-if="product.brand" class="space-y-2">
+                                <div v-if="reactiveProduct.brand" class="space-y-2">
                                     <div class="text-sm font-medium text-muted-foreground">Brand</div>
                                     <div class="flex items-center gap-2">
                                         <Tag class="h-4 w-4" />
-                                        {{ product.brand }}
+                                        {{ reactiveProduct.brand }}
                                     </div>
                                 </div>
 
-                                <div v-if="product.barcode" class="space-y-2">
+                                <div v-if="reactiveProduct.barcode" class="space-y-2">
                                     <div class="text-sm font-medium text-muted-foreground">Barcode</div>
                                     <div class="flex items-center gap-2">
                                         <BarChart3 class="h-4 w-4" />
-                                        {{ product.barcode }}
+                                        {{ reactiveProduct.barcode }}
                                     </div>
                                 </div>
                             </div>
@@ -298,29 +326,29 @@ const getStockStatusText = () => {
                                 <div class="space-y-2">
                                     <div class="text-sm font-medium text-muted-foreground">Quantity on Hand</div>
                                     <div class="text-2xl font-bold">
-                                        {{ product.inventory?.quantity_on_hand?.toLocaleString() || 0 }}
+                                        {{ reactiveProduct.inventory?.quantity_on_hand?.toLocaleString() || 0 }}
                                     </div>
                                 </div>
 
                                 <div class="space-y-2">
                                     <div class="text-sm font-medium text-muted-foreground">Available</div>
                                     <div class="text-2xl font-bold">
-                                        {{ product.inventory?.quantity_available?.toLocaleString() || 0 }}
+                                        {{ reactiveProduct.inventory?.quantity_available?.toLocaleString() || 0 }}
                                     </div>
                                 </div>
 
                                 <div class="space-y-2">
                                     <div class="text-sm font-medium text-muted-foreground">Stock Status</div>
                                     <div class="flex items-center gap-2" :class="getStockStatusColor()">
-                                        <AlertTriangle v-if="hasLowStock || product.inventory?.is_out_of_stock" class="h-4 w-4" />
+                                        <AlertTriangle v-if="hasLowStock || reactiveProduct.inventory?.is_out_of_stock" class="h-4 w-4" />
                                         <span class="font-medium">{{ getStockStatusText() }}</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div v-if="product.reorder_level" class="mt-4 border-t pt-4">
+                            <div v-if="reactiveProduct.reorder_level" class="mt-4 border-t pt-4">
                                 <div class="mb-1 text-sm font-medium text-muted-foreground">Reorder Level</div>
-                                <div class="text-sm">{{ product.reorder_level }} {{ product.unit_type }}</div>
+                                <div class="text-sm">{{ reactiveProduct.reorder_level }} {{ reactiveProduct.unit_type }}</div>
                             </div>
                         </CardContent>
                     </Card>
@@ -328,7 +356,7 @@ const getStockStatusText = () => {
             </div>
 
             <!-- Physical Properties -->
-            <Card v-if="product.weight || hasDimensions || product.color">
+            <Card v-if="reactiveProduct.weight || hasDimensions || reactiveProduct.color">
                 <CardHeader>
                     <CardTitle class="flex items-center gap-2">
                         <Ruler class="h-5 w-5" />
@@ -337,11 +365,11 @@ const getStockStatusText = () => {
                 </CardHeader>
                 <CardContent>
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-                        <div v-if="product.weight" class="space-y-2">
+                        <div v-if="reactiveProduct.weight" class="space-y-2">
                             <div class="text-sm font-medium text-muted-foreground">Weight</div>
                             <div class="flex items-center gap-2">
                                 <Weight class="h-4 w-4" />
-                                {{ formatWeight(product.weight) }}
+                                {{ formatWeight(reactiveProduct.weight) }}
                             </div>
                         </div>
 
@@ -353,11 +381,11 @@ const getStockStatusText = () => {
                             </div>
                         </div>
 
-                        <div v-if="product.color" class="space-y-2">
+                        <div v-if="reactiveProduct.color" class="space-y-2">
                             <div class="text-sm font-medium text-muted-foreground">Color</div>
                             <div class="flex items-center gap-2">
                                 <Palette class="h-4 w-4" />
-                                {{ product.color }}
+                                {{ reactiveProduct.color }}
                             </div>
                         </div>
                     </div>
@@ -374,7 +402,7 @@ const getStockStatusText = () => {
                 </CardHeader>
                 <CardContent>
                     <div class="flex flex-wrap gap-2">
-                        <Badge v-for="tag in product.tags" :key="tag" variant="outline" class="text-xs">
+                        <Badge v-for="tag in reactiveProduct.tags" :key="tag" variant="outline" class="text-xs">
                             {{ tag }}
                         </Badge>
                     </div>
@@ -382,7 +410,7 @@ const getStockStatusText = () => {
             </Card>
 
             <!-- SEO Information -->
-            <Card v-if="product.meta_title || product.meta_description">
+            <Card v-if="reactiveProduct.meta_title || reactiveProduct.meta_description">
                 <CardHeader>
                     <CardTitle class="flex items-center gap-2">
                         <Globe class="h-5 w-5" />
@@ -390,14 +418,14 @@ const getStockStatusText = () => {
                     </CardTitle>
                 </CardHeader>
                 <CardContent class="space-y-4">
-                    <div v-if="product.meta_title" class="space-y-2">
+                    <div v-if="reactiveProduct.meta_title" class="space-y-2">
                         <div class="text-sm font-medium text-muted-foreground">Meta Title</div>
-                        <div class="text-sm">{{ product.meta_title }}</div>
+                        <div class="text-sm">{{ reactiveProduct.meta_title }}</div>
                     </div>
 
-                    <div v-if="product.meta_description" class="space-y-2">
+                    <div v-if="reactiveProduct.meta_description" class="space-y-2">
                         <div class="text-sm font-medium text-muted-foreground">Meta Description</div>
-                        <div class="text-sm leading-relaxed">{{ product.meta_description }}</div>
+                        <div class="text-sm leading-relaxed">{{ reactiveProduct.meta_description }}</div>
                     </div>
                 </CardContent>
             </Card>
@@ -416,11 +444,11 @@ const getStockStatusText = () => {
                             <div class="text-sm font-medium text-muted-foreground">Created</div>
                             <div class="flex items-center gap-2 text-sm">
                                 <Calendar class="h-4 w-4" />
-                                {{ formatDate(product.created_at) }}
+                                {{ formatDate(reactiveProduct.created_at) }}
                             </div>
-                            <div v-if="product.creator" class="flex items-center gap-2 text-sm text-muted-foreground">
+                            <div v-if="reactiveProduct.creator" class="flex items-center gap-2 text-sm text-muted-foreground">
                                 <User class="h-4 w-4" />
-                                by {{ product.creator.name }}
+                                by {{ reactiveProduct.creator.name }}
                             </div>
                         </div>
 
@@ -428,11 +456,11 @@ const getStockStatusText = () => {
                             <div class="text-sm font-medium text-muted-foreground">Last Updated</div>
                             <div class="flex items-center gap-2 text-sm">
                                 <Calendar class="h-4 w-4" />
-                                {{ formatDate(product.updated_at) }}
+                                {{ formatDate(reactiveProduct.updated_at) }}
                             </div>
-                            <div v-if="product.updater" class="flex items-center gap-2 text-sm text-muted-foreground">
+                            <div v-if="reactiveProduct.updater" class="flex items-center gap-2 text-sm text-muted-foreground">
                                 <User class="h-4 w-4" />
-                                by {{ product.updater.name }}
+                                by {{ reactiveProduct.updater.name }}
                             </div>
                         </div>
                     </div>
@@ -440,13 +468,18 @@ const getStockStatusText = () => {
             </Card>
         </div>
 
+        <!-- Edit Product Modal -->
+        <PermissionGuard permission="edit_products">
+            <ProductEditModal :open="showEditModal" :product="reactiveProduct" @update:open="showEditModal = $event" @product-updated="handleProductUpdated" />
+        </PermissionGuard>
+
         <!-- Delete Confirmation Modal -->
         <DeleteConfirmationModal
             :open="showDeleteModal"
             :loading="isDeleting"
             title="Delete Product"
             message="Are you sure you want to delete"
-            :item-name="product.name"
+            :item-name="reactiveProduct.name"
             danger-text="Delete Product"
             @update:open="showDeleteModal = $event"
             @confirm="confirmDelete"

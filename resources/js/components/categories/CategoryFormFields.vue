@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
 import { watch } from 'vue';
 
 interface Props {
@@ -62,7 +62,7 @@ watch(
                 .trim();
             updateForm('slug', slug);
         }
-    }
+    },
 );
 
 // Color options for category
@@ -122,19 +122,14 @@ const iconOptions = [
                 <p v-if="hasError('slug')" class="text-sm text-destructive">
                     {{ getFieldError('slug') }}
                 </p>
-                <p class="text-sm text-muted-foreground">
-                    Leave empty to auto-generate from name
-                </p>
+                <p class="text-sm text-muted-foreground">Leave empty to auto-generate from name</p>
             </div>
         </div>
 
         <!-- Parent Category -->
         <div class="space-y-2">
             <Label for="parent_id" :class="{ 'text-destructive': hasError('parent_id') }"> Parent Category </Label>
-            <Select 
-                :model-value="form.parent_id?.toString() || ''" 
-                @update:model-value="updateForm('parent_id', $event ? parseInt($event) : null)"
-            >
+            <Select :model-value="form.parent_id?.toString() || ''" @update:model-value="updateForm('parent_id', $event ? parseInt($event) : null)">
                 <SelectTrigger :class="{ 'border-destructive': hasError('parent_id') }">
                     <SelectValue placeholder="Select parent category (optional)" />
                 </SelectTrigger>
@@ -218,13 +213,9 @@ const iconOptions = [
 
         <!-- Active Status -->
         <div class="flex items-center space-x-2">
-            <Checkbox 
-                id="is_active"
-                :checked="form.is_active"
-                @update:checked="updateForm('is_active', $event)"
-            />
+            <Checkbox id="is_active" :checked="form.is_active" @update:checked="updateForm('is_active', $event)" />
             <Label for="is_active">Active Category</Label>
-            <p v-if="hasError('is_active')" class="text-sm text-destructive ml-2">
+            <p v-if="hasError('is_active')" class="ml-2 text-sm text-destructive">
                 {{ getFieldError('is_active') }}
             </p>
         </div>

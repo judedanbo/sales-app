@@ -6,10 +6,13 @@ use App\Http\Controllers\Concerns\AuthorizesResourceOperations;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
+use App\Http\Requests\UploadProductImageRequest;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -203,9 +206,19 @@ class ProductController extends Controller
 
         $product->update($validated);
 
-        // If this is an Inertia request (e.g., from modal), redirect back to index
+        // Reload the product with relationships for returning
+        $product->load([
+            'category',
+            'inventory',
+            'currentPrice',
+        ]);
+
+        // If this is an Inertia request from modal, return the updated product
         if ($request->header('X-Inertia')) {
-            return redirect()->route('products.index')->with('success', 'Product updated successfully.');
+            return redirect()->back()->with([
+                'success' => 'Product updated successfully.',
+                'product' => $product,
+            ]);
         }
 
         // For non-Inertia requests, redirect to show page
@@ -221,6 +234,66 @@ class ProductController extends Controller
         $product->delete();
 
         return redirect()->route('products.index')->with('success', 'Product deleted successfully.');
+    }
+
+    /**
+     * Upload a new product image.
+     */
+    public function uploadImage(UploadProductImageRequest $request, Product $product)
+    {
+        $this->authorizeUpdate($product);
+
+        $file = $request->file('image');
+
+        // Delete old image if it exists
+        if ($product->image_url) {
+            $this->deleteImageFile($product->image_url);
+        }
+
+        // Generate unique filename
+        $filename = $this->generateImageFilename($file, $product);
+
+        // Store the image
+        $path = $file->storeAs('products', $filename, 'public');
+
+        // Update product with new image URL
+        $imageUrl = Storage::url($path);
+        $product->update([
+            'image_url' => $imageUrl,
+            'updated_by' => auth()->id(),
+        ]);
+
+        return back()->with([
+            'success' => 'Product image uploaded successfully.',
+            'imageUrl' => $imageUrl,
+            'product' => $product->fresh(['category', 'inventory', 'currentPrice', 'creator', 'updater']),
+        ]);
+    }
+
+    /**
+     * Delete the product image.
+     */
+    public function deleteImage(Product $product)
+    {
+        $this->authorizeUpdate($product);
+
+        if (! $product->image_url) {
+            return back()->withErrors(['image' => 'No image to delete.']);
+        }
+
+        // Delete the image file
+        $this->deleteImageFile($product->image_url);
+
+        // Update product to remove image URL
+        $product->update([
+            'image_url' => null,
+            'updated_by' => auth()->id(),
+        ]);
+
+        return back()->with([
+            'success' => 'Product image deleted successfully.',
+            'product' => $product->fresh(['category', 'inventory', 'currentPrice', 'creator', 'updater']),
+        ]);
     }
 
     /**
@@ -361,5 +434,36 @@ class ProductController extends Controller
             ['value' => 'STK-', 'label' => 'Stock Pattern (STK-XXXX)'],
             ['value' => 'custom', 'label' => 'Enter custom SKU'],
         ];
+    }
+
+    /**
+     * Generate a unique filename for the uploaded image.
+     */
+    private function generateImageFilename($file, Product $product): string
+    {
+        $extension = $file->getClientOriginalExtension();
+        $timestamp = now()->format('YmdHis');
+        $random = Str::random(6);
+        $productSlug = Str::slug($product->name, '-');
+
+        return "{$productSlug}-{$product->id}-{$timestamp}-{$random}.{$extension}";
+    }
+
+    /**
+     * Delete an image file from storage.
+     */
+    private function deleteImageFile(?string $imageUrl): void
+    {
+        if (! $imageUrl) {
+            return;
+        }
+
+        // Extract the file path from the URL
+        // Assuming URLs are in format /storage/products/filename.ext
+        $path = str_replace('/storage/', '', $imageUrl);
+
+        if (Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
     }
 }

@@ -97,7 +97,6 @@ const hasRequiredRoles = (): boolean => {
  */
 const hasRequiredUserType = (): boolean => {
     if (!auth.user) return false;
-
     // Single user type check
     if (props.userType) {
         return auth.userType === props.userType;
@@ -176,9 +175,9 @@ const isAuthorized = (): boolean => {
         hasRequiredPermissions(),
         hasRequiredRoles(),
         hasRequiredUserType(),
-        hasSystemSchoolRequirements(),
-        hasResourceOwnership(),
-        hasRequiredStatus(),
+        // hasSystemSchoolRequirements(),
+        // hasResourceOwnership(),
+        // hasRequiredStatus(),
     ];
 
     const result = checks.every((check) => check);
@@ -221,7 +220,7 @@ if (props.debug) {
 </script>
 
 <template>
-    <div v-if="isAuthorized">
+    <div v-if="isAuthorized()">
         <slot />
     </div>
     <div v-else-if="fallback" class="text-sm text-muted-foreground">

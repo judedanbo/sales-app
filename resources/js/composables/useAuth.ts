@@ -6,7 +6,7 @@ export function useAuth() {
     const page = usePage<AppPageProps>();
 
     const user: ComputedRef<User | null> = computed(() => {
-        return page.props.auth?.user || null;
+        return page.props.auth?.user.data || null;
     });
 
     const isAuthenticated: ComputedRef<boolean> = computed(() => {

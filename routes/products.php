@@ -37,6 +37,15 @@ Route::middleware(['auth', 'verified', 'audit-action:user_access'])->group(funct
         Route::delete('products/{product}', [ProductController::class, 'destroy'])
             ->middleware('permission:delete_products')
             ->name('products.destroy');
+
+        // Image upload routes
+        Route::post('products/{product}/image', [ProductController::class, 'uploadImage'])
+            ->middleware('permission:edit_products')
+            ->name('products.upload-image');
+
+        Route::delete('products/{product}/image', [ProductController::class, 'deleteImage'])
+            ->middleware('permission:edit_products')
+            ->name('products.delete-image');
     });
 });
 

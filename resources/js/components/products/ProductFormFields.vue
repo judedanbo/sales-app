@@ -125,10 +125,10 @@ const handleSubmit = () => {
         const taxRatePercentage = parseFloat(formData.tax_rate);
         formData.tax_rate = (taxRatePercentage / 100).toString();
     }
-    
+
     // Update the form with converted tax_rate before submitting
     emit('update:form', formData);
-    
+
     // Emit submit event
     emit('submit');
 };
@@ -176,7 +176,7 @@ const handleSubmit = () => {
                                 </SelectItem>
                             </SelectContent>
                         </Select>
-                        
+
                         <!-- Custom SKU Input (shown when 'custom' is selected) -->
                         <div v-if="showCustomSkuInput" class="mt-2">
                             <Input
@@ -188,14 +188,14 @@ const handleSubmit = () => {
                                 required
                             />
                         </div>
-                        
+
                         <!-- SKU Preview (shown for pattern selections) -->
                         <div v-else-if="selectedSkuPattern !== 'auto' && form.sku" class="mt-2">
                             <p class="text-sm text-muted-foreground">
                                 Preview: <span class="font-mono">{{ form.sku }}...</span>
                             </p>
                         </div>
-                        
+
                         <p v-if="hasError('sku')" class="text-sm text-destructive">
                             {{ getFieldError('sku') }}
                         </p>
@@ -315,9 +315,7 @@ const handleSubmit = () => {
                             @update:model-value="handleTaxRateChange"
                             placeholder="0.00"
                         />
-                        <p class="text-sm text-muted-foreground">
-                            Enter as percentage (e.g., 18 for 18%)
-                        </p>
+                        <p class="text-sm text-muted-foreground">Enter as percentage (e.g., 18 for 18%)</p>
                     </div>
                 </div>
 

@@ -29,6 +29,7 @@ interface Props {
 interface Emits {
     sort: [column: string];
     delete: [product: Product];
+    edit: [product: Product];
     select: [productId: number];
     'select-all': [];
     'clear-selection': [];
@@ -68,18 +69,7 @@ const getStatusBadgeVariant = (status: string): 'default' | 'secondary' | 'destr
     }
 };
 
-const getStatusColor = (status: string): string => {
-    switch (status) {
-        case 'active':
-            return 'text-green-600';
-        case 'inactive':
-            return 'text-gray-600';
-        case 'discontinued':
-            return 'text-red-600';
-        default:
-            return 'text-gray-600';
-    }
-};
+// Removed unused getStatusColor function as it's not being used in the template
 
 const formatPrice = (price: number): string => {
     return new Intl.NumberFormat('en-GH', {
@@ -111,6 +101,10 @@ const handleSelectAll = () => {
 
 const handleDelete = (product: Product) => {
     emit('delete', product);
+};
+
+const handleEdit = (product: Product) => {
+    emit('edit', product);
 };
 
 const handlePageChange = (page: number) => {
@@ -306,11 +300,9 @@ const clearSelection = () => {
                                     </PermissionGuard>
 
                                     <PermissionGuard permission="edit_products">
-                                        <DropdownMenuItem as-child>
-                                            <a :href="`/products/${product.id}/edit`" class="flex items-center gap-2">
-                                                <Edit class="h-4 w-4" />
-                                                Edit Product
-                                            </a>
+                                        <DropdownMenuItem @click="handleEdit(product)" class="flex items-center gap-2">
+                                            <Edit class="h-4 w-4" />
+                                            Edit Product
                                         </DropdownMenuItem>
                                     </PermissionGuard>
 

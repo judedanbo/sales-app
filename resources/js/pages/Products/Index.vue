@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import PermissionGuard from '@/components/PermissionGuard.vue';
 import ProductCreateModal from '@/components/products/ProductCreateModal.vue';
+import ProductEditModal from '@/components/products/ProductEditModal.vue';
 import ProductFiltersComponent from '@/components/products/ProductFilters.vue';
 import ProductsTable from '@/components/products/ProductsTable.vue';
 import ProductStats from '@/components/products/ProductStats.vue';
@@ -72,8 +73,10 @@ watch(
 const isLoading = ref(false);
 const selectedProducts = ref<number[]>([]);
 const showCreateModal = ref(false);
+const showEditModal = ref(false);
 const showDeleteModal = ref(false);
 const productToDelete = ref<Product | null>(null);
+const productToEdit = ref<Product | null>(null);
 const isDeleting = ref(false);
 
 // Selection handlers
@@ -276,6 +279,11 @@ function handleDelete(product: Product) {
     showDeleteModal.value = true;
 }
 
+function handleEdit(product: Product) {
+    productToEdit.value = product;
+    showEditModal.value = true;
+}
+
 const showAlert = (variant: 'success' | 'error', message: string, title: string) => {
     addAlert(message, variant, {
         title: title,
@@ -313,8 +321,17 @@ function handleFiltersUpdate(newFilters: ProductFilters) {
     localFilters.value = { ...localFilters.value, ...newFilters };
 }
 
-function handleProductCreated(product: Product) {
+function handleProductCreated() {
     // Refresh the page to show the new product while preserving filters
+    refreshProductsList();
+}
+
+function handleProductUpdated() {
+    // Refresh the page to show the updated product while preserving filters
+    refreshProductsList();
+}
+
+function refreshProductsList() {
     const params: Record<string, any> = {};
 
     if (localFilters.value.search) {
@@ -413,6 +430,7 @@ const clearFilters = () => {
                 :is-loading="isLoading"
                 @sort="handleSort"
                 @delete="handleDelete"
+                @edit="handleEdit"
                 @select="toggleSelection"
                 @select-all="selectAll"
                 @clear-selection="clearSelection"
@@ -423,6 +441,11 @@ const clearFilters = () => {
         <!-- Create Product Modal -->
         <PermissionGuard permission="create_products">
             <ProductCreateModal :open="showCreateModal" @update:open="showCreateModal = $event" @product-created="handleProductCreated" />
+        </PermissionGuard>
+
+        <!-- Edit Product Modal -->
+        <PermissionGuard permission="edit_products">
+            <ProductEditModal :open="showEditModal" :product="productToEdit" @update:open="showEditModal = $event" @product-updated="handleProductUpdated" />
         </PermissionGuard>
 
         <!-- Delete Confirmation Modal -->

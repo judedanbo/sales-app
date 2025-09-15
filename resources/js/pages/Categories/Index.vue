@@ -936,17 +936,13 @@ function handleCategoryUpdated() {
         </div>
 
         <!-- Category Modals -->
-        <CategoryCreateModal 
-            :open="showCreateModal" 
-            @update:open="showCreateModal = $event" 
-            @category-created="handleCategoryCreated" 
-        />
-        
-        <CategoryEditModal 
-            :open="showEditModal" 
-            :category="selectedCategory" 
-            @update:open="showEditModal = $event" 
-            @category-updated="handleCategoryUpdated" 
+        <CategoryCreateModal :open="showCreateModal" @update:open="showCreateModal = $event" @category-created="handleCategoryCreated" />
+
+        <CategoryEditModal
+            :open="showEditModal"
+            :category="selectedCategory"
+            @update:open="showEditModal = $event"
+            @category-updated="handleCategoryUpdated"
         />
     </AppLayout>
 </template>
