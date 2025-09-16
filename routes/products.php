@@ -46,6 +46,51 @@ Route::middleware(['auth', 'verified', 'audit-action:user_access'])->group(funct
         Route::delete('products/{product}/image', [ProductController::class, 'deleteImage'])
             ->middleware('permission:edit_products')
             ->name('products.delete-image');
+
+        // Product Management Pages - Variants, Pricing, Inventory
+        Route::get('products/{product}/variants', [ProductController::class, 'variants'])
+            ->name('products.variants');
+
+        Route::get('products/{product}/pricing', [ProductController::class, 'pricing'])
+            ->name('products.pricing');
+
+        Route::get('products/{product}/inventory', [ProductController::class, 'inventory'])
+            ->name('products.inventory');
+
+        // Variant CRUD Routes
+        Route::post('products/{product}/variants', [ProductController::class, 'storeVariant'])
+            ->middleware('permission:create_products')
+            ->name('products.variants.store');
+
+        Route::put('products/{product}/variants/{variant}', [ProductController::class, 'updateVariant'])
+            ->middleware('permission:edit_products')
+            ->name('products.variants.update');
+
+        Route::delete('products/{product}/variants/{variant}', [ProductController::class, 'destroyVariant'])
+            ->middleware('permission:delete_products')
+            ->name('products.variants.destroy');
+
+        // Variant image upload routes
+        Route::post('products/{product}/variants/upload-image', [ProductController::class, 'uploadVariantImage'])
+            ->middleware('permission:edit_products')
+            ->name('products.variants.upload-image');
+
+        // Price Management Routes
+        Route::post('products/{product}/prices', [ProductController::class, 'storePrice'])
+            ->middleware('permission:edit_products')
+            ->name('products.prices.store');
+
+        Route::get('products/{product}/prices/pending', [ProductController::class, 'getPendingPrices'])
+            ->middleware('permission:approve_pricing')
+            ->name('products.prices.pending');
+
+        Route::put('products/{product}/prices/{productPrice}/approve', [ProductController::class, 'approvePrice'])
+            ->middleware('permission:approve_pricing')
+            ->name('products.prices.approve');
+
+        Route::put('products/{product}/prices/{productPrice}/reject', [ProductController::class, 'rejectPrice'])
+            ->middleware('permission:approve_pricing')
+            ->name('products.prices.reject');
     });
 });
 

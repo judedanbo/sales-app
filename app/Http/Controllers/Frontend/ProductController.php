@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Concerns\AuthorizesResourceOperations;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\UpdateProductPriceRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Http\Requests\UploadProductImageRequest;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductPrice;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -174,6 +176,137 @@ class ProductController extends Controller
 
         return Inertia::render('Products/Show', [
             'product' => $product,
+        ]);
+    }
+
+    /**
+     * Display the variants management page for the specified product.
+     */
+    public function variants(Product $product): Response
+    {
+        $this->authorizeView($product);
+
+        // Load product with variants and their relationships
+        $product->load([
+            'category',
+            'variants.inventory',
+            'variants' => function ($query) {
+                $query->orderBy('is_default', 'desc')
+                    ->orderBy('name');
+            },
+        ]);
+
+        // Convert variants to array to ensure proper serialization
+        $variants = $product->variants->map(function ($variant) {
+            return [
+                'id' => $variant->id,
+                'product_id' => $variant->product_id,
+                'name' => $variant->name,
+                'sku' => $variant->sku,
+                'price' => $variant->price,
+                'size' => $variant->size,
+                'color' => $variant->color,
+                'material' => $variant->material,
+                'status' => $variant->status,
+                'is_default' => $variant->is_default,
+                'inventory' => $variant->inventory ? [
+                    'quantity_on_hand' => $variant->inventory->quantity_on_hand,
+                    'quantity_available' => $variant->inventory->quantity_available,
+                    'reorder_level' => $variant->inventory->reorder_level,
+                    'is_out_of_stock' => $variant->inventory->quantity_on_hand <= 0,
+                ] : null,
+                'created_at' => $variant->created_at,
+                'updated_at' => $variant->updated_at,
+            ];
+        });
+
+        return Inertia::render('Products/Variants', [
+            'product' => $product,
+            'variants' => $variants,
+        ]);
+    }
+
+    /**
+     * Display the pricing management page for the specified product.
+     */
+    public function pricing(Product $product): Response
+    {
+        $this->authorizeView($product);
+
+        // Load product with pricing relationships
+        $product->load([
+            'category',
+            'inventory',
+            'prices' => function ($query) {
+                $query->with(['creator:id,name'])
+                    ->orderBy('version_number', 'desc')
+                    ->limit(50);
+            },
+        ]);
+
+        // Get pricing rules that apply to this product
+        // Note: This assumes PricingRule model exists, adjust based on your implementation
+        $pricingRules = collect([]); // Placeholder - implement based on your PricingRule model
+
+        // Format price history with complete data structure
+        $priceHistory = $product->prices->map(function ($price) {
+            return [
+                'id' => $price->id,
+                'price' => $price->price,
+                'final_price' => $price->final_price ?? $price->price,
+                'cost_price' => $price->cost_price,
+                'markup_percentage' => $price->markup_percentage,
+                'valid_from' => $price->valid_from,
+                'valid_to' => $price->valid_to,
+                'currency' => $price->currency ?? 'GHS',
+                'bulk_discounts' => $price->bulk_discounts,
+                'notes' => $price->notes,
+                'status' => $price->status,
+                'version_number' => $price->version_number,
+                'created_by' => $price->created_by,
+                'creator_name' => $price->creator->name ?? 'Unknown',
+                'approved_by' => $price->approved_by,
+                'approved_at' => $price->approved_at,
+                'created_at' => $price->created_at,
+                'updated_at' => $price->updated_at,
+            ];
+        });
+
+        return Inertia::render('Products/Pricing', [
+            'product' => $product,
+            'pricing_rules' => $pricingRules,
+            'price_history' => $priceHistory,
+        ]);
+    }
+
+    /**
+     * Display the inventory management page for the specified product.
+     */
+    public function inventory(Product $product): Response
+    {
+        $this->authorizeView($product);
+
+        // Load product with inventory relationships
+        $product->load([
+            'category',
+            'inventory',
+        ]);
+
+        // Get recent stock movements for this product
+        // Note: This assumes StockMovement model exists, adjust based on your implementation
+        $recentMovements = collect([]); // Placeholder - implement based on your StockMovement model
+
+        // If you have a StockMovement model, you might do something like:
+        // $recentMovements = StockMovement::where('product_id', $product->id)
+        //     ->with('user')
+        //     ->latest()
+        //     ->limit(20)
+        //     ->get();
+
+        return Inertia::render('Products/Inventory', [
+            'product' => $product,
+            'inventory' => $product->inventory,
+            'recent_movements' => $recentMovements,
         ]);
     }
 
@@ -450,6 +583,151 @@ class ProductController extends Controller
     }
 
     /**
+     * Store a new product variant.
+     */
+    public function storeVariant(Request $request, Product $product)
+    {
+        $this->authorize('create', Product::class);
+
+        $validated = $request->validate([
+            'sku' => 'nullable|string|max:100|unique:product_variants,sku',
+            'name' => 'nullable|string|max:255',
+            'size' => 'nullable|string|max:50',
+            'color' => 'nullable|string|max:50',
+            'material' => 'nullable|string|max:100',
+            'unit_price' => 'nullable|numeric|min:0',
+            'cost_price' => 'nullable|numeric|min:0',
+            'weight' => 'nullable|numeric|min:0',
+            'dimensions.length' => 'nullable|numeric|min:0',
+            'dimensions.width' => 'nullable|numeric|min:0',
+            'dimensions.height' => 'nullable|numeric|min:0',
+            'image_url' => 'nullable|string|max:500',
+            'status' => 'required|in:active,inactive,discontinued',
+            'is_default' => 'boolean',
+            'sort_order' => 'integer|min:0',
+            'barcode' => 'nullable|string|max:100',
+        ]);
+
+        // Auto-generate SKU if not provided
+        if (empty($validated['sku'])) {
+            $baseSku = $product->sku;
+            $suffix = '';
+            if ($validated['size']) {
+                $suffix .= '-'.$validated['size'];
+            }
+            if ($validated['color']) {
+                $suffix .= '-'.substr($validated['color'], 0, 1);
+            }
+            if ($validated['material']) {
+                $suffix .= '-'.substr($validated['material'], 0, 3);
+            }
+            $validated['sku'] = $baseSku.$suffix;
+        }
+
+        // Process dimensions
+        if (isset($validated['dimensions'])) {
+            $dimensions = array_filter($validated['dimensions'], fn ($value) => $value !== null && $value !== '');
+            $validated['dimensions'] = empty($dimensions) ? null : $dimensions;
+        }
+
+        // If this is being set as default, remove default from other variants
+        if ($validated['is_default'] ?? false) {
+            $product->variants()->update(['is_default' => false]);
+        }
+
+        $variant = $product->variants()->create($validated);
+
+        return redirect()->back()->with('message', 'Variant created successfully');
+    }
+
+    /**
+     * Update a product variant.
+     */
+    public function updateVariant(Request $request, Product $product, $variantId)
+    {
+        $this->authorize('update', $product);
+
+        $variant = $product->variants()->findOrFail($variantId);
+
+        $validated = $request->validate([
+            'sku' => 'nullable|string|max:100|unique:product_variants,sku,'.$variant->id,
+            'name' => 'nullable|string|max:255',
+            'size' => 'nullable|string|max:50',
+            'color' => 'nullable|string|max:50',
+            'material' => 'nullable|string|max:100',
+            'unit_price' => 'nullable|numeric|min:0',
+            'cost_price' => 'nullable|numeric|min:0',
+            'weight' => 'nullable|numeric|min:0',
+            'dimensions.length' => 'nullable|numeric|min:0',
+            'dimensions.width' => 'nullable|numeric|min:0',
+            'dimensions.height' => 'nullable|numeric|min:0',
+            'image_url' => 'nullable|string|max:500',
+            'status' => 'required|in:active,inactive,discontinued',
+            'is_default' => 'boolean',
+            'sort_order' => 'integer|min:0',
+            'barcode' => 'nullable|string|max:100',
+        ]);
+
+        // Process dimensions
+        if (isset($validated['dimensions'])) {
+            $dimensions = array_filter($validated['dimensions'], fn ($value) => $value !== null && $value !== '');
+            $validated['dimensions'] = empty($dimensions) ? null : $dimensions;
+        }
+
+        // If this is being set as default, remove default from other variants
+        if ($validated['is_default'] ?? false) {
+            $product->variants()->where('id', '!=', $variant->id)->update(['is_default' => false]);
+        }
+
+        $variant->update($validated);
+
+        return redirect()->back()->with('message', 'Variant updated successfully');
+    }
+
+    /**
+     * Delete a product variant.
+     */
+    public function destroyVariant(Product $product, $variantId)
+    {
+        $this->authorize('delete', $product);
+
+        $variant = $product->variants()->findOrFail($variantId);
+
+        // Prevent deletion of default variant
+        if ($variant->is_default) {
+            return redirect()->back()->with('error', 'Cannot delete the default variant');
+        }
+
+        $variant->delete();
+
+        return redirect()->back()->with('message', 'Variant deleted successfully');
+    }
+
+    /**
+     * Upload variant image.
+     */
+    public function uploadVariantImage(Request $request, Product $product)
+    {
+        $this->authorize('update', $product);
+
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ]);
+
+        $image = $request->file('image');
+        $filename = time().'_'.Str::random(10).'.'.$image->getClientOriginalExtension();
+
+        // Store in products subdirectory
+        $path = $image->storeAs('products/variants', $filename, 'public');
+
+        return response()->json([
+            'success' => true,
+            'image_url' => '/storage/'.$path,
+            'message' => 'Image uploaded successfully',
+        ]);
+    }
+
+    /**
      * Delete an image file from storage.
      */
     private function deleteImageFile(?string $imageUrl): void
@@ -465,5 +743,142 @@ class ProductController extends Controller
         if (Storage::disk('public')->exists($path)) {
             Storage::disk('public')->delete($path);
         }
+    }
+
+    /**
+     * Create a new price version for a product.
+     */
+    public function storePrice(UpdateProductPriceRequest $request, Product $product)
+    {
+        $this->authorizeUpdate($product);
+
+        $validated = $request->validated();
+
+        // Create new price record
+        $productPrice = $product->prices()->create([
+            'price' => $validated['price'],
+            'final_price' => $validated['price'], // For now, same as price
+            'cost_price' => $validated['cost_price'] ?? null,
+            'markup_percentage' => $validated['markup_percentage'] ?? null,
+            'valid_from' => $validated['valid_from'],
+            'valid_to' => $validated['valid_to'] ?? null,
+            'currency' => $validated['currency'] ?? 'GHS',
+            'bulk_discounts' => $validated['bulk_discounts'] ?? null,
+            'notes' => $validated['notes'] ?? null,
+            'status' => 'pending', // Always starts as pending
+            'created_by' => auth()->id(),
+        ]);
+
+        // Auto-approve if user has manage_pricing permission
+        if (auth()->user()->hasPermissionTo('manage_pricing')) {
+            $productPrice->approve(auth()->id(), 'Auto-approved by pricing manager');
+
+            // Update product unit_price
+            $product->update(['unit_price' => $validated['price']]);
+
+            $message = 'Price updated successfully';
+        } else {
+            $message = 'Price update request submitted for approval';
+        }
+
+        return redirect()->back()->with('message', $message);
+    }
+
+    /**
+     * Approve a pending price.
+     */
+    public function approvePrice(Request $request, Product $product, ProductPrice $productPrice)
+    {
+        $this->authorizeUpdate($product);
+
+        // Check permission
+        if (! auth()->user()->hasPermissionTo('approve_pricing') && ! auth()->user()->hasPermissionTo('manage_pricing')) {
+            abort(403, 'You do not have permission to approve prices.');
+        }
+
+        $validated = $request->validate([
+            'approval_notes' => 'nullable|string|max:500',
+        ]);
+
+        if ($productPrice->status !== 'pending') {
+            return redirect()->back()->with('error', 'Only pending prices can be approved.');
+        }
+
+        // Approve the price
+        $productPrice->approve(
+            auth()->id(),
+            $validated['approval_notes'] ?? 'Price approved'
+        );
+
+        // Update product unit_price
+        $product->update(['unit_price' => $productPrice->price]);
+
+        return redirect()->back()->with('message', 'Price approved and activated successfully');
+    }
+
+    /**
+     * Reject a pending price.
+     */
+    public function rejectPrice(Request $request, Product $product, ProductPrice $productPrice)
+    {
+        $this->authorizeUpdate($product);
+
+        // Check permission
+        if (! auth()->user()->hasPermissionTo('approve_pricing') && ! auth()->user()->hasPermissionTo('manage_pricing')) {
+            abort(403, 'You do not have permission to reject prices.');
+        }
+
+        $validated = $request->validate([
+            'approval_notes' => 'required|string|max:500',
+        ]);
+
+        if ($productPrice->status !== 'pending') {
+            return redirect()->back()->with('error', 'Only pending prices can be rejected.');
+        }
+
+        // Reject the price
+        $productPrice->reject(
+            auth()->id(),
+            $validated['approval_notes']
+        );
+
+        return redirect()->back()->with('message', 'Price request rejected');
+    }
+
+    /**
+     * Get pending prices for approval.
+     */
+    public function getPendingPrices(Product $product)
+    {
+        $this->authorizeView($product);
+
+        // Check permission
+        if (! auth()->user()->hasPermissionTo('approve_pricing') && ! auth()->user()->hasPermissionTo('manage_pricing')) {
+            abort(403, 'You do not have permission to view pending prices.');
+        }
+
+        $pendingPrices = $product->prices()
+            ->pending()
+            ->with(['creator'])
+            ->latest()
+            ->get()
+            ->map(function ($price) {
+                return [
+                    'id' => $price->id,
+                    'version_number' => $price->version_number,
+                    'price' => $price->price,
+                    'cost_price' => $price->cost_price,
+                    'markup_percentage' => $price->markup_percentage,
+                    'valid_from' => $price->valid_from,
+                    'valid_to' => $price->valid_to,
+                    'currency' => $price->currency,
+                    'bulk_discounts' => $price->bulk_discounts,
+                    'notes' => $price->notes,
+                    'created_at' => $price->created_at,
+                    'created_by' => $price->creator->name ?? 'Unknown',
+                ];
+            });
+
+        return response()->json(['pending_prices' => $pendingPrices]);
     }
 }

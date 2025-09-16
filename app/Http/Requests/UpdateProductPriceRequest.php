@@ -74,7 +74,7 @@ class UpdateProductPriceRequest extends FormRequest
                 'string',
                 'size:3',
                 'regex:/^[A-Z]{3}$/',
-                Rule::in(['USD', 'EUR', 'GBP', 'INR', 'CAD', 'AUD', 'JPY']),
+                Rule::in(['GHS', 'USD', 'EUR', 'GBP', 'INR', 'CAD', 'AUD', 'JPY']),
             ],
 
             // Status (limited options for updates)

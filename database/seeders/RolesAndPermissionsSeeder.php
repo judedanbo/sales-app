@@ -135,7 +135,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'pricing' => [
                 'manage_pricing' => 'Manage product pricing',
                 'view_price_history' => 'View product price change history',
-                'approve_price_changes' => 'Approve pending price changes',
+                'approve_pricing' => 'Approve pending price changes',
+                'approve_price_changes' => 'Approve pending price changes', // Legacy support
                 'schedule_price_changes' => 'Schedule future price changes',
                 'bulk_update_pricing' => 'Perform bulk price updates',
             ],
@@ -420,6 +421,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'view_products',
             'edit_products',
             'manage_pricing',
+            'approve_pricing',
+            'view_price_history',
             'view_inventory',
             'view_financial_reports',
             'manage_invoices',

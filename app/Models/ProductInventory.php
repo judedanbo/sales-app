@@ -23,6 +23,7 @@ class ProductInventory extends Model implements Auditable
      */
     protected $fillable = [
         'product_id',
+        'product_variant_id',
         'quantity_on_hand',
         'quantity_available',
         'quantity_reserved',
@@ -75,6 +76,14 @@ class ProductInventory extends Model implements Auditable
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    /**
+     * Product inventory belongs to a product variant (optional)
+     */
+    public function variant(): BelongsTo
+    {
+        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
     }
 
     /**
@@ -178,5 +187,46 @@ class ProductInventory extends Model implements Auditable
         $this->save();
 
         return true;
+    }
+
+    /**
+     * Check if this is a variant inventory
+     */
+    public function getIsVariantInventoryAttribute(): bool
+    {
+        return ! is_null($this->product_variant_id);
+    }
+
+    /**
+     * Get display name for this inventory record
+     */
+    public function getDisplayNameAttribute(): string
+    {
+        if ($this->is_variant_inventory) {
+            return $this->variant->display_name;
+        }
+
+        return $this->product->name;
+    }
+
+    /**
+     * Get SKU for this inventory record
+     */
+    public function getSkuAttribute(): string
+    {
+        if ($this->is_variant_inventory) {
+            return $this->variant->sku;
+        }
+
+        return $this->product->sku;
+    }
+
+    /**
+     * Update available quantity based on current stock and reservations
+     */
+    public function updateAvailableQuantity(): void
+    {
+        $this->quantity_available = max(0, $this->quantity_on_hand - $this->quantity_reserved);
+        $this->save();
     }
 }

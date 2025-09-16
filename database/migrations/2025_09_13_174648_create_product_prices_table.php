@@ -36,7 +36,7 @@ return new class extends Migration
             // Additional pricing metadata
             $table->decimal('cost_price', 10, 2)->nullable()->comment('Product cost price for margin calculation');
             $table->decimal('markup_percentage', 5, 2)->nullable()->comment('Markup percentage over cost');
-            $table->string('currency', 3)->default('USD')->comment('Price currency code');
+            $table->string('currency', 3)->default('GHS')->comment('Price currency code');
             $table->json('bulk_discounts')->nullable()->comment('Bulk discount tiers');
             $table->text('notes')->nullable()->comment('Internal notes about this price version');
 

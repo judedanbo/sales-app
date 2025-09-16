@@ -16,7 +16,7 @@ import Pagination from '@/components/ui/Pagination.vue';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { type PaginatedData, type Product, type ProductFilters } from '@/types';
-import { AlertTriangle, ArrowUpDown, ChevronDown, ChevronUp, Edit, Eye, MoreHorizontal, Package, Tag, Trash2 } from 'lucide-vue-next';
+import { AlertTriangle, ArrowUpDown, ChevronDown, ChevronUp, DollarSign, Edit, Eye, MoreHorizontal, Package, Tag, Trash2, TrendingUp, Warehouse } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 interface Props {
@@ -288,7 +288,7 @@ const clearSelection = () => {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                    <DropdownMenuLabel>Product Actions</DropdownMenuLabel>
 
                                     <PermissionGuard permission="view_products">
                                         <DropdownMenuItem as-child>
@@ -303,6 +303,45 @@ const clearSelection = () => {
                                         <DropdownMenuItem @click="handleEdit(product)" class="flex items-center gap-2">
                                             <Edit class="h-4 w-4" />
                                             Edit Product
+                                        </DropdownMenuItem>
+                                    </PermissionGuard>
+
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuLabel>Management</DropdownMenuLabel>
+
+                                    <PermissionGuard permission="view_products">
+                                        <DropdownMenuItem as-child>
+                                            <a :href="`/products/${product.id}/variants`" class="flex items-center gap-2">
+                                                <Package class="h-4 w-4" />
+                                                Manage Variants
+                                            </a>
+                                        </DropdownMenuItem>
+                                    </PermissionGuard>
+
+                                    <PermissionGuard permission="view_products">
+                                        <DropdownMenuItem as-child>
+                                            <a :href="`/products/${product.id}/pricing`" class="flex items-center gap-2">
+                                                <DollarSign class="h-4 w-4" />
+                                                View Pricing
+                                            </a>
+                                        </DropdownMenuItem>
+                                    </PermissionGuard>
+
+                                    <PermissionGuard permission="view_products">
+                                        <DropdownMenuItem as-child>
+                                            <a :href="`/products/${product.id}/inventory`" class="flex items-center gap-2">
+                                                <Warehouse class="h-4 w-4" />
+                                                Inventory Status
+                                            </a>
+                                        </DropdownMenuItem>
+                                    </PermissionGuard>
+
+                                    <PermissionGuard permission="view_products">
+                                        <DropdownMenuItem as-child>
+                                            <a :href="`/pricing?product_id=${product.id}&tab=history`" class="flex items-center gap-2">
+                                                <TrendingUp class="h-4 w-4" />
+                                                Price History
+                                            </a>
                                         </DropdownMenuItem>
                                     </PermissionGuard>
 

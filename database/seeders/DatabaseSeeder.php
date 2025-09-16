@@ -30,6 +30,11 @@ class DatabaseSeeder extends Seeder
             SchoolDocumentSeeder::class,
             AcademicYearSeeder::class,
             SchoolClassSeeder::class,
+            CategorySeeder::class,
+            ProductSeeder::class,
+            ProductVariantSeeder::class,
+            // ProductInventorySeeder::class,
+
         ]);
 
         // Keep legacy role seeder for backward compatibility (runs after new system)

@@ -662,3 +662,251 @@ export interface ProductStatistics {
         lowest_price: number;
     };
 }
+
+// Product Variant Types
+export interface ProductVariant {
+    id: number;
+    product_id: number;
+    sku: string;
+    name?: string;
+    size?: string;
+    color?: string;
+    material?: string;
+    attributes?: Record<string, any>;
+    unit_price?: number;
+    cost_price?: number;
+    weight?: number;
+    dimensions?: {
+        length?: number;
+        width?: number;
+        height?: number;
+    };
+    image_url?: string;
+    gallery?: string[];
+    status: 'active' | 'inactive' | 'discontinued';
+    is_default: boolean;
+    sort_order: number;
+    barcode?: string;
+    created_by?: number;
+    updated_by?: number;
+    created_at: string;
+    updated_at: string;
+
+    // Computed attributes
+    effective_price?: number;
+    formatted_price?: string;
+    display_name?: string;
+    variant_attributes?: string;
+    has_inventory?: boolean;
+    current_stock?: number;
+    is_low_stock?: boolean;
+    is_available?: boolean;
+    profit_margin?: number;
+
+    // Relationships
+    product?: Product;
+    inventory?: ProductInventory;
+    creator?: User;
+    updater?: User;
+    stock_movements?: StockMovement[];
+}
+
+export interface ProductVariantFilters {
+    search?: string;
+    product_id?: string | number;
+    status?: string;
+    size?: string;
+    color?: string;
+    material?: string;
+    price_from?: string | number;
+    price_to?: string | number;
+    low_stock?: string | boolean;
+    sort_by?: string;
+    sort_direction?: 'asc' | 'desc';
+}
+
+// Stock Movement Types
+export interface StockMovement {
+    id: number;
+    product_id: number;
+    product_variant_id?: number;
+    movement_type: 'in' | 'out' | 'adjustment' | 'transfer' | 'return' | 'damage' | 'sale' | 'purchase';
+    quantity: number;
+    unit_cost?: number;
+    total_cost?: number;
+    movement_date: string;
+    reference_type?: string;
+    reference_id?: number;
+    reference_number?: string;
+    notes?: string;
+    created_by: number;
+    approved_by?: number;
+    approved_at?: string;
+    created_at: string;
+    updated_at: string;
+
+    // Computed attributes
+    formatted_quantity?: string;
+    formatted_cost?: string;
+    movement_direction?: 'positive' | 'negative';
+    movement_type_label?: string;
+    movement_type_color?: string;
+
+    // Relationships
+    product?: Product;
+    variant?: ProductVariant;
+    creator?: User;
+    approver?: User;
+}
+
+export interface StockMovementFilters {
+    search?: string;
+    product_id?: string | number;
+    variant_id?: string | number;
+    movement_type?: string;
+    date_from?: string;
+    date_to?: string;
+    created_by?: string | number;
+    reference_type?: string;
+    sort_by?: string;
+    sort_direction?: 'asc' | 'desc';
+}
+
+// Pricing Rule Types
+export interface PricingRule {
+    id: number;
+    name: string;
+    description?: string;
+    rule_type: 'bulk_discount' | 'time_based' | 'customer_group' | 'category_discount' | 'clearance';
+    status: 'active' | 'inactive' | 'scheduled' | 'expired';
+    priority: number;
+    valid_from: string;
+    valid_to?: string;
+    conditions: PricingRuleCondition[];
+    actions: PricingRuleAction[];
+    usage_limit?: number;
+    usage_count: number;
+    can_be_combined: boolean;
+    applies_to: 'all_products' | 'specific_products' | 'categories';
+    product_ids?: number[];
+    category_ids?: number[];
+    created_by: number;
+    updated_by?: number;
+    created_at: string;
+    updated_at: string;
+
+    // Computed attributes
+    is_active?: boolean;
+    is_valid?: boolean;
+    formatted_discount?: string;
+    usage_percentage?: number;
+
+    // Relationships
+    creator?: User;
+    updater?: User;
+    products?: Product[];
+    categories?: Category[];
+}
+
+export interface PricingRuleCondition {
+    field: string;
+    operator: 'equals' | 'greater_than' | 'less_than' | 'between' | 'in' | 'not_in';
+    value: any;
+    logic?: 'and' | 'or';
+}
+
+export interface PricingRuleAction {
+    type: 'percentage_discount' | 'fixed_discount' | 'fixed_price' | 'buy_x_get_y';
+    value: number;
+    applies_to?: 'cart' | 'product' | 'category';
+    max_discount?: number;
+    free_quantity?: number;
+}
+
+export interface PricingRuleFilters {
+    search?: string;
+    rule_type?: string;
+    status?: string;
+    valid_from?: string;
+    valid_to?: string;
+    applies_to?: string;
+    created_by?: string | number;
+    sort_by?: string;
+    sort_direction?: 'asc' | 'desc';
+}
+
+// Inventory Statistics Types
+export interface InventoryStatistics {
+    total_products: number;
+    total_variants: number;
+    total_stock_value: number;
+    low_stock_items: number;
+    out_of_stock_items: number;
+    recent_movements: number;
+    by_movement_type: Record<string, number>;
+    by_status: Record<string, number>;
+    stock_value_by_category: Array<{
+        category_id: number;
+        category_name: string;
+        total_value: number;
+        total_quantity: number;
+    }>;
+    top_products_by_value: Array<{
+        product: Product;
+        total_value: number;
+        quantity_on_hand: number;
+    }>;
+    recent_stock_movements: StockMovement[];
+}
+
+// Pricing Statistics Types
+export interface PricingStatistics {
+    total_rules: number;
+    active_rules: number;
+    expired_rules: number;
+    total_discount_amount: number;
+    rules_by_type: Record<string, number>;
+    most_used_rules: Array<{
+        rule: PricingRule;
+        usage_count: number;
+        total_discount: number;
+    }>;
+    upcoming_expirations: PricingRule[];
+}
+
+// Bulk Operations Types
+export interface BulkOperation {
+    type: 'update_prices' | 'update_stock' | 'update_status' | 'apply_discount' | 'export' | 'import';
+    items: number[];
+    data: Record<string, any>;
+    progress?: number;
+    status?: 'pending' | 'processing' | 'completed' | 'failed';
+    result?: {
+        success: number;
+        failed: number;
+        errors: string[];
+    };
+}
+
+export interface BulkPriceUpdate {
+    product_ids: number[];
+    price_change_type: 'percentage' | 'fixed_amount' | 'set_price';
+    price_change_value: number;
+    apply_to_variants: boolean;
+    valid_from?: string;
+    valid_to?: string;
+    notes?: string;
+}
+
+export interface BulkStockUpdate {
+    items: Array<{
+        product_id: number;
+        variant_id?: number;
+        quantity: number;
+        movement_type: 'in' | 'out' | 'adjustment';
+        notes?: string;
+    }>;
+    movement_date: string;
+    reference_number?: string;
+    notes?: string;
+}

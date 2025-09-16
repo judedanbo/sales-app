@@ -139,11 +139,52 @@ class Product extends Model implements Auditable
     }
 
     /**
-     * Product has inventory records
+     * Product has many variants
+     */
+    public function variants(): HasMany
+    {
+        return $this->hasMany(ProductVariant::class)->orderBy('sort_order');
+    }
+
+    /**
+     * Product's default variant
+     */
+    public function defaultVariant(): HasOne
+    {
+        return $this->hasOne(ProductVariant::class)->where('is_default', true);
+    }
+
+    /**
+     * Product has inventory records (for products without variants)
      */
     public function inventory(): HasOne
     {
-        return $this->hasOne(ProductInventory::class);
+        return $this->hasOne(ProductInventory::class)->whereNull('product_variant_id');
+    }
+
+    /**
+     * Product has many inventory records (including variant inventories)
+     */
+    public function inventories(): HasMany
+    {
+        return $this->hasMany(ProductInventory::class);
+    }
+
+    /**
+     * Product has many stock movements
+     */
+    public function stockMovements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class)->orderBy('movement_date', 'desc');
+    }
+
+    /**
+     * Product has many recent stock movements (last 30 days)
+     */
+    public function recentStockMovements(): HasMany
+    {
+        return $this->stockMovements()
+            ->where('movement_date', '>=', now()->subDays(30));
     }
 
     /**
@@ -328,13 +369,109 @@ class Product extends Model implements Auditable
     }
 
     /**
+     * Check if product has variants
+     */
+    public function getHasVariantsAttribute(): bool
+    {
+        return $this->variants()->count() > 0;
+    }
+
+    /**
+     * Get total stock across all variants
+     */
+    public function getTotalStockAttribute(): int
+    {
+        if ($this->has_variants) {
+            return $this->variants()->with('inventory')->get()->sum('current_stock');
+        }
+
+        return $this->current_stock;
+    }
+
+    /**
+     * Check if any variant is low on stock
+     */
+    public function getHasLowStockVariantsAttribute(): bool
+    {
+        if ($this->has_variants) {
+            return $this->variants()->whereHas('inventory', function ($q) {
+                $q->whereRaw('quantity_on_hand <= minimum_stock_level')
+                    ->whereNotNull('minimum_stock_level');
+            })->exists();
+        }
+
+        return $this->is_low_stock;
+    }
+
+    /**
+     * Get the primary variant (default or first active)
+     */
+    public function getPrimaryVariantAttribute(): ?ProductVariant
+    {
+        if (! $this->has_variants) {
+            return null;
+        }
+
+        return $this->defaultVariant ?? $this->variants()->active()->first();
+    }
+
+    /**
+     * Get all available sizes from variants
+     */
+    public function getAvailableSizesAttribute(): array
+    {
+        return $this->variants()
+            ->active()
+            ->whereNotNull('size')
+            ->distinct()
+            ->pluck('size')
+            ->toArray();
+    }
+
+    /**
+     * Get all available colors from variants
+     */
+    public function getAvailableColorsAttribute(): array
+    {
+        return $this->variants()
+            ->active()
+            ->whereNotNull('color')
+            ->distinct()
+            ->pluck('color')
+            ->toArray();
+    }
+
+    /**
+     * Get all available materials from variants
+     */
+    public function getAvailableMaterialsAttribute(): array
+    {
+        return $this->variants()
+            ->active()
+            ->whereNotNull('material')
+            ->distinct()
+            ->pluck('material')
+            ->toArray();
+    }
+
+    /**
      * Get products requiring reorder
      */
     public static function getProductsNeedingReorder()
     {
-        return static::with(['inventory', 'category'])
-            ->whereHas('inventory', function ($query) {
-                $query->whereRaw('quantity_on_hand <= minimum_stock_level');
+        return static::with(['inventory', 'inventories.variant', 'category'])
+            ->where(function ($query) {
+                // Products without variants
+                $query->whereHas('inventory', function ($q) {
+                    $q->whereRaw('quantity_on_hand <= minimum_stock_level')
+                        ->whereNotNull('minimum_stock_level');
+                })
+                // Or products with variants that need reordering
+                    ->orWhereHas('inventories', function ($q) {
+                        $q->whereRaw('quantity_on_hand <= minimum_stock_level')
+                            ->whereNotNull('minimum_stock_level')
+                            ->whereNotNull('product_variant_id');
+                    });
             })
             ->where('status', 'active')
             ->get();
