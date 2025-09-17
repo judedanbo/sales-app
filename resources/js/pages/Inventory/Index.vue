@@ -2,12 +2,11 @@
 import InventoryDashboard from '@/components/products/InventoryDashboard.vue';
 import LowStockAlerts from '@/components/products/LowStockAlerts.vue';
 import StockAdjustmentModal from '@/components/products/StockAdjustmentModal.vue';
-import StockMovementTable from '@/components/products/StockMovementTable.vue';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAlerts } from '@/composables/useAlerts';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { type BreadcrumbItem, type InventoryStatistics, type PaginatedData, type Product, type ProductInventory, type StockMovement, type StockMovementFilters } from '@/types';
+import { type BreadcrumbItem, type InventoryStatistics, type LowStockProduct, type Product, type ProductInventory, type StockMovement, type StockMovementFilters } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
 import { useDebounceFn } from '@vueuse/core';
 import { Download, Plus, Upload } from 'lucide-vue-next';
@@ -15,13 +14,9 @@ import { ref, watch } from 'vue';
 
 const { addAlert } = useAlerts();
 
-interface LowStockProduct extends Product {
-    inventory?: ProductInventory;
-}
-
 interface Props {
     statistics: InventoryStatistics;
-    movements: PaginatedData<StockMovement>;
+    movements: StockMovement[]; // Backend returns simple array, not paginated
     lowStockProducts: LowStockProduct[];
     filters: StockMovementFilters;
 }
@@ -96,43 +91,13 @@ function applyFilters() {
     });
 }
 
-function handleSort(column: string) {
-    if (localFilters.value.sort_by === column) {
-        localFilters.value.sort_direction = localFilters.value.sort_direction === 'asc' ? 'desc' : 'asc';
-    } else {
-        localFilters.value.sort_by = column;
-        localFilters.value.sort_direction = 'asc';
-    }
-}
-
-function handlePageChange(page: number) {
-    const params: Record<string, any> = {};
-
-    Object.entries(localFilters.value).forEach(([key, value]) => {
-        if (value && value !== '') {
-            params[key] = value;
-        }
-    });
-
-    params.page = page;
-    params.tab = activeTab.value;
-
-    router.get('/inventory', params, {
-        preserveScroll: true,
-        preserveState: true,
-    });
-}
-
-function handleUpdateFilters(newFilters: StockMovementFilters) {
-    localFilters.value = { ...localFilters.value, ...newFilters };
-}
 
 function handleViewLowStock() {
     activeTab.value = 'low-stock';
 }
 
 function handleViewMovements() {
-    activeTab.value = 'movements';
+    router.visit('/inventory/movements');
 }
 
 function handleViewCategory(categoryId: number) {
@@ -260,15 +225,14 @@ function handleBulkAdjustment() {
 
                 <!-- Stock Movements Tab -->
                 <TabsContent value="movements" class="space-y-6">
-                    <StockMovementTable
-                        :movements="movements"
-                        :filters="localFilters"
-                        :is-loading="isLoading"
-                        @update:filters="handleUpdateFilters"
-                        @sort="handleSort"
-                        @page-change="handlePageChange"
-                        @view-details="handleViewMovementDetails"
-                    />
+                    <!-- This tab redirects to full movements page -->
+                    <div class="text-center py-12">
+                        <h3 class="text-lg font-medium mb-4">Stock Movements</h3>
+                        <p class="text-gray-600 mb-6">View detailed stock movements with advanced filtering and search capabilities.</p>
+                        <Button @click="router.visit('/inventory/movements')">
+                            View All Stock Movements
+                        </Button>
+                    </div>
                 </TabsContent>
 
                 <!-- Low Stock Alerts Tab -->

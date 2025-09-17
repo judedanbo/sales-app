@@ -61,7 +61,9 @@ return new class extends Migration
             $table->index(['sku'], 'products_sku_index');
 
             // Full-text search indexes (MySQL specific)
-            $table->fullText(['name', 'description'], 'products_search_index');
+            if (config('database.default') !== 'sqlite') {
+                $table->fullText(['name', 'description'], 'products_search_index');
+            }
         });
     }
 

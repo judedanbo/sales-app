@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAlerts } from '@/composables/useAlerts';
+import { useCurrency } from '@/composables/useCurrency';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem, type PaginatedData, type PricingRule, type PricingRuleFilters, type PricingStatistics, type Product, type ProductPrice } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
@@ -190,7 +191,7 @@ function handlePricesUpdated() {
     router.reload();
 }
 
-const formatCurrency = (amount: number) => `GH₵${amount.toFixed(2)}`;
+const { formatCurrency } = useCurrency();
 </script>
 
 <template>

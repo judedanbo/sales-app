@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Progress from '@/components/ui/progress.vue';
+import { useCurrency } from '@/composables/useCurrency';
 import { AlertTriangle, Building2, Database, TrendingUp, Users } from 'lucide-vue-next';
 import { computed } from 'vue';
 
@@ -25,9 +26,7 @@ const activePercentage = computed(() =>
     props.stats.total_schools > 0 ? Math.round((props.stats.active_schools / props.stats.total_schools) * 100) : 0,
 );
 
-const formatNumber = (num: number) => {
-    return new Intl.NumberFormat().format(num);
-};
+const { formatNumber } = useCurrency();
 </script>
 
 <template>

@@ -6,6 +6,7 @@ import UpdatePriceModal from '@/components/products/UpdatePriceModal.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import { useCurrency } from '@/composables/useCurrency';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem, type PricingRule, type Product, type ProductPrice } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
@@ -48,13 +49,7 @@ const handlePriceCreated = () => {
     router.reload();
 };
 
-// Helper functions
-const formatPrice = (price: number): string => {
-    return new Intl.NumberFormat('en-GH', {
-        style: 'currency',
-        currency: 'GHS',
-    }).format(price);
-};
+const { formatCurrency: formatPrice } = useCurrency();
 
 const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString('en-US', {

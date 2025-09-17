@@ -5,15 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import Progress from '@/components/ui/progress.vue';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { type Product, type ProductInventory } from '@/types';
+import { useCurrency } from '@/composables/useCurrency';
+import { type LowStockProduct } from '@/types';
 import { AlertTriangle, Package, ShoppingCart, TrendingDown } from 'lucide-vue-next';
 import { computed } from 'vue';
-
-interface LowStockProduct extends Product {
-    inventory?: ProductInventory;
-    stock_percentage?: number;
-    days_until_stockout?: number;
-}
 
 interface Props {
     products: LowStockProduct[];
@@ -30,16 +25,16 @@ const emit = defineEmits<{
 }>();
 
 const criticalProducts = computed(() => {
-    return props.products.filter(p =>
-        p.inventory?.quantity_on_hand === 0 ||
-        (p.inventory?.quantity_on_hand || 0) <= (p.inventory?.minimum_stock_level || 0) * 0.5
+    return props.products.filter(
+        (p) => p.inventory?.quantity_on_hand === 0 || (p.inventory?.quantity_on_hand || 0) <= (p.inventory?.minimum_stock_level || 0) * 0.5,
     );
 });
 
 const warningProducts = computed(() => {
-    return props.products.filter(p =>
-        (p.inventory?.quantity_on_hand || 0) > (p.inventory?.minimum_stock_level || 0) * 0.5 &&
-        (p.inventory?.quantity_on_hand || 0) <= (p.inventory?.minimum_stock_level || 0)
+    return props.products.filter(
+        (p) =>
+            (p.inventory?.quantity_on_hand || 0) > (p.inventory?.minimum_stock_level || 0) * 0.5 &&
+            (p.inventory?.quantity_on_hand || 0) <= (p.inventory?.minimum_stock_level || 0),
     );
 });
 
@@ -87,13 +82,13 @@ const sortedProducts = computed(() => {
 
 const totalValue = computed(() => {
     return props.products.reduce((sum, product) => {
-        const reorderQty = product.inventory?.reorder_quantity || 10;
+        const reorderQty = product.reorder_level || product.inventory?.minimum_stock_level || 10;
         const unitPrice = product.unit_price || 0;
-        return sum + (reorderQty * unitPrice);
+        return sum + reorderQty * unitPrice;
     }, 0);
 });
 
-const formatCurrency = (amount: number) => `GH₵${amount.toFixed(2)}`;
+const { formatCurrency } = useCurrency();
 
 const getStockColor = (level: string) => {
     switch (level) {
@@ -128,9 +123,7 @@ const selectedProducts = computed(() => {
                     <div class="text-2xl font-bold text-red-600 dark:text-red-400">
                         {{ criticalProducts.length }}
                     </div>
-                    <p class="text-xs text-muted-foreground">
-                        Immediate attention required
-                    </p>
+                    <p class="text-xs text-muted-foreground">Immediate attention required</p>
                 </CardContent>
             </Card>
 
@@ -143,9 +136,7 @@ const selectedProducts = computed(() => {
                     <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
                         {{ warningProducts.length }}
                     </div>
-                    <p class="text-xs text-muted-foreground">
-                        Need to reorder soon
-                    </p>
+                    <p class="text-xs text-muted-foreground">Need to reorder soon</p>
                 </CardContent>
             </Card>
 
@@ -158,28 +149,20 @@ const selectedProducts = computed(() => {
                     <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">
                         {{ formatCurrency(totalValue) }}
                     </div>
-                    <p class="text-xs text-muted-foreground">
-                        Estimated reorder cost
-                    </p>
+                    <p class="text-xs text-muted-foreground">Estimated reorder cost</p>
                 </CardContent>
             </Card>
         </div>
 
         <!-- Actions Bar -->
-        <div class="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+        <div class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <div>
                 <h2 class="text-2xl font-bold tracking-tight">Low Stock Alerts</h2>
-                <p class="text-muted-foreground">
-                    Products that need immediate attention or reordering.
-                </p>
+                <p class="text-muted-foreground">Products that need immediate attention or reordering.</p>
             </div>
             <div class="flex gap-2">
-                <Button
-                    variant="outline"
-                    @click="$emit('create-purchase-order', selectedProducts)"
-                    :disabled="selectedProducts.length === 0"
-                >
-                    <ShoppingCart class="h-4 w-4 mr-2" />
+                <Button variant="outline" @click="$emit('create-purchase-order', selectedProducts)" :disabled="selectedProducts.length === 0">
+                    <ShoppingCart class="mr-2 h-4 w-4" />
                     Create Purchase Order
                 </Button>
             </div>
@@ -192,15 +175,13 @@ const selectedProducts = computed(() => {
                     <AlertTriangle class="h-5 w-5" />
                     Low Stock Products
                 </CardTitle>
-                <CardDescription>
-                    Products below their minimum stock levels, sorted by urgency.
-                </CardDescription>
+                <CardDescription> Products below their minimum stock levels, sorted by urgency. </CardDescription>
             </CardHeader>
             <CardContent>
                 <div v-if="isLoading" class="space-y-4">
                     <div v-for="i in 5" :key="i" class="flex items-center space-x-4">
                         <Skeleton class="h-12 w-12 rounded" />
-                        <div class="space-y-2 flex-1">
+                        <div class="flex-1 space-y-2">
                             <Skeleton class="h-4 w-[250px]" />
                             <Skeleton class="h-4 w-[200px]" />
                         </div>
@@ -208,12 +189,10 @@ const selectedProducts = computed(() => {
                     </div>
                 </div>
 
-                <div v-else-if="products.length === 0" class="text-center py-8">
-                    <Package class="h-12 w-12 mx-auto text-green-400 mb-4" />
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">All stock levels are healthy!</h3>
-                    <p class="text-gray-500 dark:text-gray-400">
-                        No products are currently below their minimum stock levels.
-                    </p>
+                <div v-else-if="products.length === 0" class="py-8 text-center">
+                    <Package class="mx-auto mb-4 h-12 w-12 text-green-400" />
+                    <h3 class="mb-2 text-lg font-medium text-gray-900 dark:text-gray-100">All stock levels are healthy!</h3>
+                    <p class="text-gray-500 dark:text-gray-400">No products are currently below their minimum stock levels.</p>
                 </div>
 
                 <div v-else class="overflow-hidden rounded-md border">
@@ -234,13 +213,12 @@ const selectedProducts = computed(() => {
                                 <TableCell>
                                     <div class="flex items-center space-x-3">
                                         <div v-if="product.image_url" class="h-10 w-10 flex-shrink-0">
-                                            <img
-                                                :src="product.image_url"
-                                                :alt="product.name"
-                                                class="h-10 w-10 rounded object-cover"
-                                            />
+                                            <img :src="product.image_url" :alt="product.name" class="h-10 w-10 rounded object-cover" />
                                         </div>
-                                        <div v-else class="h-10 w-10 flex-shrink-0 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center">
+                                        <div
+                                            v-else
+                                            class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded bg-gray-100 dark:bg-gray-800"
+                                        >
                                             <Package class="h-5 w-5 text-gray-400" />
                                         </div>
                                         <div>
@@ -267,34 +245,23 @@ const selectedProducts = computed(() => {
                                     </Badge>
                                 </TableCell>
                                 <TableCell>
-                                    <div class="font-medium">{{ product.inventory?.reorder_quantity || 10 }} units</div>
-                                    <div class="text-sm text-gray-500">
-                                        To reach max level
-                                    </div>
+                                    <div class="font-medium">{{ product.reorder_level || product.inventory?.minimum_stock_level || 10 }} units</div>
+                                    <div class="text-sm text-gray-500">To reach max level</div>
                                 </TableCell>
                                 <TableCell>
                                     <div class="font-medium">
-                                        {{ formatCurrency((product.inventory?.reorder_quantity || 10) * (product.unit_price || 0)) }}
+                                        {{
+                                            formatCurrency(
+                                                (product.reorder_level || product.inventory?.minimum_stock_level || 10) * (product.unit_price || 0),
+                                            )
+                                        }}
                                     </div>
-                                    <div class="text-sm text-gray-500">
-                                        {{ formatCurrency(product.unit_price || 0) }} per unit
-                                    </div>
+                                    <div class="text-sm text-gray-500">{{ formatCurrency(product.unit_price || 0) }} per unit</div>
                                 </TableCell>
                                 <TableCell class="text-right">
                                     <div class="flex items-center justify-end space-x-2">
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            @click="$emit('adjust-stock', product)"
-                                        >
-                                            Adjust
-                                        </Button>
-                                        <Button
-                                            size="sm"
-                                            @click="$emit('reorder-product', product)"
-                                        >
-                                            Reorder
-                                        </Button>
+                                        <Button size="sm" variant="outline" @click="$emit('adjust-stock', product)"> Adjust </Button>
+                                        <Button size="sm" @click="$emit('reorder-product', product)"> Reorder </Button>
                                     </div>
                                 </TableCell>
                             </TableRow>

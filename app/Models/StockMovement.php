@@ -92,6 +92,62 @@ class StockMovement extends Model implements Auditable
     }
 
     /**
+     * Accessors for backward compatibility with frontend expectations
+     */
+
+    /**
+     * Get movement type (alias for type field)
+     */
+    public function getMovementTypeAttribute(): string
+    {
+        return $this->type;
+    }
+
+    /**
+     * Get quantity (alias for quantity_change field)
+     */
+    public function getQuantityAttribute(): int
+    {
+        return abs($this->quantity_change);
+    }
+
+    /**
+     * Get reason (from notes field for now - can be enhanced later)
+     */
+    public function getReasonAttribute(): ?string
+    {
+        // For now, extract reason from notes or return default based on type
+        if ($this->notes) {
+            return $this->notes;
+        }
+
+        // Return default reason based on movement type
+        return $this->getDefaultReason();
+    }
+
+    /**
+     * Get default reason based on movement type
+     */
+    private function getDefaultReason(): string
+    {
+        return match ($this->type) {
+            'adjustment' => 'Stock Adjustment',
+            'purchase' => 'Stock Purchase',
+            'sale' => 'Product Sale',
+            'return_from_customer' => 'Customer Return',
+            'return_to_supplier' => 'Supplier Return',
+            'damaged' => 'Damaged Stock',
+            'expired' => 'Expired Stock',
+            'theft' => 'Stock Loss/Theft',
+            'transfer_in' => 'Transfer In',
+            'transfer_out' => 'Transfer Out',
+            'manufacturing' => 'Manufacturing',
+            'initial_stock' => 'Initial Stock',
+            default => 'Stock Movement',
+        };
+    }
+
+    /**
      * Audit configuration
      */
     protected $auditInclude = [

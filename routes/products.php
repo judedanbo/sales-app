@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\ProductController as ApiProductController;
+use App\Http\Controllers\Frontend\InventoryController;
 use App\Http\Controllers\Frontend\ProductController;
 use Illuminate\Support\Facades\Route;
 
@@ -91,6 +92,76 @@ Route::middleware(['auth', 'verified', 'audit-action:user_access'])->group(funct
         Route::put('products/{product}/prices/{productPrice}/reject', [ProductController::class, 'rejectPrice'])
             ->middleware('permission:approve_pricing')
             ->name('products.prices.reject');
+
+        // Inventory Management Routes
+        Route::middleware('permission:edit_products')->group(function () {
+            Route::put('products/{product}/reorder-level', [ProductController::class, 'updateReorderLevel'])
+                ->name('products.reorder-level.update');
+
+            Route::post('products/{product}/stock-adjustment', [ProductController::class, 'adjustStock'])
+                ->name('products.stock.adjust');
+        });
+
+        // Inventory Dashboard Routes (temporarily without permission for testing)
+        Route::get('inventory/test', function () {
+            return \Inertia\Inertia::render('Inventory/Index', [
+                'statistics' => [
+                    'total_products' => 150,
+                    'total_variants' => 45,
+                    'total_stock_value' => 125000,
+                    'low_stock_items' => 12,
+                    'out_of_stock_items' => 3,
+                    'recent_movements' => 28,
+                    'by_movement_type' => [
+                        'purchase' => 15,
+                        'sale' => 8,
+                        'adjustment' => 3,
+                        'return_from_customer' => 2,
+                    ],
+                    'by_status' => [
+                        'in_stock' => 135,
+                        'low_stock' => 12,
+                        'out_of_stock' => 3,
+                    ],
+                ],
+                'movements' => [
+                    [
+                        'id' => 1,
+                        'movement_type' => 'purchase',
+                        'quantity' => 50,
+                        'quantity_change' => 50,
+                        'reason' => 'Stock Purchase',
+                        'quantity_before' => 20,
+                        'quantity_after' => 70,
+                        'movement_date' => now()->toISOString(),
+                        'created_at' => now()->toISOString(),
+                        'product' => ['id' => 1, 'name' => 'Test Product', 'sku' => 'TST001'],
+                        'user' => ['id' => 1, 'name' => 'Test User'],
+                    ],
+                ],
+                'lowStockProducts' => [
+                    [
+                        'id' => 1,
+                        'name' => 'Low Stock Product',
+                        'sku' => 'LSP001',
+                        'unit_price' => 25.99,
+                        'reorder_level' => 10,
+                        'inventory' => [
+                            'quantity_on_hand' => 5,
+                            'quantity_available' => 5,
+                            'minimum_stock_level' => 10,
+                            'maximum_stock_level' => 100,
+                        ],
+                    ],
+                ],
+                'filters' => [],
+            ]);
+        })->name('inventory.test');
+
+        Route::middleware('permission:view_inventory')->group(function () {
+            Route::get('inventory', [InventoryController::class, 'index'])->name('inventory.index');
+            Route::get('inventory/movements', [InventoryController::class, 'movements'])->name('inventory.movements');
+        });
     });
 });
 

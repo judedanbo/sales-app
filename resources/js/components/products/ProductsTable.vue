@@ -15,6 +15,7 @@ import {
 import Pagination from '@/components/ui/Pagination.vue';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useCurrency } from '@/composables/useCurrency';
 import { type PaginatedData, type Product, type ProductFilters } from '@/types';
 import { AlertTriangle, ArrowUpDown, ChevronDown, ChevronUp, DollarSign, Edit, Eye, MoreHorizontal, Package, Tag, Trash2, TrendingUp, Warehouse } from 'lucide-vue-next';
 import { computed } from 'vue';
@@ -71,12 +72,7 @@ const getStatusBadgeVariant = (status: string): 'default' | 'secondary' | 'destr
 
 // Removed unused getStatusColor function as it's not being used in the template
 
-const formatPrice = (price: number): string => {
-    return new Intl.NumberFormat('en-GH', {
-        style: 'currency',
-        currency: 'GHS',
-    }).format(price);
-};
+const { formatCurrency: formatPrice } = useCurrency();
 
 const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString('en-GH', {

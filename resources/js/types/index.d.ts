@@ -730,18 +730,32 @@ export interface StockMovement {
     id: number;
     product_id: number;
     product_variant_id?: number;
-    movement_type: 'in' | 'out' | 'adjustment' | 'transfer' | 'return' | 'damage' | 'sale' | 'purchase';
-    quantity: number;
+    movement_type: 'adjustment' | 'purchase' | 'sale' | 'return_from_customer' | 'return_to_supplier' |
+                   'transfer_in' | 'transfer_out' | 'damaged' | 'expired' | 'theft' | 'manufacturing' |
+                   'initial_stock' | 'reservation' | 'release_reservation';
+    quantity: number; // Absolute quantity (always positive) - from accessor
+    quantity_change: number; // Actual change (+/-)
+    quantity_before: number; // Stock level before movement
+    quantity_after: number; // Stock level after movement
     unit_cost?: number;
     total_cost?: number;
+    currency?: string;
     movement_date: string;
     reference_type?: string;
     reference_id?: number;
-    reference_number?: string;
+    reason?: string; // Computed from notes or type
     notes?: string;
-    created_by: number;
-    approved_by?: number;
-    approved_at?: string;
+    metadata?: Record<string, any>;
+    location?: string;
+    batch_number?: string;
+    expiry_date?: string;
+    user_id?: number;
+    is_confirmed: boolean;
+    confirmed_at?: string;
+    user?: {
+        id: number;
+        name: string;
+    };
     created_at: string;
     updated_at: string;
 
@@ -844,19 +858,36 @@ export interface InventoryStatistics {
     out_of_stock_items: number;
     recent_movements: number;
     by_movement_type: Record<string, number>;
-    by_status: Record<string, number>;
-    stock_value_by_category: Array<{
-        category_id: number;
-        category_name: string;
-        total_value: number;
-        total_quantity: number;
-    }>;
-    top_products_by_value: Array<{
-        product: Product;
-        total_value: number;
-        quantity_on_hand: number;
-    }>;
-    recent_stock_movements: StockMovement[];
+    by_status: {
+        in_stock: number;
+        low_stock: number;
+        out_of_stock: number;
+    };
+    // Optional extended analytics (not provided by current backend)
+    stock_value_by_category?: CategoryStockData[];
+    top_products_by_value?: ProductValueData[];
+    recent_stock_movements?: StockMovement[];
+}
+
+// Additional interfaces for optional analytics
+export interface CategoryStockData {
+    category_id: number;
+    category_name: string;
+    total_value: number;
+    total_quantity: number;
+}
+
+export interface ProductValueData {
+    product: Product;
+    total_value: number;
+    quantity_on_hand: number;
+}
+
+// Low stock product interface (extends Product with inventory info)
+export interface LowStockProduct extends Product {
+    inventory?: ProductInventory;
+    stock_percentage?: number;
+    days_until_stockout?: number;
 }
 
 // Pricing Statistics Types

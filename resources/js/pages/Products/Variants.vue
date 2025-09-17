@@ -8,6 +8,7 @@ import PageHeader from '@/components/ui/PageHeader.vue';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAlerts } from '@/composables/useAlerts';
+import { useCurrency } from '@/composables/useCurrency';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem, type Product, type ProductVariant } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
@@ -100,13 +101,7 @@ const handleVariantUpdated = () => {
     router.reload();
 };
 
-// Helper functions
-const formatPrice = (price: number): string => {
-    return new Intl.NumberFormat('en-GH', {
-        style: 'currency',
-        currency: 'GHS',
-    }).format(price);
-};
+const { formatCurrency: formatPrice } = useCurrency();
 
 const getStockStatusColor = (variant: ProductVariant): string => {
     if (!variant.inventory) return 'text-muted-foreground';

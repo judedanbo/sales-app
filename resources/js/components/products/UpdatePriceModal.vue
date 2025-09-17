@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useAlerts } from '@/composables/useAlerts';
+import { useCurrency } from '@/composables/useCurrency';
 import { type Product } from '@/types';
 import { useForm } from '@inertiajs/vue3';
 import { Calculator, DollarSign, Plus, Trash2, TrendingUp } from 'lucide-vue-next';
@@ -120,13 +121,7 @@ const handleSubmit = () => {
     });
 };
 
-// Format currency
-const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('en-GH', {
-        style: 'currency',
-        currency: form.currency,
-    }).format(amount);
-};
+const { formatCurrency } = useCurrency();
 </script>
 
 <template>

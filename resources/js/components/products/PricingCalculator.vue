@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { useCurrency } from '@/composables/useCurrency';
 import { type PricingRule, type Product } from '@/types';
 import { Calculator, Percent, Tag } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
@@ -15,6 +16,8 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const { formatCurrency } = useCurrency();
 
 const quantity = ref(1);
 const customerGroup = ref('regular');
@@ -117,12 +120,12 @@ const calculation = computed((): PriceCalculation => {
                         break;
                     case 'fixed_discount':
                         discount = Math.min(action.value, subtotal - totalDiscount);
-                        description = `GH₵${action.value.toFixed(2)} discount`;
+                        description = `${formatCurrency(action.value)} discount`;
                         break;
                     case 'fixed_price':
                         const currentPrice = subtotal - totalDiscount;
                         discount = Math.max(0, currentPrice - action.value * quantity.value);
-                        description = `Fixed price: GH₵${action.value.toFixed(2)} per unit`;
+                        description = `Fixed price: ${formatCurrency(action.value)} per unit`;
                         break;
                     case 'buy_x_get_y':
                         if (quantity.value >= (rule.conditions[0]?.value || 1)) {
@@ -166,9 +169,9 @@ const calculation = computed((): PriceCalculation => {
     };
 });
 
-const formatCurrency = (amount: number) => {
+const formatPrice = (amount: number) => {
     if (amount === null || amount === undefined) return 'GH₵0.00';
-    return `GH₵${Number(amount).toFixed(2)}`;
+    return formatCurrency(Number(amount));
 };
 
 const savingsPercentage = computed(() => {
@@ -218,8 +221,8 @@ const savingsPercentage = computed(() => {
                 <div class="space-y-3">
                     <!-- Base Price -->
                     <div class="flex items-center justify-between">
-                        <span>Base Price ({{ quantity }} × {{ formatCurrency(calculation.basePrice) }})</span>
-                        <span class="font-medium">{{ formatCurrency(calculation.subtotal) }}</span>
+                        <span>Base Price ({{ quantity }} × {{ formatPrice(calculation.basePrice) }})</span>
+                        <span class="font-medium">{{ formatPrice(calculation.subtotal) }}</span>
                     </div>
 
                     <!-- Applied Rules -->
@@ -239,7 +242,7 @@ const savingsPercentage = computed(() => {
                                 </Badge>
                                 <span class="text-gray-600 dark:text-gray-400">{{ appliedRule.description }}</span>
                             </div>
-                            <span class="font-medium text-green-600 dark:text-green-400"> -{{ formatCurrency(appliedRule.discount) }} </span>
+                            <span class="font-medium text-green-600 dark:text-green-400"> -{{ formatPrice(appliedRule.discount) }} </span>
                         </div>
                     </div>
 
@@ -248,13 +251,13 @@ const savingsPercentage = computed(() => {
                     <!-- Subtotal after discounts -->
                     <div class="flex items-center justify-between font-medium">
                         <span>Subtotal after discounts</span>
-                        <span>{{ formatCurrency(calculation.finalPrice) }}</span>
+                        <span>{{ formatPrice(calculation.finalPrice) }}</span>
                     </div>
 
                     <!-- Tax -->
                     <div v-if="calculation.taxAmount > 0" class="flex items-center justify-between text-sm">
                         <span>Tax ({{ ((product.tax_rate || 0) * 100).toFixed(2) }}%)</span>
-                        <span>{{ formatCurrency(calculation.taxAmount) }}</span>
+                        <span>{{ formatPrice(calculation.taxAmount) }}</span>
                     </div>
 
                     <Separator />
@@ -262,13 +265,13 @@ const savingsPercentage = computed(() => {
                     <!-- Final Total -->
                     <div class="flex items-center justify-between text-lg font-bold">
                         <span>Total</span>
-                        <span>{{ formatCurrency(calculation.totalWithTax) }}</span>
+                        <span>{{ formatPrice(calculation.totalWithTax) }}</span>
                     </div>
 
                     <!-- Price per unit -->
                     <div class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
                         <span>Price per unit</span>
-                        <span>{{ formatCurrency(calculation.pricePerUnit) }}</span>
+                        <span>{{ formatPrice(calculation.pricePerUnit) }}</span>
                     </div>
                 </div>
             </div>
@@ -282,7 +285,7 @@ const savingsPercentage = computed(() => {
                 <div class="space-y-1">
                     <div class="flex justify-between">
                         <span>Total Savings:</span>
-                        <span class="font-bold">{{ formatCurrency(calculation.savings) }}</span>
+                        <span class="font-bold">{{ formatPrice(calculation.savings) }}</span>
                     </div>
                     <div class="flex justify-between text-sm">
                         <span>Savings Percentage:</span>
@@ -309,7 +312,7 @@ const savingsPercentage = computed(() => {
                         :key="qty"
                         size="sm"
                         variant="outline"
-                        :class="{ 'bg-primary text-primary-foreground': quantity === qty }"
+                        :class="{ 'bg-primary text-primary-foreground dark:text-gray-600': quantity === qty }"
                         @click="quantity = qty"
                     >
                         {{ qty }}

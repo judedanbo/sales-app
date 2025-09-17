@@ -2,6 +2,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useCurrency } from '@/composables/useCurrency';
 import { type ProductPrice } from '@/types';
 import {
     CategoryScale,
@@ -28,6 +29,8 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const { formatCurrency } = useCurrency();
 
 const chartContainer = ref<HTMLCanvasElement | null>(null);
 const chartInstance = ref<ChartJS | null>(null);
@@ -235,7 +238,7 @@ const chartConfig = computed<ChartConfiguration<'line'>>(() => ({
                     label: (context) => {
                         const price = context.parsed.y;
                         const dataPoint = chartData.value[context.dataIndex];
-                        return [`Price: GH₵${price.toFixed(2)}`, `Status: ${dataPoint.status}`, `Version: ${dataPoint.version}`];
+                        return [`Price: ${formatCurrency(price)}`, `Status: ${dataPoint.status}`, `Version: ${dataPoint.version}`];
                     },
                 },
             },
@@ -270,7 +273,7 @@ const chartConfig = computed<ChartConfiguration<'line'>>(() => ({
                 },
                 ticks: {
                     color: '#6b7280',
-                    callback: (value) => `GH₵${Number(value).toFixed(2)}`,
+                    callback: (value) => formatCurrency(Number(value)),
                 },
             },
         },
@@ -430,7 +433,7 @@ watch([timeRange, priceType, () => props.prices], async () => {
                 <!-- Price Statistics -->
                 <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
                     <div class="rounded-lg bg-blue-50 p-4 text-center dark:bg-blue-900/10">
-                        <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">GH₵{{ priceStats.current.toFixed(2) }}</div>
+                        <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ formatCurrency(priceStats.current) }}</div>
                         <div class="text-sm text-gray-600 dark:text-gray-400">Current Price</div>
                         <div
                             v-if="priceStats.changePercentage !== 0"
@@ -445,17 +448,17 @@ watch([timeRange, priceType, () => props.prices], async () => {
                     </div>
 
                     <div class="rounded-lg bg-green-50 p-4 text-center dark:bg-green-900/10">
-                        <div class="text-2xl font-bold text-green-600 dark:text-green-400">GH₵{{ priceStats.highest.toFixed(2) }}</div>
+                        <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ formatCurrency(priceStats.highest) }}</div>
                         <div class="text-sm text-gray-600 dark:text-gray-400">Highest</div>
                     </div>
 
                     <div class="rounded-lg bg-red-50 p-4 text-center dark:bg-red-900/10">
-                        <div class="text-2xl font-bold text-red-600 dark:text-red-400">GH₵{{ priceStats.lowest.toFixed(2) }}</div>
+                        <div class="text-2xl font-bold text-red-600 dark:text-red-400">{{ formatCurrency(priceStats.lowest) }}</div>
                         <div class="text-sm text-gray-600 dark:text-gray-400">Lowest</div>
                     </div>
 
                     <div class="rounded-lg bg-gray-50 p-4 text-center dark:bg-gray-900/10">
-                        <div class="text-2xl font-bold text-gray-600 dark:text-gray-400">GH₵{{ priceStats.average.toFixed(2) }}</div>
+                        <div class="text-2xl font-bold text-gray-600 dark:text-gray-400">{{ formatCurrency(priceStats.average) }}</div>
                         <div class="text-sm text-gray-600 dark:text-gray-400">Average</div>
                     </div>
                 </div>

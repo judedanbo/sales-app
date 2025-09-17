@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useCurrency } from '@/composables/useCurrency';
 import { type ProductVariant } from '@/types';
 import { Edit, MoreHorizontal, Package, Star, Trash2 } from 'lucide-vue-next';
 import { computed } from 'vue';
@@ -14,6 +15,8 @@ interface Props {
 }
 
 defineProps<Props>();
+
+const { formatCurrency } = useCurrency();
 
 const emit = defineEmits<{
     edit: [variant: ProductVariant];
@@ -148,7 +151,7 @@ const getStockStatusText = (variant: ProductVariant) => {
                                 <div class="space-y-1">
                                     <div class="font-medium">{{ variant.formatted_price || 'GH₵ 0.00' }}</div>
                                     <div v-if="variant.cost_price" class="text-sm text-gray-500">
-                                        Cost: GH₵ {{ variant.cost_price.toFixed(2) }}
+                                        Cost: {{ formatCurrency(variant.cost_price) }}
                                     </div>
                                     <div v-if="variant.profit_margin" class="text-sm text-green-600">
                                         {{ variant.profit_margin.toFixed(1) }}% margin

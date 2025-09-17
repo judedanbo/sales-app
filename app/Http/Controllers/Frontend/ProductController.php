@@ -293,15 +293,40 @@ class ProductController extends Controller
         ]);
 
         // Get recent stock movements for this product
-        // Note: This assumes StockMovement model exists, adjust based on your implementation
-        $recentMovements = collect([]); // Placeholder - implement based on your StockMovement model
-
-        // If you have a StockMovement model, you might do something like:
-        // $recentMovements = StockMovement::where('product_id', $product->id)
-        //     ->with('user')
-        //     ->latest()
-        //     ->limit(20)
-        //     ->get();
+        $recentMovements = collect([]);
+        try {
+            $recentMovements = \App\Models\StockMovement::where('product_id', $product->id)
+                ->whereNull('product_variant_id') // Only product-level movements
+                ->with('user:id,name')
+                ->orderBy('movement_date', 'desc')
+                ->orderBy('created_at', 'desc')
+                ->limit(20)
+                ->get()
+                ->map(function ($movement) {
+                    return [
+                        'id' => $movement->id,
+                        'movement_type' => $movement->movement_type, // Uses accessor
+                        'quantity' => $movement->quantity, // Uses accessor
+                        'reason' => $movement->reason, // Uses accessor
+                        'notes' => $movement->notes,
+                        'created_at' => $movement->created_at->toISOString(),
+                        'movement_date' => $movement->movement_date->toISOString(),
+                        'quantity_before' => $movement->quantity_before,
+                        'quantity_after' => $movement->quantity_after,
+                        'user' => $movement->user ? [
+                            'id' => $movement->user->id,
+                            'name' => $movement->user->name,
+                        ] : null,
+                    ];
+                });
+        } catch (\Exception $e) {
+            // Log error but don't fail the page load
+            \Log::error('Failed to load stock movements', [
+                'error' => $e->getMessage(),
+                'product_id' => $product->id,
+            ]);
+            $recentMovements = collect([]);
+        }
 
         return Inertia::render('Products/Inventory', [
             'product' => $product,
@@ -880,5 +905,128 @@ class ProductController extends Controller
             });
 
         return response()->json(['pending_prices' => $pendingPrices]);
+    }
+
+    /**
+     * Update the reorder level for a product.
+     */
+    public function updateReorderLevel(Request $request, Product $product)
+    {
+        $this->authorizeUpdate($product);
+
+        $validated = $request->validate([
+            'reorder_level' => 'required|numeric|min:0',
+        ]);
+
+        $oldLevel = $product->reorder_level;
+        $newLevel = $validated['reorder_level'];
+
+        $product->update([
+            'reorder_level' => $newLevel,
+            'updated_by' => auth()->id(),
+        ]);
+
+        return response()->json([
+            'message' => "Reorder level updated from {$oldLevel} to {$newLevel}",
+            'product' => $product->fresh(['category', 'inventory']),
+        ]);
+    }
+
+    /**
+     * Adjust stock for a product.
+     */
+    public function adjustStock(Request $request, Product $product)
+    {
+        $this->authorizeUpdate($product);
+
+        $validated = $request->validate([
+            'adjustment_type' => 'required|in:increase,decrease,set',
+            'quantity' => 'required|numeric|min:0',
+            'reason' => 'required|string|max:500',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        $inventory = $product->inventory;
+        if (! $inventory) {
+            return response()->json([
+                'error' => 'No inventory record exists for this product',
+            ], 422);
+        }
+
+        $oldQuantity = $inventory->quantity_on_hand;
+        $adjustmentQuantity = $validated['quantity'];
+        $newQuantity = $oldQuantity;
+
+        // Calculate new quantity based on adjustment type
+        switch ($validated['adjustment_type']) {
+            case 'increase':
+                $newQuantity = $oldQuantity + $adjustmentQuantity;
+                $quantityChange = $adjustmentQuantity;
+                break;
+            case 'decrease':
+                $newQuantity = max(0, $oldQuantity - $adjustmentQuantity);
+                $quantityChange = -($oldQuantity - $newQuantity); // Negative for decrease
+                break;
+            case 'set':
+                $newQuantity = $adjustmentQuantity;
+                $quantityChange = $newQuantity - $oldQuantity; // Can be positive or negative
+                break;
+        }
+
+        // Update inventory
+        $inventory->update([
+            'quantity_on_hand' => $newQuantity,
+            'quantity_available' => $inventory->quantity_available + ($newQuantity - $oldQuantity),
+            'last_movement_at' => now(),
+        ]);
+
+        // Create stock movement record
+        try {
+            \App\Models\StockMovement::create([
+                'product_id' => $product->id,
+                'product_variant_id' => null,
+                'type' => 'adjustment', // Use the correct field name
+                'quantity_change' => $quantityChange, // Use signed quantity change
+                'quantity_before' => $oldQuantity,
+                'quantity_after' => $newQuantity,
+                'unit_cost' => null,
+                'total_cost' => null,
+                'currency' => 'GHS',
+                'reference_type' => 'manual_adjustment',
+                'reference_id' => null,
+                'notes' => $validated['reason'].($validated['notes'] ? ' - '.$validated['notes'] : ''),
+                'metadata' => json_encode([
+                    'adjustment_type' => $validated['adjustment_type'],
+                    'reason' => $validated['reason'],
+                    'original_notes' => $validated['notes'],
+                ]),
+                'location' => null,
+                'batch_number' => null,
+                'expiry_date' => null,
+                'user_id' => auth()->id(),
+                'movement_date' => now(),
+                'is_confirmed' => true,
+                'confirmed_at' => now(),
+            ]);
+        } catch (\Exception $e) {
+            // Log the error but don't fail the stock adjustment
+            \Log::error('Failed to create stock movement record', [
+                'error' => $e->getMessage(),
+                'product_id' => $product->id,
+                'adjustment_type' => $validated['adjustment_type'],
+                'quantity_change' => $quantityChange,
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Stock adjustment completed successfully',
+            'adjustment' => [
+                'type' => $validated['adjustment_type'],
+                'old_quantity' => $oldQuantity,
+                'new_quantity' => $newQuantity,
+                'change' => $newQuantity - $oldQuantity,
+            ],
+            'inventory' => $inventory->fresh(),
+        ]);
     }
 }

@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useAlerts } from '@/composables/useAlerts';
+import { useCurrency } from '@/composables/useCurrency';
 import { type Product } from '@/types';
 import { Form } from '@inertiajs/vue3';
 import { Calculator, DollarSign } from 'lucide-vue-next';
@@ -171,15 +172,15 @@ const getChangeDescription = () => {
         case 'percentage':
             return `${form.price_change_value}% ${parseFloat(form.price_change_value) >= 0 ? 'increase' : 'decrease'}`;
         case 'fixed_amount':
-            return `GH₵${Math.abs(parseFloat(form.price_change_value)).toFixed(2)} ${parseFloat(form.price_change_value) >= 0 ? 'increase' : 'decrease'}`;
+            return `${formatCurrency(Math.abs(parseFloat(form.price_change_value)))} ${parseFloat(form.price_change_value) >= 0 ? 'increase' : 'decrease'}`;
         case 'set_price':
-            return `Set to GH₵${parseFloat(form.price_change_value).toFixed(2)}`;
+            return `Set to ${formatCurrency(parseFloat(form.price_change_value))}`;
         default:
             return '';
     }
 };
 
-const formatCurrency = (amount: number) => `GH₵${amount.toFixed(2)}`;
+const { formatCurrency } = useCurrency();
 </script>
 
 <template>

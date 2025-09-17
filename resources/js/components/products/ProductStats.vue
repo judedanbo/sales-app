@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useCurrency } from '@/composables/useCurrency';
 import { type ProductStatistics } from '@/types';
 import { AlertTriangle, Archive, BadgeCent, Package, ShoppingCart, TrendingUp } from 'lucide-vue-next';
 
@@ -9,13 +10,7 @@ interface Props {
 
 defineProps<Props>();
 
-// Format currency values in Ghana Cedis
-const formatCurrency = (value: number): string => {
-    return new Intl.NumberFormat('en-GH', {
-        style: 'currency',
-        currency: 'GHS',
-    }).format(value);
-};
+const { formatCurrency } = useCurrency();
 
 // Format percentage
 const formatPercentage = (current: number, total: number): string => {

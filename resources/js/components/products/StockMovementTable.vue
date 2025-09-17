@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useCurrency } from '@/composables/useCurrency';
 import { type PaginatedData, type StockMovement, type StockMovementFilters } from '@/types';
 import { ArrowDown, ArrowUp, Calendar, FileText, Package, Search, TrendingUp, User } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
@@ -28,14 +29,20 @@ const emit = defineEmits<{
 const localFilters = ref<StockMovementFilters>({ ...props.filters });
 
 const movementTypes = [
-    { value: 'in', label: 'Stock In', icon: ArrowUp, color: 'green' },
-    { value: 'out', label: 'Stock Out', icon: ArrowDown, color: 'red' },
-    { value: 'adjustment', label: 'Adjustment', icon: Package, color: 'blue' },
-    { value: 'transfer', label: 'Transfer', icon: Package, color: 'purple' },
-    { value: 'return', label: 'Return', icon: ArrowUp, color: 'green' },
-    { value: 'damage', label: 'Damage', icon: ArrowDown, color: 'red' },
-    { value: 'sale', label: 'Sale', icon: ArrowDown, color: 'orange' },
+    { value: 'initial_stock', label: 'Initial Stock', icon: Package, color: 'blue' },
     { value: 'purchase', label: 'Purchase', icon: ArrowUp, color: 'green' },
+    { value: 'sale', label: 'Sale', icon: ArrowDown, color: 'orange' },
+    { value: 'return_from_customer', label: 'Customer Return', icon: ArrowUp, color: 'green' },
+    { value: 'return_to_supplier', label: 'Supplier Return', icon: ArrowDown, color: 'red' },
+    { value: 'adjustment', label: 'Stock Adjustment', icon: Package, color: 'blue' },
+    { value: 'transfer_in', label: 'Transfer In', icon: ArrowUp, color: 'purple' },
+    { value: 'transfer_out', label: 'Transfer Out', icon: ArrowDown, color: 'purple' },
+    { value: 'damaged', label: 'Damaged', icon: ArrowDown, color: 'red' },
+    { value: 'expired', label: 'Expired', icon: ArrowDown, color: 'red' },
+    { value: 'theft', label: 'Theft/Loss', icon: ArrowDown, color: 'red' },
+    { value: 'manufacturing', label: 'Manufacturing', icon: Package, color: 'blue' },
+    { value: 'reservation', label: 'Reserved', icon: ArrowDown, color: 'yellow' },
+    { value: 'release_reservation', label: 'Released Reservation', icon: ArrowUp, color: 'green' },
 ];
 
 const referenceTypes = [
@@ -51,16 +58,18 @@ watch(
     (newFilters) => {
         emit('update:filters', newFilters);
     },
-    { deep: true }
+    { deep: true },
 );
 
 const getMovementTypeDetails = (type: string) => {
-    return movementTypes.find(mt => mt.value === type) || {
-        value: type,
-        label: type.charAt(0).toUpperCase() + type.slice(1),
-        icon: Package,
-        color: 'gray'
-    };
+    return (
+        movementTypes.find((mt) => mt.value === type) || {
+            value: type,
+            label: type.charAt(0).toUpperCase() + type.slice(1),
+            icon: Package,
+            color: 'gray',
+        }
+    );
 };
 
 const getMovementIcon = (type: string) => {
@@ -81,12 +90,13 @@ const getMovementColor = (type: string) => {
             return 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400';
         case 'orange':
             return 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400';
+        case 'yellow':
+            return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
         default:
             return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
     }
 };
-
-const formatCurrency = (amount: number) => `GH₵${amount.toFixed(2)}`;
+const { formatCurrency } = useCurrency();
 const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString();
 const formatDateTime = (dateString: string) => new Date(dateString).toLocaleString();
 
@@ -107,7 +117,7 @@ const clearFilters = () => {
 
 const totalMovements = computed(() => props.movements.total || 0);
 const hasFilters = computed(() => {
-    return Object.values(localFilters.value).some(value => value && value !== '');
+    return Object.values(localFilters.value).some((value) => value && value !== '');
 });
 </script>
 
@@ -118,23 +128,17 @@ const hasFilters = computed(() => {
                 <TrendingUp class="h-5 w-5" />
                 Stock Movements
             </CardTitle>
-            <CardDescription>
-                Track all inventory transactions and stock changes.
-            </CardDescription>
+            <CardDescription> Track all inventory transactions and stock changes. </CardDescription>
         </CardHeader>
         <CardContent>
             <!-- Filters -->
-            <div class="space-y-4 mb-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="mb-6 space-y-4">
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <div class="space-y-2">
                         <label class="text-sm font-medium">Search</label>
                         <div class="relative">
-                            <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                            <Input
-                                v-model="localFilters.search"
-                                placeholder="Search products, SKU, or reference..."
-                                class="pl-10"
-                            />
+                            <Search class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
+                            <Input v-model="localFilters.search" placeholder="Search products, SKU, or reference..." class="pl-10" />
                         </div>
                     </div>
 
@@ -155,34 +159,19 @@ const hasFilters = computed(() => {
 
                     <div class="space-y-2">
                         <label class="text-sm font-medium">From Date</label>
-                        <Input
-                            v-model="localFilters.date_from"
-                            type="date"
-                        />
+                        <Input v-model="localFilters.date_from" type="date" />
                     </div>
 
                     <div class="space-y-2">
                         <label class="text-sm font-medium">To Date</label>
-                        <Input
-                            v-model="localFilters.date_to"
-                            type="date"
-                        />
+                        <Input v-model="localFilters.date_to" type="date" />
                     </div>
                 </div>
 
-                <div class="flex justify-between items-center">
-                    <div class="text-sm text-gray-600 dark:text-gray-400">
-                        {{ totalMovements }} movements found
-                    </div>
+                <div class="flex items-center justify-between">
+                    <div class="text-sm text-gray-600 dark:text-gray-400">{{ totalMovements }} movements found</div>
                     <div class="flex gap-2">
-                        <Button
-                            v-if="hasFilters"
-                            variant="outline"
-                            size="sm"
-                            @click="clearFilters"
-                        >
-                            Clear Filters
-                        </Button>
+                        <Button v-if="hasFilters" variant="outline" size="sm" @click="clearFilters"> Clear Filters </Button>
                     </div>
                 </div>
             </div>
@@ -191,7 +180,7 @@ const hasFilters = computed(() => {
             <div v-if="isLoading" class="space-y-4">
                 <div v-for="i in 10" :key="i" class="flex items-center space-x-4">
                     <Skeleton class="h-8 w-8 rounded" />
-                    <div class="space-y-2 flex-1">
+                    <div class="flex-1 space-y-2">
                         <Skeleton class="h-4 w-[250px]" />
                         <Skeleton class="h-4 w-[200px]" />
                     </div>
@@ -200,9 +189,9 @@ const hasFilters = computed(() => {
             </div>
 
             <!-- Empty State -->
-            <div v-else-if="movements.data.length === 0" class="text-center py-8">
-                <TrendingUp class="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No movements found</h3>
+            <div v-else-if="movements.data.length === 0" class="py-8 text-center">
+                <TrendingUp class="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                <h3 class="mb-2 text-lg font-medium text-gray-900 dark:text-gray-100">No movements found</h3>
                 <p class="text-gray-500 dark:text-gray-400">
                     {{ hasFilters ? 'Try adjusting your filters to see more results.' : 'Stock movements will appear here as inventory changes.' }}
                 </p>
@@ -221,9 +210,7 @@ const hasFilters = computed(() => {
                                     </div>
                                 </TableHead>
                                 <TableHead>Type</TableHead>
-                                <TableHead class="cursor-pointer" @click="$emit('sort', 'product.name')">
-                                    Product
-                                </TableHead>
+                                <TableHead class="cursor-pointer" @click="$emit('sort', 'product.name')"> Product </TableHead>
                                 <TableHead class="text-right">Quantity</TableHead>
                                 <TableHead class="text-right">Cost</TableHead>
                                 <TableHead>Reference</TableHead>
@@ -241,10 +228,12 @@ const hasFilters = computed(() => {
                                 </TableCell>
                                 <TableCell>
                                     <div class="flex items-center gap-2">
-                                        <div :class="[
-                                            'flex h-8 w-8 items-center justify-center rounded-full',
-                                            getMovementColor(movement.movement_type)
-                                        ]">
+                                        <div
+                                            :class="[
+                                                'flex h-8 w-8 items-center justify-center rounded-full',
+                                                getMovementColor(movement.movement_type),
+                                            ]"
+                                        >
                                             <component :is="getMovementIcon(movement.movement_type)" class="h-4 w-4" />
                                         </div>
                                         <Badge :class="getMovementColor(movement.movement_type)" variant="secondary">
@@ -261,13 +250,14 @@ const hasFilters = computed(() => {
                                     </div>
                                 </TableCell>
                                 <TableCell class="text-right">
-                                    <div :class="[
-                                        'font-medium',
-                                        movement.movement_type === 'in' || movement.movement_type === 'purchase' || movement.movement_type === 'return'
-                                            ? 'text-green-600 dark:text-green-400'
-                                            : 'text-red-600 dark:text-red-400'
-                                    ]">
-                                        {{ movement.movement_type === 'in' || movement.movement_type === 'purchase' || movement.movement_type === 'return' ? '+' : '-' }}{{ movement.quantity }}
+                                    <div
+                                        :class="[
+                                            'font-medium',
+                                            movement.quantity > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400',
+                                        ]"
+                                    >
+                                        {{ movement.quantity > 0 ? '+' : '' }}{{ movement.quantity }}
+                                        <div class="text-sm text-gray-500">from: {{ movement.quantity_before }} to {{ movement.quantity_after }}</div>
                                     </div>
                                 </TableCell>
                                 <TableCell class="text-right">
@@ -280,12 +270,12 @@ const hasFilters = computed(() => {
                                     <span v-else class="text-gray-400">-</span>
                                 </TableCell>
                                 <TableCell>
-                                    <div v-if="movement.reference_number || movement.reference_type" class="space-y-1">
-                                        <div v-if="movement.reference_number" class="font-medium">
-                                            {{ movement.reference_number }}
+                                    <div v-if="movement.reference_id || movement.reference_type" class="space-y-1">
+                                        <div v-if="movement.reference_id" class="font-medium">
+                                            {{ movement.reference_id }}
                                         </div>
                                         <div v-if="movement.reference_type" class="text-sm text-gray-500">
-                                            {{ referenceTypes.find(rt => rt.value === movement.reference_type)?.label || movement.reference_type }}
+                                            {{ referenceTypes.find((rt) => rt.value === movement.reference_type)?.label || movement.reference_type }}
                                         </div>
                                     </div>
                                     <span v-else class="text-gray-400">-</span>
@@ -293,15 +283,11 @@ const hasFilters = computed(() => {
                                 <TableCell>
                                     <div class="flex items-center gap-2">
                                         <User class="h-4 w-4 text-gray-400" />
-                                        <span class="text-sm">{{ movement.creator?.name || 'System' }}</span>
+                                        <span class="text-sm">{{ movement.user?.name || 'System' }}</span>
                                     </div>
                                 </TableCell>
                                 <TableCell class="text-right">
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        @click="$emit('view-details', movement)"
-                                    >
+                                    <Button size="sm" variant="outline" @click="$emit('view-details', movement)">
                                         <FileText class="h-4 w-4" />
                                     </Button>
                                 </TableCell>
@@ -324,9 +310,7 @@ const hasFilters = computed(() => {
                         >
                             Previous
                         </Button>
-                        <span class="text-sm">
-                            Page {{ movements.current_page }} of {{ movements.last_page }}
-                        </span>
+                        <span class="text-sm"> Page {{ movements.current_page }} of {{ movements.last_page }} </span>
                         <Button
                             size="sm"
                             variant="outline"

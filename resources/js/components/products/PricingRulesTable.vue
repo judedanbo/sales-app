@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import Progress from '@/components/ui/progress.vue';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useCurrency } from '@/composables/useCurrency';
 import { type PaginatedData, type PricingRule, type PricingRuleFilters } from '@/types';
 import { Calendar, Clock, Edit, MoreHorizontal, Percent, Tag, Trash2, Users } from 'lucide-vue-next';
 import { computed } from 'vue';
@@ -16,6 +17,8 @@ interface Props {
 }
 
 defineProps<Props>();
+
+const { formatCurrency } = useCurrency();
 
 const emit = defineEmits<{
     edit: [rule: PricingRule];
@@ -86,9 +89,9 @@ const formatDiscount = (rule: PricingRule) => {
         case 'percentage_discount':
             return `${action.value}% off`;
         case 'fixed_discount':
-            return `GH₵${action.value.toFixed(2)} off`;
+            return `${formatCurrency(action.value)} off`;
         case 'fixed_price':
-            return `GH₵${action.value.toFixed(2)}`;
+            return formatCurrency(action.value);
         case 'buy_x_get_y':
             return `Buy X Get ${action.free_quantity || 1} Free`;
         default:
@@ -182,7 +185,7 @@ const formatDate = (dateString: string) => {
                                 <TableCell>
                                     <div class="font-medium">{{ formatDiscount(rule) }}</div>
                                     <div v-if="rule.actions[0]?.max_discount" class="text-sm text-gray-500">
-                                        Max: GH₵{{ rule.actions[0].max_discount.toFixed(2) }}
+                                        Max: {{ formatCurrency(rule.actions[0].max_discount) }}
                                     </div>
                                 </TableCell>
                                 <TableCell>

@@ -8,6 +8,7 @@ import DeleteConfirmationModal from '@/components/ui/DeleteConfirmationModal.vue
 import ImageUpload from '@/components/ui/ImageUpload.vue';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import { useAlerts } from '@/composables/useAlerts';
+import { useCurrency } from '@/composables/useCurrency';
 import { usePermissions } from '@/composables/usePermissions';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem, type Product } from '@/types';
@@ -130,12 +131,7 @@ const handleImageDeleted = () => {
 };
 
 // Format helpers
-const formatPrice = (price: number): string => {
-    return new Intl.NumberFormat('en-GH', {
-        style: 'currency',
-        currency: 'GHS',
-    }).format(price);
-};
+const { formatCurrency: formatPrice } = useCurrency();
 
 const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString('en-US', {

@@ -83,7 +83,7 @@ const handleEditReorderLevel = () => {
     newReorderLevel.value = props.product.reorder_level || 0;
 };
 
-const handleSaveReorderLevel = () => {
+const handleSaveReorderLevel = async () => {
     if (newReorderLevel.value === props.product.reorder_level) {
         isEditingReorderLevel.value = false;
         return;
@@ -91,20 +91,35 @@ const handleSaveReorderLevel = () => {
 
     isSavingReorderLevel.value = true;
 
-    // In a real implementation, this would make an API call to update the reorder level
-    setTimeout(() => {
-        addAlert(
-            `Reorder level updated from ${props.product.reorder_level || 0} to ${newReorderLevel.value}`,
-            'success',
-            { title: 'Reorder Level Updated' }
+    try {
+        await router.put(
+            `/products/${props.product.id}/reorder-level`,
+            {
+                reorder_level: newReorderLevel.value,
+            },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                onSuccess: () => {
+                    addAlert(`Reorder level updated from ${props.product.reorder_level || 0} to ${newReorderLevel.value}`, 'success', {
+                        title: 'Reorder Level Updated',
+                    });
+
+                    isEditingReorderLevel.value = false;
+                },
+                onError: () => {
+                    addAlert('Failed to update reorder level. Please try again.', 'destructive', { title: 'Update Failed' });
+                },
+                onFinish: () => {
+                    isSavingReorderLevel.value = false;
+                },
+            },
         );
-
+    } catch (error) {
+        console.error('Error updating reorder level:', error);
+        addAlert('Failed to update reorder level. Please try again.', 'destructive', { title: 'Update Failed' });
         isSavingReorderLevel.value = false;
-        isEditingReorderLevel.value = false;
-
-        // Refresh the page to show the updated reorder level
-        router.reload();
-    }, 1000);
+    }
 };
 
 const handleCancelReorderEdit = () => {
@@ -114,11 +129,6 @@ const handleCancelReorderEdit = () => {
 
 const handleStockAdjusted = () => {
     showAdjustmentModal.value = false;
-    addAlert(
-        'Stock adjustment has been recorded successfully.',
-        'success',
-        { title: 'Stock Adjusted' }
-    );
     // Refresh the page to show the updated stock
     router.reload();
 };
@@ -136,36 +146,60 @@ const formatDate = (dateString: string): string => {
 
 const getMovementTypeIcon = (type: string) => {
     switch (type) {
-        case 'in':
-        case 'restock':
-        case 'adjustment_in':
+        case 'purchase':
+        case 'return_from_customer':
+        case 'transfer_in':
+        case 'manufacturing':
+        case 'initial_stock':
             return TrendingUp;
-        case 'out':
         case 'sale':
-        case 'adjustment_out':
+        case 'return_to_supplier':
+        case 'transfer_out':
+        case 'damaged':
+        case 'expired':
+        case 'theft':
             return TrendingDown;
-        default:
+        case 'adjustment':
             return BarChart3;
+        default:
+            return Package;
     }
 };
 
 const getMovementTypeColor = (type: string): string => {
     switch (type) {
-        case 'in':
-        case 'restock':
-        case 'adjustment_in':
+        case 'purchase':
+        case 'return_from_customer':
+        case 'transfer_in':
+        case 'manufacturing':
+        case 'initial_stock':
             return 'text-green-600';
-        case 'out':
         case 'sale':
-        case 'adjustment_out':
+        case 'return_to_supplier':
+        case 'transfer_out':
+        case 'damaged':
+        case 'expired':
+        case 'theft':
             return 'text-red-600';
+        case 'adjustment':
+            return 'text-blue-600';
+        case 'reservation':
+        case 'release_reservation':
+            return 'text-orange-600';
         default:
             return 'text-gray-600';
     }
 };
 
 const formatMovementType = (type: string): string => {
-    return type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+    return type.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+};
+
+const getQuantityChangeDisplay = (movement: any): string => {
+    // Calculate the change based on before/after quantities
+    const change = movement.quantity_after - movement.quantity_before;
+    const sign = change > 0 ? '+' : '';
+    return `${sign}${change.toLocaleString()}`;
 };
 </script>
 
@@ -175,10 +209,7 @@ const formatMovementType = (type: string): string => {
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="space-y-6 p-8">
             <!-- Header -->
-            <PageHeader
-                :title="`${product.name} Inventory`"
-                :description="`Track stock levels and movements for ${product.name}`"
-            >
+            <PageHeader :title="`${product.name} Inventory`" :description="`Track stock levels and movements for ${product.name}`">
                 <template #action>
                     <div class="flex items-center gap-2">
                         <Button variant="outline" @click="router.visit(`/products/${product.id}`)">
@@ -198,7 +229,7 @@ const formatMovementType = (type: string): string => {
 
             <div class="grid gap-6 lg:grid-cols-3">
                 <!-- Stock Overview -->
-                <div class="lg:col-span-2 space-y-6">
+                <div class="space-y-6 lg:col-span-2">
                     <!-- Current Stock Levels -->
                     <Card>
                         <CardHeader>
@@ -218,8 +249,8 @@ const formatMovementType = (type: string): string => {
                                 </div>
                             </div>
 
-                            <div v-else-if="!inventory" class="text-center py-8">
-                                <Package class="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                            <div v-else-if="!inventory" class="py-8 text-center">
+                                <Package class="mx-auto mb-4 h-12 w-12 text-gray-400" />
                                 <p class="text-gray-500 dark:text-gray-400">No inventory data available</p>
                                 <p class="text-sm text-gray-400 dark:text-gray-500">
                                     Set up inventory tracking for this product to see stock levels.
@@ -228,22 +259,22 @@ const formatMovementType = (type: string): string => {
 
                             <div v-else class="space-y-6">
                                 <!-- Stock Metrics -->
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div class="text-center p-4 bg-blue-50 rounded-lg">
+                                <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                                    <div class="rounded-lg bg-blue-50 p-4 text-center">
                                         <div class="text-2xl font-bold text-blue-600">
                                             {{ inventory.quantity_on_hand.toLocaleString() }}
                                         </div>
                                         <div class="text-sm text-muted-foreground">On Hand</div>
                                     </div>
 
-                                    <div class="text-center p-4 bg-green-50 rounded-lg">
+                                    <div class="rounded-lg bg-green-50 p-4 text-center">
                                         <div class="text-2xl font-bold text-green-600">
                                             {{ inventory.quantity_available.toLocaleString() }}
                                         </div>
                                         <div class="text-sm text-muted-foreground">Available</div>
                                     </div>
 
-                                    <div class="text-center p-4 bg-orange-50 rounded-lg">
+                                    <div class="rounded-lg bg-orange-50 p-4 text-center">
                                         <div class="text-2xl font-bold text-orange-600">
                                             {{ (inventory.quantity_on_hand - inventory.quantity_available).toLocaleString() }}
                                         </div>
@@ -252,7 +283,7 @@ const formatMovementType = (type: string): string => {
                                 </div>
 
                                 <!-- Stock Status -->
-                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div class="flex items-center justify-between rounded-lg bg-gray-50 p-4">
                                     <div class="flex items-center gap-3">
                                         <AlertTriangle
                                             v-if="inventory.is_out_of_stock || inventory.quantity_on_hand <= (product.reorder_level || 0)"
@@ -268,11 +299,8 @@ const formatMovementType = (type: string): string => {
 
                                     <!-- Stock Health Bar -->
                                     <div class="w-32">
-                                        <div class="text-xs text-muted-foreground mb-1">Stock Health</div>
-                                        <Progress
-                                            :value="stockHealthPercentage"
-                                            :class="stockHealthColor"
-                                        />
+                                        <div class="mb-1 text-xs text-muted-foreground">Stock Health</div>
+                                        <Progress :value="stockHealthPercentage" :class="stockHealthColor" />
                                     </div>
                                 </div>
                             </div>
@@ -287,18 +315,14 @@ const formatMovementType = (type: string): string => {
                                     <CardTitle>Recent Stock Movements</CardTitle>
                                     <CardDescription>Latest inventory transactions for this product</CardDescription>
                                 </div>
-                                <Button variant="ghost" size="sm" @click="router.visit('/inventory')">
-                                    View All
-                                </Button>
+                                <Button variant="ghost" size="sm" @click="router.visit(`/inventory/movements?product_id=${props.product.id}`)"> View All </Button>
                             </div>
                         </CardHeader>
                         <CardContent class="p-0">
-                            <div v-if="recent_movements.length === 0" class="text-center py-8">
-                                <BarChart3 class="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                            <div v-if="recent_movements.length === 0" class="py-8 text-center">
+                                <BarChart3 class="mx-auto mb-4 h-12 w-12 text-gray-400" />
                                 <p class="text-gray-500 dark:text-gray-400">No recent movements</p>
-                                <p class="text-sm text-gray-400 dark:text-gray-500">
-                                    Stock movements will appear here as they occur.
-                                </p>
+                                <p class="text-sm text-gray-400 dark:text-gray-500">Stock movements will appear here as they occur.</p>
                             </div>
 
                             <Table v-else>
@@ -328,10 +352,10 @@ const formatMovementType = (type: string): string => {
                                         <!-- Quantity -->
                                         <TableCell>
                                             <span
-                                                :class="movement.movement_type.includes('in') || movement.movement_type === 'restock' ? 'text-green-600' : 'text-red-600'"
+                                                :class="getMovementTypeColor(movement.movement_type)"
                                                 class="font-medium"
                                             >
-                                                {{ movement.movement_type.includes('in') || movement.movement_type === 'restock' ? '+' : '-' }}{{ movement.quantity.toLocaleString() }}
+                                                {{ getQuantityChangeDisplay(movement) }}
                                             </span>
                                         </TableCell>
 
@@ -382,7 +406,7 @@ const formatMovementType = (type: string): string => {
 
                                 <PermissionGuard permission="edit_products">
                                     <Button variant="outline" class="w-full" @click="handleEditReorderLevel">
-                                        <Edit class="h-4 w-4 mr-2" />
+                                        <Edit class="mr-2 h-4 w-4" />
                                         Update Level
                                     </Button>
                                 </PermissionGuard>
@@ -391,26 +415,16 @@ const formatMovementType = (type: string): string => {
                             <div v-else class="space-y-4">
                                 <div class="space-y-2">
                                     <Label for="reorder-level">Reorder Level</Label>
-                                    <Input
-                                        id="reorder-level"
-                                        v-model.number="newReorderLevel"
-                                        type="number"
-                                        min="0"
-                                        step="1"
-                                    />
-                                    <p class="text-xs text-muted-foreground">
-                                        Alert when stock falls to or below this level
-                                    </p>
+                                    <Input id="reorder-level" v-model.number="newReorderLevel" type="number" min="0" step="1" />
+                                    <p class="text-xs text-muted-foreground">Alert when stock falls to or below this level</p>
                                 </div>
 
                                 <div class="flex items-center gap-2">
                                     <Button size="sm" @click="handleSaveReorderLevel" :disabled="isSavingReorderLevel">
-                                        <Save class="h-4 w-4 mr-2" />
+                                        <Save class="mr-2 h-4 w-4" />
                                         {{ isSavingReorderLevel ? 'Saving...' : 'Save' }}
                                     </Button>
-                                    <Button variant="outline" size="sm" @click="handleCancelReorderEdit">
-                                        Cancel
-                                    </Button>
+                                    <Button variant="outline" size="sm" @click="handleCancelReorderEdit"> Cancel </Button>
                                 </div>
                             </div>
                         </CardContent>
@@ -425,18 +439,18 @@ const formatMovementType = (type: string): string => {
                         <CardContent class="space-y-2">
                             <PermissionGuard permission="edit_products">
                                 <Button variant="outline" class="w-full justify-start" @click="handleAdjustStock" :disabled="!inventory">
-                                    <Edit class="h-4 w-4 mr-2" />
+                                    <Edit class="mr-2 h-4 w-4" />
                                     Stock Adjustment
                                 </Button>
                             </PermissionGuard>
 
-                            <Button variant="outline" class="w-full justify-start" @click="router.visit(`/inventory?product_id=${product.id}`)">
-                                <BarChart3 class="h-4 w-4 mr-2" />
+                            <Button variant="outline" class="w-full justify-start" @click="router.visit(`/inventory/movements?product_id=${props.product.id}`)">
+                                <BarChart3 class="mr-2 h-4 w-4" />
                                 View All Movements
                             </Button>
 
                             <Button variant="outline" class="w-full justify-start" @click="router.visit('/inventory')">
-                                <Warehouse class="h-4 w-4 mr-2" />
+                                <Warehouse class="mr-2 h-4 w-4" />
                                 Inventory Dashboard
                             </Button>
                         </CardContent>
