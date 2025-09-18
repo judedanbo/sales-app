@@ -22,7 +22,7 @@ return new class extends Migration
             $table->date('expiry_date')->nullable();
             $table->timestamps();
             $table->softDeletes();
-            
+
             $table->index(['school_id', 'document_type']);
         });
     }

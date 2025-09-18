@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\AcademicYear;
 use App\Models\School;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class AcademicYearSeeder extends Seeder

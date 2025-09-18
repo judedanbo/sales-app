@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Enums\AddressType;
 use App\Models\School;
 use App\Models\SchoolAddress;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class SchoolAddressSeeder extends Seeder

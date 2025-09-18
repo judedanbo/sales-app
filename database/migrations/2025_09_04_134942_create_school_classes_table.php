@@ -22,7 +22,7 @@ return new class extends Migration
             $table->integer('order_sequence')->default(0);
             $table->timestamps();
             $table->softDeletes();
-            
+
             $table->index(['school_id', 'grade_level']);
             $table->unique(['school_id', 'class_code']);
         });

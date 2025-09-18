@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuditController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\RoleController;
+use App\Http\Controllers\Api\SaleController;
 use App\Http\Controllers\Api\SchoolClassController;
 use App\Http\Controllers\Api\SchoolController;
 use App\Http\Controllers\Api\UserController;
@@ -390,6 +391,74 @@ Route::prefix('audits')->name('api.audits.')->group(function () {
             Route::delete('bulk/cleanup', [AuditController::class, 'bulkCleanup'])
                 ->middleware(['role:Super Admin', 'ip-restricted:strict'])
                 ->name('bulk_cleanup');
+        });
+    });
+});
+
+// Sales Management API Routes
+Route::prefix('sales')->name('api.sales.')->group(function () {
+    // Public routes
+    Route::get('statistics', [SaleController::class, 'statistics'])->name('statistics');
+
+    // Protected routes
+    Route::middleware(['auth:sanctum', 'permission:view_sales'])->group(function () {
+        // Standard resource routes
+        Route::get('/', [SaleController::class, 'index'])->name('index');
+        Route::get('{sale}', [SaleController::class, 'show'])->name('show');
+
+        Route::middleware('permission:create_sales')->group(function () {
+            Route::post('/', [SaleController::class, 'store'])->name('store');
+        });
+
+        Route::middleware('permission:edit_sales')->group(function () {
+            Route::put('{sale}', [SaleController::class, 'update'])->name('update');
+        });
+
+        Route::middleware('permission:void_sales')->group(function () {
+            Route::delete('{sale}', [SaleController::class, 'destroy'])->name('destroy');
+            Route::post('{sale}/void', [SaleController::class, 'void'])->name('void');
+        });
+
+        // Receipt and reporting routes
+        Route::get('{sale}/receipt', [SaleController::class, 'receipt'])
+            ->middleware('permission:view_sales')
+            ->name('receipt');
+
+        Route::get('daily-summary', [SaleController::class, 'dailySummary'])
+            ->middleware('permission:view_sales_reports')
+            ->name('daily_summary');
+
+        // POS specific routes
+        Route::middleware([
+            'permission:process_sales',
+            'throttle:60,1', // Allow up to 60 transactions per minute
+        ])->group(function () {
+            Route::post('pos/process', [SaleController::class, 'store'])->name('pos.process');
+        });
+
+        // Sales reporting routes (restricted access)
+        Route::middleware([
+            'permission:view_sales_reports',
+            'throttle:30,1',
+        ])->group(function () {
+            Route::get('reports/daily', [SaleController::class, 'dailySummary'])->name('reports.daily');
+            Route::get('reports/statistics', [SaleController::class, 'statistics'])->name('reports.statistics');
+        });
+
+        // Advanced Sales Operations (Manager/Admin only)
+        Route::middleware([
+            'permission:manage_sales',
+            'throttle:10,60',
+            'audit-action:sales_management_operation',
+            'time-based-access:business_hours',
+        ])->group(function () {
+            Route::post('bulk/void', function () {
+                return response()->json(['message' => 'Bulk void not implemented yet'], 501);
+            })->name('bulk_void');
+
+            Route::post('bulk/export', function () {
+                return response()->json(['message' => 'Bulk export not implemented yet'], 501);
+            })->name('bulk_export');
         });
     });
 });

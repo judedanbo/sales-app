@@ -11,11 +11,12 @@ import { index as inventoryIndex } from '@/routes/inventory';
 import { index as permissionsIndex } from '@/routes/permissions';
 import { index as productsIndex } from '@/routes/products';
 import { index as rolesIndex } from '@/routes/roles';
+import { index as salesIndex, pos as salesPOS } from '@/routes/sales';
 import { index as schoolsIndex } from '@/routes/schools';
 import { index as usersIndex } from '@/routes/users';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { Activity, BookOpen, Folder, Key, LayoutGrid, Package, School, Shield, Users, Warehouse } from 'lucide-vue-next';
+import { Activity, BookOpen, CreditCard, Folder, Key, LayoutGrid, Package, Receipt, School, Shield, Users, Warehouse } from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogo from './AppLogo.vue';
 
@@ -26,6 +27,18 @@ const allMainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'POS',
+        href: salesPOS(),
+        icon: CreditCard,
+        permissions: ['process_sales'],
+    },
+    {
+        title: 'Sales',
+        href: salesIndex(),
+        icon: Receipt,
+        permissions: ['view_sales'],
     },
     {
         title: 'Schools',

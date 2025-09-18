@@ -7,9 +7,11 @@ use App\Http\Controllers\Frontend\AuditController;
 use App\Http\Controllers\Frontend\CategoryController;
 use App\Http\Controllers\Frontend\PermissionController;
 use App\Http\Controllers\Frontend\RoleController;
+use App\Http\Controllers\Frontend\SaleController;
 use App\Http\Controllers\Frontend\SchoolClassController;
 use App\Http\Controllers\Frontend\SchoolController;
 use App\Http\Controllers\Frontend\UserController;
+use App\Http\Controllers\ReceiptVerificationController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -20,6 +22,15 @@ Route::get('/', function () {
 Route::get('/test-alerts', function () {
     return Inertia::render('TestAlerts');
 })->name('test-alerts');
+
+// Guest receipt verification routes
+Route::get('/receipt/{verificationToken}', [ReceiptVerificationController::class, 'show'])
+    ->name('receipt.verify');
+
+// Fallback route for temporary verification (using sale_number)
+Route::get('/receipt/temp/{saleIdentifier}', [ReceiptVerificationController::class, 'showBySaleNumber'])
+    ->name('receipt.verify.temp');
+
 
 // Level 1: Basic authenticated access
 Route::middleware(['auth'])->group(function () {
@@ -112,6 +123,28 @@ Route::middleware(['auth', 'verified', 'audit-action:user_access'])->group(funct
             Route::post('categories/{category}/move', [CategoryController::class, 'move'])
                 ->middleware('permission:manage_category_hierarchy')
                 ->name('categories.move');
+        });
+
+        // Sales Frontend Routes - Permission-based access
+        Route::middleware(['permission:view_sales'])->group(function () {
+            // Sales POS interface
+            Route::get('/sales/pos', [SaleController::class, 'pos'])
+                ->middleware('permission:process_sales')
+                ->name('sales.pos');
+
+            // Sales resource routes with specific permissions
+            Route::get('sales', [SaleController::class, 'index'])->name('sales.index');
+            Route::get('sales/{sale}', [SaleController::class, 'show'])->name('sales.show');
+
+            // Sales creation route
+            Route::post('sales', [SaleController::class, 'store'])
+                ->middleware('permission:process_sales')
+                ->name('sales.store');
+
+            // Sales void route
+            Route::post('sales/{sale}/void', [SaleController::class, 'void'])
+                ->middleware('permission:void_sales')
+                ->name('sales.void');
         });
     });
 });

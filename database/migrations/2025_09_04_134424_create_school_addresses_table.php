@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('country')->default('India');
             $table->timestamps();
             $table->softDeletes();
-            
+
             $table->index(['school_id', 'address_type']);
         });
     }

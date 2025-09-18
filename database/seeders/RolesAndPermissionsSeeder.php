@@ -88,16 +88,16 @@ class RolesAndPermissionsSeeder extends Seeder
 
             // Sales Management
             'sales' => [
-                'view_own_sales' => 'View own sales records',
-                'view_all_sales' => 'View all sales records',
+                'view_sales' => 'View sales records',
                 'create_sales' => 'Create new sales',
-                'edit_own_sales' => 'Edit own sales',
-                'edit_all_sales' => 'Edit all sales',
-                'delete_sales' => 'Delete sales records',
+                'edit_sales' => 'Edit sales records',
                 'void_sales' => 'Void completed sales',
+                'process_sales' => 'Process sales through POS',
+                'view_sales_reports' => 'View sales reports and analytics',
+                'manage_sales' => 'Advanced sales management operations',
                 'approve_discounts' => 'Approve discount requests',
                 'manage_sales_targets' => 'Set and manage sales targets',
-                'view_sales_analytics' => 'View sales analytics',
+                'export_sales' => 'Export sales data',
             ],
 
             // Category Management
@@ -410,14 +410,16 @@ class RolesAndPermissionsSeeder extends Seeder
             'edit_users',
             'bulk_edit_users',
             'export_users',
-            'view_all_sales',
+            'view_sales',
             'create_sales',
-            'edit_all_sales',
-            'delete_sales',
+            'edit_sales',
             'void_sales',
+            'process_sales',
+            'view_sales_reports',
+            'manage_sales',
             'approve_discounts',
             'manage_sales_targets',
-            'view_sales_analytics',
+            'export_sales',
             'view_products',
             'edit_products',
             'manage_pricing',
@@ -443,9 +445,10 @@ class RolesAndPermissionsSeeder extends Seeder
             ['guard_name' => 'web']
         );
         $salesRep->syncPermissions([
-            'view_own_sales',
+            'view_sales',
             'create_sales',
-            'edit_own_sales',
+            'edit_sales',
+            'process_sales',
             'view_products',
             'view_inventory',
             'view_reports',
@@ -461,8 +464,9 @@ class RolesAndPermissionsSeeder extends Seeder
             ['guard_name' => 'web']
         );
         $financeOfficer->syncPermissions([
-            'view_all_sales',
+            'view_sales',
             'void_sales',
+            'view_sales_reports',
             'view_financial_reports',
             'manage_invoices',
             'manage_payments',
@@ -546,8 +550,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'view_schools',
             'view_all_schools',
             'export_schools',
-            'view_all_sales',
-            'view_sales_analytics',
+            'view_sales',
+            'view_sales_reports',
             'view_products',
             'view_inventory',
             'view_financial_reports',
@@ -581,7 +585,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'view_schools',
             'view_all_schools',
             'export_schools',
-            'view_all_sales',
+            'view_sales',
             'view_products',
             'view_inventory',
             'view_financial_reports',
@@ -628,9 +632,10 @@ class RolesAndPermissionsSeeder extends Seeder
             ['guard_name' => 'web']
         );
         $staff->syncPermissions([
-            'view_own_sales',
+            'view_sales',
             'create_sales',
-            'edit_own_sales',
+            'edit_sales',
+            'process_sales',
             'view_products',
             'view_inventory',
             'edit_profile',

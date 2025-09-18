@@ -17,7 +17,7 @@ return new class extends Migration
             $table->boolean('locked')->default(false);
             $table->json('payload');
             $table->timestamps();
-            
+
             $table->primary(['group', 'name']);
             $table->index(['group', 'locked']);
         });

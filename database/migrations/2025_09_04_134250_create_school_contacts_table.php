@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('website')->nullable();
             $table->timestamps();
             $table->softDeletes();
-            
+
             $table->index(['school_id', 'contact_type']);
         });
     }

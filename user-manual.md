@@ -8,9 +8,10 @@
 4. [Schools Management](#schools-management)
 5. [Categories Management](#categories-management)
 6. [Products Management](#products-management)
-7. [Audit Management](#audit-management)
-8. [Dashboard Overview](#dashboard-overview)
-9. [System Administration](#system-administration)
+7. [Sales Management](#sales-management)
+8. [Audit Management](#audit-management)
+9. [Dashboard Overview](#dashboard-overview)
+10. [System Administration](#system-administration)
 
 ---
 
@@ -860,6 +861,108 @@ Products system respects user permissions:
 - Inventory turnover analysis and trends
 - Category-based sales reporting
 - Price history and change impact analysis
+
+---
+
+## Sales Management
+
+### Understanding the Sales System
+
+The Sales Management system provides comprehensive transaction tracking and receipt management capabilities for the application:
+
+- **Sales Transactions**: Complete tracking of all sales with detailed line items
+- **Receipt Management**: Professional receipt display and printing capabilities
+- **Sales Statistics**: Real-time revenue and performance analytics
+- **Void Handling**: Proper transaction voiding with audit trails
+
+### Viewing Sales
+
+1. Click "Sales" in the sidebar (if available to your role)
+2. The Sales Index page displays all sales transactions in a data table
+3. Use the search functionality to find specific sales by sale number, receipt number, or notes
+4. Filter sales by status, cashier, school, payment method, or date range
+
+### Sales Table Actions
+
+**Print Receipt**:
+- Click the printer icon in the Actions column for any sale
+- A professional receipt modal will display with formatted sale information
+- The modal includes:
+  - Business information and sale details
+  - Itemized list of products with quantities and prices
+  - Payment method and totals
+  - QR code for verification
+  - Print, preview, and download options
+
+**View Sale Details**:
+- Click on a sale row to view complete transaction details
+- Includes customer information, sale items, and payment details
+- Shows complete audit trail if transaction was modified or voided
+
+### Sales Statistics
+
+The sales statistics provide real-time business insights:
+
+**Key Metrics**:
+- **Total Sales**: Count of all sales transactions
+- **Total Revenue**: Sum of completed sales (excludes voided transactions)
+- **Completed Sales**: Count of successfully completed transactions
+- **Voided Sales**: Count of cancelled transactions
+- **Average Order Value**: Average transaction amount for completed sales
+- **Completion Rate**: Percentage of successful vs total transactions
+
+**Important Notes**:
+- Revenue calculations exclude voided sales for accurate business metrics
+- Average order value is calculated from completed sales only
+- All statistics can be filtered by date range for period analysis
+- Both raw numbers and formatted currency values are available
+
+### Receipt Features
+
+**Professional Receipt Display**:
+- Clean, formatted layout suitable for printing
+- Complete transaction details with line-by-line breakdown
+- Business information and contact details
+- QR code for transaction verification
+- Print timestamp and unique receipt number
+
+**Receipt Actions**:
+- **Print**: Direct printing to connected printer
+- **Preview**: Print preview in new browser window
+- **Download**: Save receipt as PDF (if configured)
+
+### Sales Workflow
+
+1. **Transaction Creation**: Sales are typically created through POS interface
+2. **Receipt Generation**: Each completed sale generates a unique receipt
+3. **Status Tracking**: Sales progress through statuses (pending → completed or voided)
+4. **Receipt Access**: Staff can access and reprint receipts as needed
+5. **Statistics Update**: Real-time updates to sales analytics and reporting
+
+### Permission Requirements
+
+Sales access is controlled by user permissions:
+- **View Sales**: Required to access sales list and view receipts
+- **Create Sales**: Required for POS operations (if available)
+- **Void Sales**: Required to cancel transactions
+- **Sales Reports**: Required for statistics and analytics access
+
+### Best Practices
+
+**Receipt Management**:
+- Always verify receipt details before printing
+- Use receipt modal for professional display
+- Keep receipt numbers for reference and tracking
+
+**Statistics Monitoring**:
+- Regular review of completion rates and void percentages
+- Monitor average order values for business insights
+- Use date filtering for period-specific analysis
+
+**Data Integrity**:
+- Voided sales are preserved for audit but excluded from revenue
+- All sales actions are logged in the audit trail
+- Receipt regeneration maintains original transaction data
 
 ---
 

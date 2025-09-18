@@ -18,7 +18,7 @@ class AcademicYearFactory extends Factory
     {
         $startYear = $this->faker->numberBetween(2020, 2025);
         $endYear = $startYear + 1;
-        
+
         return [
             'year_name' => "{$startYear}-{$endYear}",
             'start_date' => "{$startYear}-04-01", // April 1st start

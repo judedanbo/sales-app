@@ -18,7 +18,7 @@ class SchoolDocumentFactory extends Factory
     public function definition(): array
     {
         $documentType = $this->faker->randomElement(DocumentType::cases());
-        
+
         return [
             'document_type' => $documentType,
             'document_name' => $this->getDocumentName($documentType),
@@ -31,7 +31,7 @@ class SchoolDocumentFactory extends Factory
 
     private function getDocumentName(DocumentType $type): string
     {
-        return match($type) {
+        return match ($type) {
             DocumentType::REGISTRATION => 'School Registration Certificate',
             DocumentType::AFFILIATION => 'Board Affiliation Certificate',
             DocumentType::TAX_CERTIFICATE => 'Tax Exemption Certificate',

@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\School;
 use App\Models\SchoolManagement;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class SchoolManagementSeeder extends Seeder

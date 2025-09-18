@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Enums\DocumentType;
 use App\Models\School;
 use App\Models\SchoolDocument;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class SchoolDocumentSeeder extends Seeder

@@ -204,6 +204,22 @@ class Product extends Model implements Auditable
     }
 
     /**
+     * Product has many sale items
+     */
+    public function saleItems(): HasMany
+    {
+        return $this->hasMany(SaleItem::class);
+    }
+
+    /**
+     * Product has many sales through sale items
+     */
+    public function sales(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    {
+        return $this->hasManyThrough(Sale::class, SaleItem::class);
+    }
+
+    /**
      * Scopes
      */
 

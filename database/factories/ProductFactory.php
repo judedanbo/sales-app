@@ -40,18 +40,16 @@ class ProductFactory extends Factory
         $name = $brand.' '.$baseName;
 
         $unitPrice = $this->faker->randomFloat(2, 5, 500);
-        $costPrice = $unitPrice * $this->faker->randomFloat(2, 0.4, 0.8); // 40-80% of selling price
 
         return [
+            'sku' => strtoupper($this->faker->unique()->bothify('??###??')),
             'name' => $name,
             'description' => $this->faker->paragraph(3),
-            'sku' => strtoupper($this->faker->unique()->bothify('??###??')),
+            'status' => $this->faker->randomElement(['active', 'inactive', 'discontinued']),
             'unit_price' => $unitPrice,
-            'cost_price' => $costPrice,
             'unit_type' => $this->faker->randomElement(['piece', 'kg', 'liter', 'meter', 'pack', 'box', 'set']),
-            'tax_rate' => $this->faker->randomElement([0, 5, 12.5, 18]),
-            'brand' => $brand,
-            'model' => $this->faker->bothify('??-####'),
+            'reorder_level' => $this->faker->numberBetween(5, 50),
+            'tax_rate' => $this->faker->randomElement([0.0000, 0.0500, 0.1250, 0.1800]),
             'weight' => $this->faker->randomFloat(3, 0.1, 20),
             'dimensions' => [
                 'length' => $this->faker->numberBetween(5, 100),
@@ -59,25 +57,29 @@ class ProductFactory extends Factory
                 'height' => $this->faker->numberBetween(1, 50),
             ],
             'color' => $this->faker->colorName(),
-            'material' => $this->faker->randomElement(['Plastic', 'Metal', 'Wood', 'Glass', 'Fabric', 'Leather', 'Ceramic']),
+            'brand' => $brand,
+            'attributes' => [
+                'model' => $this->faker->bothify('??-####'),
+                'material' => $this->faker->randomElement(['Plastic', 'Metal', 'Wood', 'Glass', 'Fabric', 'Leather', 'Ceramic']),
+                'features' => [
+                    $this->faker->sentence(),
+                    $this->faker->sentence(),
+                    $this->faker->sentence(),
+                ],
+                'specifications' => [
+                    'warranty' => $this->faker->randomElement(['1 year', '2 years', '6 months', 'Lifetime']),
+                    'origin' => $this->faker->country(),
+                    'certification' => $this->faker->randomElement(['CE', 'ISO', 'FDA', 'RoHS', null]),
+                ],
+                'is_digital' => $this->faker->boolean(10), // 10% chance of digital product
+                'is_featured' => $this->faker->boolean(20), // 20% chance of featured
+            ],
             'barcode' => $this->faker->ean13(),
-            'tags' => $this->faker->words(3),
-            'features' => [
-                $this->faker->sentence(),
-                $this->faker->sentence(),
-                $this->faker->sentence(),
-            ],
-            'specifications' => [
-                'warranty' => $this->faker->randomElement(['1 year', '2 years', '6 months', 'Lifetime']),
-                'origin' => $this->faker->country(),
-                'certification' => $this->faker->randomElement(['CE', 'ISO', 'FDA', 'RoHS', null]),
-            ],
-            'status' => $this->faker->randomElement(['active', 'inactive', 'discontinued']),
-            'is_digital' => $this->faker->boolean(10), // 10% chance of digital product
-            'is_featured' => $this->faker->boolean(20), // 20% chance of featured
+            'image_url' => null, // Will be populated later if needed
+            'gallery' => [],
             'meta_title' => $name.' | Best Quality Products',
             'meta_description' => $this->faker->sentence(10),
-            'reorder_level' => $this->faker->numberBetween(5, 50),
+            'tags' => $this->faker->words(3),
             'created_by' => 1,
             'updated_by' => 1,
         ];
@@ -88,10 +90,15 @@ class ProductFactory extends Factory
      */
     public function featured(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'is_featured' => true,
-            'status' => 'active',
-        ]);
+        return $this->state(function (array $attributes) {
+            $currentAttributes = $attributes['attributes'] ?? [];
+            $currentAttributes['is_featured'] = true;
+
+            return [
+                'attributes' => $currentAttributes,
+                'status' => 'active',
+            ];
+        });
     }
 
     /**
@@ -129,12 +136,17 @@ class ProductFactory extends Factory
      */
     public function digital(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'is_digital' => true,
-            'weight' => null,
-            'dimensions' => null,
-            'unit_type' => 'license',
-        ]);
+        return $this->state(function (array $attributes) {
+            $currentAttributes = $attributes['attributes'] ?? [];
+            $currentAttributes['is_digital'] = true;
+
+            return [
+                'attributes' => $currentAttributes,
+                'weight' => null,
+                'dimensions' => null,
+                'unit_type' => 'license',
+            ];
+        });
     }
 
     /**
@@ -142,9 +154,14 @@ class ProductFactory extends Factory
      */
     public function physical(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'is_digital' => false,
-        ]);
+        return $this->state(function (array $attributes) {
+            $currentAttributes = $attributes['attributes'] ?? [];
+            $currentAttributes['is_digital'] = false;
+
+            return [
+                'attributes' => $currentAttributes,
+            ];
+        });
     }
 
     /**
@@ -157,7 +174,6 @@ class ProductFactory extends Factory
 
             return [
                 'unit_price' => $unitPrice,
-                'cost_price' => $unitPrice * $this->faker->randomFloat(2, 0.5, 0.7),
             ];
         });
     }
@@ -172,7 +188,6 @@ class ProductFactory extends Factory
 
             return [
                 'unit_price' => $unitPrice,
-                'cost_price' => $unitPrice * $this->faker->randomFloat(2, 0.3, 0.6),
             ];
         });
     }

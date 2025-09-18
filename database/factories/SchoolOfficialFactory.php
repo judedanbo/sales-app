@@ -21,11 +21,11 @@ class SchoolOfficialFactory extends Factory
             'official_type' => $this->faker->randomElement(OfficialType::cases()),
             'name' => $this->faker->name(),
             'qualification' => $this->faker->randomElement([
-                'B.Ed, M.A', 'M.Ed, B.A', 'Ph.D, M.Sc', 'B.A, B.Ed', 
-                'M.Com, B.Ed', 'M.A, B.Ed', 'M.Sc, B.Ed'
+                'B.Ed, M.A', 'M.Ed, B.A', 'Ph.D, M.Sc', 'B.A, B.Ed',
+                'M.Com, B.Ed', 'M.A, B.Ed', 'M.Sc, B.Ed',
             ]),
             'department' => $this->faker->optional(0.7)->randomElement([
-                'Administration', 'Academics', 'Finance', 'Operations', 'Student Affairs'
+                'Administration', 'Academics', 'Finance', 'Operations', 'Student Affairs',
             ]),
             'email' => $this->faker->unique()->safeEmail(),
             'phone' => $this->faker->phoneNumber(),

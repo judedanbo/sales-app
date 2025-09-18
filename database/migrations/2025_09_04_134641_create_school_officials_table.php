@@ -24,7 +24,7 @@ return new class extends Migration
             $table->boolean('is_primary')->default(false);
             $table->timestamps();
             $table->softDeletes();
-            
+
             $table->index(['school_id', 'official_type']);
             $table->index('user_id');
         });

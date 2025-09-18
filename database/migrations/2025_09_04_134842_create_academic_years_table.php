@@ -20,7 +20,7 @@ return new class extends Migration
             $table->boolean('is_current')->default(false);
             $table->timestamps();
             $table->softDeletes();
-            
+
             $table->index(['school_id', 'is_current']);
             $table->unique(['school_id', 'year_name']);
         });

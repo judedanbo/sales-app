@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('board_name')->nullable();
             $table->timestamps();
             $table->softDeletes();
-            
+
             $table->index('school_id');
         });
     }

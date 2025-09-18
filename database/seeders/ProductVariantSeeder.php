@@ -36,20 +36,29 @@ class ProductVariantSeeder extends Seeder
                         'updated_by' => 1,
                     ]);
 
-                // Create inventory for this variant
-                ProductInventory::create([
-                    'product_id' => $product->id,
-                    'product_variant_id' => $variant->id,
-                    'quantity_on_hand' => fake()->numberBetween(5, 200),
-                    'quantity_available' => fake()->numberBetween(5, 200),
-                    'quantity_reserved' => fake()->numberBetween(0, 10),
-                    'minimum_stock_level' => fake()->numberBetween(5, 20),
-                    'maximum_stock_level' => fake()->numberBetween(100, 500),
-                    'reorder_point' => fake()->numberBetween(10, 30),
-                    'reorder_quantity' => fake()->numberBetween(50, 100),
-                    'last_stock_count' => fake()->dateTimeBetween('-1 month', 'now'),
-                    'last_movement_at' => fake()->dateTimeBetween('-1 week', 'now'),
-                ]);
+                // Create inventory for this variant only if no inventory exists for the base product
+                $existingInventory = ProductInventory::where('product_id', $product->id)->where('product_variant_id', null)->first();
+
+                if (! $existingInventory) {
+                    ProductInventory::create([
+                        'product_id' => $product->id,
+                        'product_variant_id' => $variant->id,
+                        'quantity_on_hand' => fake()->numberBetween(5, 200),
+                        'quantity_available' => fake()->numberBetween(5, 200),
+                        'quantity_reserved' => fake()->numberBetween(0, 10),
+                        'minimum_stock_level' => fake()->numberBetween(5, 20),
+                        'maximum_stock_level' => fake()->numberBetween(100, 500),
+                        'reorder_point' => fake()->numberBetween(10, 30),
+                        'reorder_quantity' => fake()->numberBetween(50, 100),
+                        'last_stock_count' => fake()->dateTimeBetween('-1 month', 'now'),
+                        'last_movement_at' => fake()->dateTimeBetween('-1 week', 'now'),
+                    ]);
+                } else {
+                    // Update existing inventory to include variant reference
+                    $existingInventory->update([
+                        'product_variant_id' => $variant->id,
+                    ]);
+                }
             }
         }
 

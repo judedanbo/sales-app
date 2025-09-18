@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Enums\ContactType;
 use App\Models\School;
 use App\Models\SchoolContact;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class SchoolContactSeeder extends Seeder
